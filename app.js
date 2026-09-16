@@ -293,7 +293,8 @@
   }
 
   function loadSavedPreferences() {
-    const savedUser = localStorage.getItem("sleeper_user_id");
+    const savedUser =
+      localStorage.getItem("sleeper_username") || localStorage.getItem("sleeper_user_id");
     if (savedUser && userIdInput) userIdInput.value = savedUser;
     const savedSeason = localStorage.getItem("sleeper_season");
     if (savedSeason && seasonInput) seasonInput.value = savedSeason;
@@ -308,7 +309,12 @@
   }
 
   function savePreferences() {
-    if (userIdInput) localStorage.setItem("sleeper_user_id", userIdInput.value.trim());
+    if (userIdInput) {
+      const username = userIdInput.value.trim();
+      localStorage.setItem("sleeper_username", username);
+      // Keep the old key so returning users retain their saved value after upgrading.
+      localStorage.setItem("sleeper_user_id", username);
+    }
     if (seasonInput) localStorage.setItem("sleeper_season", seasonInput.value);
     if (weekInput) localStorage.setItem("sleeper_week", weekInput.value);
     if (modeSelect) localStorage.setItem("sleeper_mode", modeSelect.value);
