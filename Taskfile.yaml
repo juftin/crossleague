@@ -45,6 +45,11 @@ tasks:
       - task: test
       - node scripts/bundle.js --check
 
+  docs:
+    desc: Build site distribution for GitHub Pages
+    cmds:
+      - npm run docs
+
   dev:
     desc: Start local development preview server
     cmds:

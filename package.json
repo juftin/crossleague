@@ -7,6 +7,7 @@
   "scripts": {
     "build": "node scripts/bundle.js",
     "build:check": "node scripts/bundle.js --check",
+    "docs": "node scripts/bundle.js && mkdir -p site && cp index.html styles.css app.js site/ && touch site/.nojekyll",
     "format": "prettier --write \"**/*.{js,json,html,css,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{js,json,html,css,md,yaml,yml}\"",
     "lint": "eslint .",

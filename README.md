@@ -56,7 +56,8 @@
 sleeper-analytics/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml      # GitHub Actions CI pipeline
+│       ├── ci.yml        # GitHub Actions CI pipeline
+│       └── publish.yaml  # GitHub Pages deployment workflow
 ├── scripts/
 │   └── bundle.js       # Bundles app.js into index.html for zero-dependency standalone usage
 ├── tests/
@@ -88,6 +89,7 @@ This project uses [Task](https://taskfile.dev/) and [`npm`](https://nodejs.org/)
 | `task lint`    | Run formatting check (Prettier) and code linting (ESLint)      | `npm run format:check && eslint .` |
 | `task fix`     | Auto-fix formatting and linting errors                         | `npm run format && eslint . --fix` |
 | `task build`   | Synchronize standalone `app.js` into `index.html`              | `node scripts/bundle.js`           |
+| `task docs`    | Build site distribution package for GitHub Pages               | `npm run docs`                     |
 | `task check`   | Complete quality check: formatting, linting, tests, and bundle | `task lint && task test && ...`    |
 | `task dev`     | Start a local development server on port 8080                  | `npx serve -l 8080 .`              |
 

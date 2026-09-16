@@ -7,6 +7,7 @@ yarn-error.log*
 .env
 .env.local
 dist/
+site/
 coverage/
 .idea/
 .vscode/
