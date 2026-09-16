@@ -194,8 +194,13 @@
     currentUserName = data.user ? data.user.name : "";
     currentUserAvatar = data.user ? data.user.avatar : "";
 
-    if (userIdInput && currentUserName) {
-      userIdInput.value = currentUserName || currentUserId;
+    if (userIdInput) {
+      const saved = localStorage.getItem("sleeper_user_id");
+      if (saved) {
+        userIdInput.value = saved;
+      } else if (currentUserName) {
+        userIdInput.value = currentUserName || currentUserId;
+      }
     }
     if (seasonInput && data.season) {
       seasonInput.value = String(data.season);
@@ -241,13 +246,20 @@
 
   function tryLoadFromCache() {
     try {
-      const user = userIdInput.value.trim();
-      const season = seasonInput.value;
+      const user = userIdInput ? userIdInput.value.trim() : "";
+      const season = seasonInput ? seasonInput.value : "";
       const mode = modeSelect ? modeSelect.value : "WEEKLY";
-      const week = parseInt(weekInput.value, 10);
+      const week = weekInput ? parseInt(weekInput.value, 10) : 1;
 
       if (!user) return false;
-      const raw = localStorage.getItem(getCacheKey(user, season, mode, week));
+      let raw = localStorage.getItem(getCacheKey(user, season, mode, week));
+
+      if (!raw) {
+        const lastKey = localStorage.getItem("crossleague_last_cache_key");
+        if (lastKey && lastKey.toLowerCase().includes(user.toLowerCase())) {
+          raw = localStorage.getItem(lastKey);
+        }
+      }
 
       if (raw) {
         const data = JSON.parse(raw);
@@ -261,13 +273,32 @@
     return false;
   }
 
+  function populateSeasonOptions(defaultYear) {
+    if (!seasonInput) return;
+    const maxYear = Math.max(defaultYear + 1, 2026);
+    const minYear = 2020;
+    const currentVal = seasonInput.value;
+    seasonInput.innerHTML = "";
+    for (let y = maxYear; y >= minYear; y--) {
+      const opt = document.createElement("option");
+      opt.value = String(y);
+      opt.textContent = String(y);
+      seasonInput.appendChild(opt);
+    }
+    if (currentVal && Array.from(seasonInput.options).some(o => o.value === currentVal)) {
+      seasonInput.value = currentVal;
+    } else {
+      seasonInput.value = String(defaultYear);
+    }
+  }
+
   function loadSavedPreferences() {
     const savedUser = localStorage.getItem("sleeper_user_id");
-    if (savedUser) userIdInput.value = savedUser;
+    if (savedUser && userIdInput) userIdInput.value = savedUser;
     const savedSeason = localStorage.getItem("sleeper_season");
-    if (savedSeason) seasonInput.value = savedSeason;
+    if (savedSeason && seasonInput) seasonInput.value = savedSeason;
     const savedWeek = localStorage.getItem("sleeper_week");
-    if (savedWeek) weekInput.value = savedWeek;
+    if (savedWeek && weekInput) weekInput.value = savedWeek;
     const savedMode = localStorage.getItem("sleeper_mode");
     if (savedMode && modeSelect) {
       modeSelect.value = savedMode;
@@ -277,9 +308,9 @@
   }
 
   function savePreferences() {
-    localStorage.setItem("sleeper_user_id", userIdInput.value.trim());
-    localStorage.setItem("sleeper_season", seasonInput.value);
-    localStorage.setItem("sleeper_week", weekInput.value);
+    if (userIdInput) localStorage.setItem("sleeper_user_id", userIdInput.value.trim());
+    if (seasonInput) localStorage.setItem("sleeper_season", seasonInput.value);
+    if (weekInput) localStorage.setItem("sleeper_week", weekInput.value);
     if (modeSelect) localStorage.setItem("sleeper_mode", modeSelect.value);
   }
 
@@ -311,6 +342,15 @@
         `;
       }
     }
+  }
+
+  if (userIdInput) {
+    userIdInput.addEventListener("input", () => {
+      savePreferences();
+    });
+    userIdInput.addEventListener("change", () => {
+      savePreferences();
+    });
   }
 
   if (modeSelect) {
@@ -360,15 +400,20 @@
   });
 
   async function initDefaults() {
+    const currentYear = new Date().getFullYear();
+    populateSeasonOptions(currentYear);
     loadSavedPreferences();
+    if (!localStorage.getItem("sleeper_season") && seasonInput) {
+      seasonInput.value = String(currentYear);
+    }
     try {
       const resp = await fetch(`${BASE_URL}/state/nfl`);
       if (resp.ok) {
         const state = await resp.json();
-        if (!localStorage.getItem("sleeper_season") && state.season) {
+        if (!localStorage.getItem("sleeper_season") && state.season && seasonInput) {
           seasonInput.value = String(state.season);
         }
-        if (!localStorage.getItem("sleeper_week")) {
+        if (!localStorage.getItem("sleeper_week") && weekInput) {
           const defaultWeek = state.display_week || state.week || 1;
           if (defaultWeek >= 1 && defaultWeek <= 18) {
             weekInput.value = String(defaultWeek);
