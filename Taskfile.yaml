@@ -1,0 +1,51 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Run standard verification suite (lint, test, build check)
+    cmds:
+      - task: check
+
+  install:
+    desc: Install project dependencies
+    cmds:
+      - npm install
+
+  build:
+    desc: Synchronize and bundle app.js into index.html
+    cmds:
+      - node scripts/bundle.js {{.CLI_ARGS}}
+
+  format:
+    desc: Format code using Prettier
+    cmds:
+      - npm run format
+
+  lint:
+    desc: Check code quality and formatting
+    cmds:
+      - npm run format:check
+      - npm run lint
+
+  fix:
+    desc: Auto-fix formatting and linting issues
+    cmds:
+      - npm run format
+      - npm run lint:fix
+
+  test:
+    desc: Run automated test suite
+    cmds:
+      - npm test {{.CLI_ARGS}}
+
+  check:
+    desc: Complete verification pipeline (lint, test, build sync check)
+    cmds:
+      - task: lint
+      - task: test
+      - node scripts/bundle.js --check
+
+  dev:
+    desc: Start local development preview server
+    cmds:
+      - npm run dev

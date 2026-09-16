@@ -1,0 +1,32 @@
+{
+  "name": "sleeper-analytics",
+  "version": "2.0.0",
+  "description": "Universal power rankings and multi-league analytics dashboard for Sleeper fantasy football leagues",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/bundle.js",
+    "build:check": "node scripts/bundle.js --check",
+    "format": "prettier --write \"**/*.{js,json,html,css,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{js,json,html,css,md,yaml,yml}\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test tests/**/*.test.js",
+    "dev": "npx serve ."
+  },
+  "keywords": [
+    "sleeper",
+    "fantasy-football",
+    "analytics",
+    "power-rankings",
+    "dashboard"
+  ],
+  "author": "Justin Flannery",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "eslint": "^9.20.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.5.0"
+  }
+}
