@@ -163,39 +163,57 @@
         opacity: 0;
         transition: all 0.25s ease-in;
       }
+
+      /* Mobile Touch & Scroll Utilities */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .touch-scroll {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      button, select, input, a {
+        touch-action: manipulation;
+      }
     </style>
   </head>
   <body
-    class="text-slate-100 min-h-screen antialiased flex flex-col selection:bg-emerald-500 selection:text-slate-950"
+    class="text-slate-100 min-h-screen antialiased flex flex-col selection:bg-emerald-500 selection:text-slate-950 overflow-x-hidden"
   >
     <!-- Header (Full-Width Fluid) -->
     <header
       class="border-b border-slate-800/80 bg-slate-950/90 sticky top-0 z-40 backdrop-blur-xl w-full"
     >
       <div
-        class="w-full px-4 sm:px-8 lg:px-12 py-4 flex flex-col sm:flex-row items-center justify-between gap-4"
+        class="w-full px-3 sm:px-8 lg:px-12 py-3 sm:py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4"
       >
         <!-- Brand & Title -->
-        <div class="flex items-center gap-4">
-          <div class="relative group">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <div class="relative group flex-shrink-0">
             <div
               class="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-60 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none transform-gpu"
             ></div>
             <div
-              class="relative w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-2xl shadow-xl border border-white/10"
+              class="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-900 flex items-center justify-center text-xl sm:text-2xl shadow-xl border border-white/10"
             >
               ⚡
             </div>
           </div>
           <div>
-            <div class="flex items-center gap-2.5">
+            <div class="flex items-center gap-2 sm:gap-2.5">
               <h1
-                class="text-xl sm:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-emerald-400"
+                class="text-lg sm:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-emerald-400"
               >
                 CrossLeague
               </h1>
               <span
-                class="text-xs uppercase font-black tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                class="text-[10px] sm:text-xs uppercase font-black tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
               >
                 Sleeper HQ
               </span>
@@ -208,21 +226,21 @@
         </div>
 
         <!-- Action Badges, League Filter & Buttons -->
-        <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full md:w-auto justify-start md:justify-end">
           <!-- LEAGUE FILTER DROPDOWN BAR -->
-          <div class="relative inline-block text-left z-50 hidden" id="leagueDropdownContainer">
+          <div class="relative inline-block text-left z-50 hidden max-w-full" id="leagueDropdownContainer">
             <!-- Dropdown Trigger Button -->
             <button
               type="button"
               id="leagueDropdownBtn"
-              class="px-4 py-2 rounded-xl glass-card border border-slate-700/80 hover:border-emerald-500/50 text-sm text-slate-200 hover:text-white transition flex items-center gap-2.5 shadow-sm active:scale-95 cursor-pointer font-bold"
+              class="px-3 sm:px-4 py-2 rounded-xl glass-card border border-slate-700/80 hover:border-emerald-500/50 text-xs sm:text-sm text-slate-200 hover:text-white transition flex items-center gap-2 sm:gap-2.5 shadow-sm active:scale-95 cursor-pointer font-bold max-w-full"
               aria-expanded="false"
               aria-haspopup="true"
             >
               <span class="text-base flex-shrink-0">🏟️</span>
               <span
                 id="leagueDropdownLabel"
-                class="truncate max-w-[160px] sm:max-w-[240px] md:max-w-[320px] text-left"
+                class="truncate max-w-[120px] xs:max-w-[160px] sm:max-w-[240px] md:max-w-[320px] text-left"
                 >All Leagues Selected</span
               >
               <span
@@ -250,7 +268,7 @@
             <!-- Dropdown Panel -->
             <div
               id="leagueDropdownMenu"
-              class="hidden absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl glass-card border border-slate-700/80 shadow-2xl p-4 z-50 space-y-3 backdrop-blur-xl bg-slate-950/95 ring-1 ring-white/10"
+              class="hidden absolute left-0 sm:left-auto sm:right-0 mt-2 w-[calc(100vw-1.5rem)] sm:w-96 max-w-sm rounded-2xl glass-card border border-slate-700/80 shadow-2xl p-3.5 sm:p-4 z-50 space-y-3 backdrop-blur-xl bg-slate-950/95 ring-1 ring-white/10"
             >
               <!-- Dropdown Header Actions -->
               <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 px-1">
@@ -284,7 +302,7 @@
           <button
             id="copyRecapBtn"
             title="Copy formatted summary to clipboard for Discord, Slack, or GroupMe"
-            class="hidden px-4 py-2 rounded-xl glass-card border border-slate-700/80 hover:border-emerald-500/50 text-sm text-slate-200 hover:text-white transition flex items-center gap-2 shadow-sm active:scale-95 cursor-pointer font-bold"
+            class="hidden px-3 sm:px-4 py-2 rounded-xl glass-card border border-slate-700/80 hover:border-emerald-500/50 text-xs sm:text-sm text-slate-200 hover:text-white transition flex items-center gap-1.5 sm:gap-2 shadow-sm active:scale-95 cursor-pointer font-bold"
           >
             <svg
               class="w-4 h-4 text-cyan-400"
@@ -306,7 +324,7 @@
           <button
             id="shareReportBtn"
             title="Download standalone HTML report with embedded data to share with league members"
-            class="hidden px-4 py-2 rounded-xl glass-card border border-slate-700/80 hover:border-emerald-500/50 text-sm text-slate-200 hover:text-white transition flex items-center gap-2 shadow-sm active:scale-95 cursor-pointer font-bold"
+            class="hidden px-3 sm:px-4 py-2 rounded-xl glass-card border border-slate-700/80 hover:border-emerald-500/50 text-xs sm:text-sm text-slate-200 hover:text-white transition flex items-center gap-1.5 sm:gap-2 shadow-sm active:scale-95 cursor-pointer font-bold"
           >
             <svg
               class="w-4 h-4 text-emerald-400"
@@ -326,20 +344,20 @@
 
           <span
             id="snapshotIndicator"
-            class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-950/80 border border-cyan-500/30 text-xs sm:text-sm font-semibold text-cyan-300"
+            class="hidden inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-cyan-950/80 border border-cyan-500/30 text-xs sm:text-sm font-semibold text-cyan-300"
           >
             <span
-              class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"
+              class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"
             ></span>
             Snapshot
           </span>
 
           <span
             id="liveSyncIndicator"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-semibold text-slate-300"
+            class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-semibold text-slate-300"
           >
             <span
-              class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+              class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
             ></span>
             Live Sync
           </span>
@@ -348,11 +366,11 @@
     </header>
 
     <!-- Main Content Container (Full-Width Fluid) -->
-    <main class="flex-1 w-full px-4 sm:px-8 lg:px-12 py-6 sm:py-8 space-y-7">
+    <main class="flex-1 w-full px-3 sm:px-8 lg:px-12 py-4 sm:py-8 space-y-5 sm:space-y-7">
       <!-- Search / Filter Control Center (Live Mode Only) -->
       <div
         id="syncControlCenter"
-        class="bg-slate-900/95 border border-slate-800/90 rounded-2xl p-6 sm:p-7 shadow-2xl relative"
+        class="bg-slate-900/95 border border-slate-800/90 rounded-2xl p-4 sm:p-7 shadow-2xl relative overflow-hidden"
       >
         <div
           class="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none transform-gpu"
@@ -778,15 +796,15 @@
 
         <!-- VIEW SELECTOR TABS -->
         <div
-          class="flex items-center justify-between border-b border-slate-800 pb-3.5 flex-wrap gap-4"
+          class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-b border-slate-800 pb-3 gap-3"
         >
           <div
-            class="flex items-center gap-2 p-1.5 bg-slate-900/90 rounded-xl border border-slate-800 text-sm font-bold"
+            class="flex items-center gap-1.5 sm:gap-2 p-1 bg-slate-900/90 rounded-xl border border-slate-800 text-xs sm:text-sm font-bold overflow-x-auto no-scrollbar touch-scroll max-w-full"
           >
             <button
               id="tabLeaderboard"
               onclick="switchTab('leaderboard')"
-              class="px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-2"
+              class="px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -801,7 +819,7 @@
             <button
               id="tabVisuals"
               onclick="switchTab('visuals')"
-              class="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer"
+              class="px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -816,7 +834,7 @@
             <button
               id="tabLeagueGrid"
               onclick="switchTab('leagueGrid')"
-              class="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer"
+              class="px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -831,7 +849,7 @@
             <button
               id="tabLuck"
               onclick="switchTab('luck')"
-              class="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer"
+              class="px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -846,7 +864,7 @@
             <button
               id="tabPlayers"
               onclick="switchTab('players')"
-              class="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer"
+              class="px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -860,10 +878,10 @@
             </button>
           </div>
 
-          <div class="text-xs sm:text-sm text-slate-300 font-medium flex items-center gap-2">
+          <div class="text-xs sm:text-sm text-slate-300 font-medium flex items-center justify-between sm:justify-end gap-2">
             <span
               id="statSpread"
-              class="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 font-mono text-xs sm:text-sm"
+              class="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 font-mono text-xs sm:text-sm w-full sm:w-auto text-center"
             >
               Score Spread: 0 pts
             </span>
@@ -874,19 +892,19 @@
         <div id="viewLeaderboard" class="space-y-4 w-full">
           <!-- Advanced Filter & Search Deck -->
           <div
-            class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 w-full"
+            class="glass-card rounded-2xl p-3.5 sm:p-5 border border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 w-full"
           >
-            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto flex-1">
               <!-- Search -->
               <div class="relative flex-1 sm:w-80">
                 <input
                   type="text"
                   id="tableSearch"
                   placeholder="Search manager, squad, league..."
-                  class="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
+                  class="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
                 />
                 <svg
-                  class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5"
+                  class="w-4 h-4 text-slate-500 absolute left-3.5 top-3"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -903,7 +921,7 @@
               <!-- Score Tier Filter -->
               <select
                 id="scoreTierSelect"
-                class="bg-slate-950/90 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold cursor-pointer"
+                class="bg-slate-950/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold cursor-pointer"
               >
                 <option value="ALL">All Scores</option>
                 <option value="BOOM">🔥 Nuclear (140+ pts)</option>
@@ -1037,7 +1055,7 @@
                 <span id="mainPageInfoText" class="text-slate-400 font-medium">Showing 0 of 0</span>
               </div>
 
-              <div id="mainPaginationControls" class="flex items-center gap-1.5">
+              <div id="mainPaginationControls" class="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end">
                 <button
                   id="btnPrevMainPage"
                   onclick="changeMainPage(-1)"
@@ -1577,7 +1595,7 @@
                 <span id="luckPageInfoText" class="text-slate-400 font-medium">Showing 0 of 0</span>
               </div>
 
-              <div id="luckPaginationControls" class="flex items-center gap-1.5">
+              <div id="luckPaginationControls" class="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end">
                 <button
                   id="btnPrevLuckPage"
                   onclick="changeLuckPage(-1)"
@@ -1647,61 +1665,61 @@
             >
               <!-- Position Filter Pills -->
               <div
-                class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800"
+                class="flex items-center gap-1 sm:gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar touch-scroll max-w-full"
               >
                 <button
                   onclick="setPlayerPositionFilter('ALL')"
                   id="posFilterALL"
-                  class="px-3 py-1.5 rounded-lg text-xs font-black transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 cursor-pointer"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   ALL
                 </button>
                 <button
                   onclick="setPlayerPositionFilter('QB')"
                   id="posFilterQB"
-                  class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   QB
                 </button>
                 <button
                   onclick="setPlayerPositionFilter('RB')"
                   id="posFilterRB"
-                  class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   RB
                 </button>
                 <button
                   onclick="setPlayerPositionFilter('WR')"
                   id="posFilterWR"
-                  class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   WR
                 </button>
                 <button
                   onclick="setPlayerPositionFilter('TE')"
                   id="posFilterTE"
-                  class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   TE
                 </button>
                 <button
                   onclick="setPlayerPositionFilter('FLEX')"
                   id="posFilterFLEX"
-                  class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   FLEX
                 </button>
                 <button
                   onclick="setPlayerPositionFilter('K')"
                   id="posFilterK"
-                  class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   K
                 </button>
                 <button
                   onclick="setPlayerPositionFilter('DEF')"
                   id="posFilterDEF"
-                  class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   DEF
                 </button>
@@ -1825,7 +1843,7 @@
                 >
               </div>
 
-              <div id="playerPaginationControls" class="flex items-center gap-1.5">
+              <div id="playerPaginationControls" class="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end">
                 <button
                   id="btnPrevPlayerPage"
                   onclick="changePlayerPage(-1)"
