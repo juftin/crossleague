@@ -11,8 +11,8 @@ describe("Chat Recap Formatter", () => {
     benchKing,
     shareUrl = "https://crossleague.app/?season=2024&week=1#awards"
   }) => {
-    let text = `*<${shareUrl}|Week ${week} Fantasy Recap (${season})>*\n\n`;
-    text += `*The Podium (Top Scores)*\n`;
+    let text = `[**Week ${week} Fantasy Recap (${season})**](${shareUrl})\n\n`;
+    text += `*__The Podium (Top Scores)__*\n`;
     if (top3[0])
       text += `• 🥇 *#1* ${top3[0].manager} (${top3[0].teamName}) — *${top3[0].points.toFixed(2)} pts* • _${top3[0].league}_\n`;
     if (top3[1])
@@ -20,7 +20,7 @@ describe("Chat Recap Formatter", () => {
     if (top3[2])
       text += `• 🥉 *#3* ${top3[2].manager} (${top3[2].teamName}) — *${top3[2].points.toFixed(2)} pts* • _${top3[2].league}_\n\n`;
 
-    text += `*Superlatives Showcase*\n`;
+    text += `*__Superlatives Showcase__*\n`;
     if (badBeat)
       text += `• 💔 *The Bad Beat:* ${badBeat.manager} (${badBeat.teamName}) scored *${badBeat.points.toFixed(2)} pts* and lost by ${Math.abs(badBeat.margin || 0).toFixed(2)} to ${badBeat.opponentName || "rival"} • _${badBeat.league}_\n`;
     if (luckyEscape)
@@ -31,7 +31,7 @@ describe("Chat Recap Formatter", () => {
     return text;
   };
 
-  it("should generate valid Slack mrkdwn for weekly recap with emoji indicators and embedded URL in title", () => {
+  it("should generate valid Markdown formatted weekly recap with bold/underlined headers and markdown URL", () => {
     const data = {
       week: 1,
       season: 2024,
@@ -68,12 +68,12 @@ describe("Chat Recap Formatter", () => {
 
     assert.ok(
       output.includes(
-        "*<https://crossleague.app/?season=2024&week=1#awards|Week 1 Fantasy Recap (2024)>*"
+        "[**Week 1 Fantasy Recap (2024)**](https://crossleague.app/?season=2024&week=1#awards)"
       )
     );
-    assert.ok(output.includes("*The Podium (Top Scores)*"));
+    assert.ok(output.includes("*__The Podium (Top Scores)__*"));
     assert.ok(!output.includes("*🏆 The Podium"));
-    assert.ok(output.includes("*Superlatives Showcase*"));
+    assert.ok(output.includes("*__Superlatives Showcase__*"));
     assert.ok(!output.includes("*🌟 Superlatives Showcase*"));
     assert.ok(output.includes("• 🥇 *#1* Alice"));
     assert.ok(output.includes("• 🥈 *#2* Bob"));

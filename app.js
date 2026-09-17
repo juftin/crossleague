@@ -4602,9 +4602,9 @@
 
     let text = "";
     if (isSeason) {
-      text = `*<${shareUrl}|Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})>*\n\n`;
+      text = `[**Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})**](${shareUrl})\n\n`;
 
-      text += `*The Podium (Avg PPG)*\n`;
+      text += `*__The Podium (Avg PPG)__*\n`;
       if (first)
         text += `• 🥇 *#1* ${first.manager} (${first.teamName}) — *${first.points.toFixed(2)} PPG* (${(first.totalPoints || 0).toFixed(1)} PF, ${first.wins || 0}W-${first.losses || 0}L) • _${first.league}_\n`;
       if (second)
@@ -4612,7 +4612,7 @@
       if (third)
         text += `• 🥉 *#3* ${third.manager} (${third.teamName}) — *${third.points.toFixed(2)} PPG* (${(third.totalPoints || 0).toFixed(1)} PF, ${third.wins || 0}W-${third.losses || 0}L) • _${third.league}_\n\n`;
 
-      text += `*Superlatives Showcase*\n`;
+      text += `*__Superlatives Showcase__*\n`;
       if (badBeat)
         text += `• 💔 *Season Heartbreak:* ${badBeat.manager} (${badBeat.teamName}) — *${(badBeat.points || 0).toFixed(1)} PPG* with a ${badBeat.wins || 0}W-${badBeat.losses || 0}L record • _${badBeat.league}_\n`;
       if (luckyEscape)
@@ -4620,7 +4620,7 @@
       if (benchKing && benchKing.benchPoints > 0)
         text += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) — *${benchKing.benchPoints.toFixed(1)} pts* left on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
 
-      text += `*Schedule Luck & All-Play*\n`;
+      text += `*__Schedule Luck & All-Play__*\n`;
       if (luckiest) {
         const luckStr = `${(luckiest.luckIndex || 0) >= 0 ? "+" : ""}${(luckiest.luckIndex || 0).toFixed(2)}`;
         text += `• 🍀 *Luckiest Squad:* ${luckiest.manager} — *${luckStr} Luck Index* (${luckiest.wins || 0}W actual vs ${(luckiest.expectedWins || 0).toFixed(2)} xW) • _${luckiest.league}_\n`;
@@ -4633,16 +4633,16 @@
         text += `• ⚡ *All-Play Dominance:* ${allPlayLeader.manager} — *${allPlayLeader.allPlayWinPct || 0}% All-Play Win Rate* (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • _${allPlayLeader.league}_\n\n`;
       }
 
-      text += `*Overview*\n`;
+      text += `*__Overview__*\n`;
       text += `• 👑 *Power League:* ${topLeagueName} (Avg: *${topLeagueAvg.toFixed(2)} PPG*)\n`;
       if (first && lowest)
         text += `• 🔥 *Peak PPG:* ${first.points.toFixed(2)} (${first.manager}) | ❄️ *Lowest PPG:* ${lowest.points.toFixed(2)} (${lowest.manager})\n`;
       text += `• 📈 *Benchmark:* Avg: *${avgScore.toFixed(2)} PPG* | Median: *${medianScore.toFixed(2)} PPG*\n`;
       text += `• 🏟️ *Scope:* ${totalLeagues} Leagues | ${totalSquads} Squads`;
     } else {
-      text = `*<${shareUrl}|Week ${week} Fantasy Recap (${season})>*\n\n`;
+      text = `[**Week ${week} Fantasy Recap (${season})**](${shareUrl})\n\n`;
 
-      text += `*The Podium (Top Scores)*\n`;
+      text += `*__The Podium (Top Scores)__*\n`;
       if (first)
         text += `• 🥇 *#1* ${first.manager} (${first.teamName}) — *${first.points.toFixed(2)} pts* • _${first.league}_\n`;
       if (second)
@@ -4650,7 +4650,7 @@
       if (third)
         text += `• 🥉 *#3* ${third.manager} (${third.teamName}) — *${third.points.toFixed(2)} pts* • _${third.league}_\n\n`;
 
-      text += `*Superlatives Showcase*\n`;
+      text += `*__Superlatives Showcase__*\n`;
       if (badBeat)
         text += `• 💔 *The Bad Beat:* ${badBeat.manager} (${badBeat.teamName}) scored *${badBeat.points.toFixed(2)} pts* and lost by ${Math.abs(badBeat.margin || 0).toFixed(2)} to ${badBeat.opponentName || "rival"} • _${badBeat.league}_\n`;
       if (luckyEscape)
@@ -4658,7 +4658,7 @@
       if (benchKing && benchKing.benchPoints > 0)
         text += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) left *${benchKing.benchPoints.toFixed(2)} pts* on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
 
-      text += `*Schedule Luck & All-Play*\n`;
+      text += `*__Schedule Luck & All-Play__*\n`;
       if (luckiest) {
         const luckStr = `${(luckiest.luckIndex || 0) >= 0 ? "+" : ""}${(luckiest.luckIndex || 0).toFixed(2)}`;
         text += `• 🍀 *Luckiest Draw:* ${luckiest.manager} — *${luckStr} Luck Index* (${(luckiest.expectedWins || 0).toFixed(2)} xW) • _${luckiest.league}_\n`;
@@ -4671,7 +4671,7 @@
         text += `• ⚡ *All-Play Leader:* ${allPlayLeader.manager} — *${allPlayLeader.allPlayWinPct || 0}% Win Rate* (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • _${allPlayLeader.league}_\n\n`;
       }
 
-      text += `*Overview*\n`;
+      text += `*__Overview__*\n`;
       text += `• 👑 *Power League:* ${topLeagueName} (Avg: *${topLeagueAvg.toFixed(2)} pts*)\n`;
       if (first && lowest)
         text += `• 🔥 *Peak Score:* ${first.points.toFixed(2)} pts (${first.manager}) | ❄️ *Lowest Score:* ${lowest.points.toFixed(2)} pts (${lowest.manager})\n`;
