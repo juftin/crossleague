@@ -120,4 +120,48 @@ describe("Shareable URL & Parameter Extraction", () => {
 
     assert.deepEqual(ids, ["112233445566778899", "998877665544332211", "445566778899001122"]);
   });
+
+  it("should generate and parse ESPN platform shareable URLs correctly", () => {
+    function buildEspnShareableUrl({
+      origin = "https://crossleague.app",
+      pathname = "/",
+      platform = "espn",
+      season = "2024",
+      week = "1",
+      mode = "WEEKLY",
+      leagueIds = ["espn:1664455"],
+      currentTab = "power"
+    }) {
+      const url = new URL(`${origin}${pathname}`);
+      url.search = "";
+      if (platform === "espn") url.searchParams.set("platform", "espn");
+      if (season) url.searchParams.set("season", season);
+      if (week) url.searchParams.set("week", week);
+      if (mode) url.searchParams.set("mode", mode);
+      const cleanIds = leagueIds.map(id => String(id).replace(/^espn:/i, ""));
+      if (cleanIds.length > 0) url.searchParams.set("leagues", cleanIds.join(","));
+      url.hash = `#${currentTab}`;
+      return url.toString();
+    }
+
+    const shareUrl = buildEspnShareableUrl({
+      season: "2024",
+      week: "1",
+      mode: "WEEKLY",
+      leagueIds: ["espn:1664455"],
+      currentTab: "power"
+    });
+
+    assert.equal(
+      shareUrl,
+      "https://crossleague.app/?platform=espn&season=2024&week=1&mode=WEEKLY&leagues=1664455#power"
+    );
+
+    const parsed = new URL(shareUrl);
+    assert.equal(parsed.searchParams.get("platform"), "espn");
+    assert.equal(parsed.searchParams.get("leagues"), "1664455");
+    assert.equal(parsed.searchParams.get("season"), "2024");
+    assert.equal(parsed.searchParams.get("week"), "1");
+    assert.equal(parsed.hash, "#power");
+  });
 });

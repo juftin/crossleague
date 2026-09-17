@@ -220,3 +220,16 @@ a {
     transform: translateY(0) scale(1);
   }
 }
+
+/* Platform Badges */
+.badge-espn {
+  background: rgba(220, 38, 38, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.badge-sleeper {
+  background: rgba(0, 206, 184, 0.15);
+  color: #2dd4bf;
+  border: 1px solid rgba(0, 206, 184, 0.35);
+}

@@ -167,10 +167,11 @@ describe("Bundle & Syntax Integrity", () => {
     assert.ok(indexHtml.includes('id="selectAllLeaguesBtn"'), "Must contain #selectAllLeaguesBtn");
     assert.ok(indexHtml.includes('id="clearAllLeaguesBtn"'), "Must contain #clearAllLeaguesBtn");
 
-    // Menu Action Buttons (Copy Recap, Share, Download Report)
+    // Menu Action Buttons (Copy Recap, Share, Download Report, Clear Data)
     assert.ok(indexHtml.includes('id="copyRecapBtn"'), "Must contain #copyRecapBtn");
     assert.ok(indexHtml.includes('id="shareUrlBtn"'), "Must contain #shareUrlBtn");
     assert.ok(indexHtml.includes('id="downloadReportBtn"'), "Must contain #downloadReportBtn");
+    assert.ok(indexHtml.includes('id="clearDataBtn"'), "Must contain #clearDataBtn");
     assert.ok(indexHtml.includes('id="btnOpenLuckModal"'), "Must contain #btnOpenLuckModal");
 
     // Menu Week Selector & settings elements

@@ -14,8 +14,59 @@
   "use strict";
 
   const BASE_URL = "https://api.sleeper.app/v1";
+  const ESPN_BASE_URL = "https://lm-api-reads.fantasy.espn.com";
+
+  const ESPN_POS_MAP = {
+    1: "QB",
+    2: "RB",
+    3: "WR",
+    4: "TE",
+    5: "K",
+    16: "DEF"
+  };
+
+  const ESPN_PRO_TEAMS = {
+    0: "FA",
+    1: "ATL",
+    2: "BUF",
+    3: "CHI",
+    4: "CIN",
+    5: "CLE",
+    6: "DAL",
+    7: "DEN",
+    8: "DET",
+    9: "GB",
+    10: "TEN",
+    11: "IND",
+    12: "KC",
+    13: "LV",
+    14: "LAR",
+    15: "MIA",
+    16: "MIN",
+    17: "NE",
+    18: "NO",
+    19: "NYG",
+    20: "NYJ",
+    21: "PHI",
+    22: "ARI",
+    23: "PIT",
+    24: "LAC",
+    25: "SF",
+    26: "SEA",
+    27: "TB",
+    28: "WSH",
+    29: "CAR",
+    30: "JAX",
+    33: "BAL",
+    34: "HOU"
+  };
+
+  function isEspnStarter(slotId) {
+    return slotId !== 20 && slotId !== 21;
+  }
 
   // App State
+  let currentPlatform = "sleeper"; // "sleeper" | "espn"
   let currentMode = "WEEKLY"; // "WEEKLY" | "SEASON_ROLLUP"
   let currentUserId = "";
   let currentUserName = "";
@@ -33,6 +84,8 @@
   let searchQuery = "";
   let expandedRowIds = new Set();
 
+  let espnPlayersDb = {};
+
   let currentMainPage = 1;
   let currentMainPageSize = 25;
 
@@ -41,11 +94,15 @@
 
   // DOM Elements
   const filterForm = document.getElementById("filterForm");
+  const platformSleeperBtn = document.getElementById("platformSleeperBtn");
+  const platformEspnBtn = document.getElementById("platformEspnBtn");
+  const syncTypeButtonsContainer = document.getElementById("syncTypeButtonsContainer");
   const modeSelect = document.getElementById("modeSelect");
   const weekLabelText = document.getElementById("weekLabelText");
   const syncTypeUserBtn = document.getElementById("syncTypeUserBtn");
   const syncTypeLeaguesBtn = document.getElementById("syncTypeLeaguesBtn");
   const userSyncPanel = document.getElementById("userSyncPanel");
+  const customLeaguesLabel = document.getElementById("customLeaguesLabel");
   const leaguesSyncPanel = document.getElementById("leaguesSyncPanel");
   const customLeagueIdInput = document.getElementById("customLeagueIdInput");
   const btnAddCustomLeagueId = document.getElementById("btnAddCustomLeagueId");
@@ -88,6 +145,7 @@
   const downloadReportBtnText =
     document.getElementById("downloadReportBtnText") ||
     document.getElementById("shareReportBtnText");
+  const clearDataBtn = document.getElementById("clearDataBtn");
   const shareReportBtn = downloadReportBtn;
   const shareReportBtnText = downloadReportBtnText;
   const noResultsFound = document.getElementById("noResultsFound");
@@ -588,11 +646,18 @@
     if (!str) return;
     const parts = str
       .split(/[\s,;\n\t]+/)
-      .map(s => s.trim().replace(/^#/, ""))
+      .map(s => {
+        let cleaned = s.trim().replace(/^#/, "");
+        const urlMatch = cleaned.match(/leagueId=(\d+)/i);
+        if (urlMatch) {
+          cleaned = urlMatch[1];
+        }
+        return cleaned;
+      })
       .filter(s => s.length > 0 && /^\d+$/.test(s));
 
     if (parts.length === 0 && str.trim()) {
-      showToast("League IDs should be numeric.", "⚠️");
+      showToast("League IDs should be numeric (e.g. 1664455).", "⚠️");
       return;
     }
 
@@ -673,9 +738,37 @@
     }
   }
 
+  function setPlatform(platform) {
+    currentPlatform = platform === "espn" ? "espn" : "sleeper";
+    if (platformSleeperBtn && platformEspnBtn) {
+      if (currentPlatform === "espn") {
+        platformSleeperBtn.className =
+          "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 text-xs";
+        platformEspnBtn.className =
+          "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-white bg-rose-900/80 border border-rose-500/40 shadow-sm flex items-center justify-center gap-1.5 text-xs font-bold";
+        if (syncTypeButtonsContainer) syncTypeButtonsContainer.classList.add("hidden");
+        if (userSyncPanel) userSyncPanel.classList.add("hidden");
+        if (leaguesSyncPanel) leaguesSyncPanel.classList.remove("hidden");
+        if (customLeaguesLabel) customLeaguesLabel.textContent = "ESPN League IDs (Public)";
+        setSyncType("leagues");
+      } else {
+        // Sleeper
+        platformSleeperBtn.className =
+          "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-200 bg-slate-800 shadow-sm flex items-center justify-center gap-1.5 text-xs font-bold";
+        platformEspnBtn.className =
+          "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 text-xs";
+        if (syncTypeButtonsContainer) syncTypeButtonsContainer.classList.remove("hidden");
+        if (customLeaguesLabel) customLeaguesLabel.textContent = "Sleeper League IDs";
+        setSyncType(currentSyncType || "user");
+      }
+    }
+    savePreferences();
+    updateSettingsButtonBadge();
+  }
+
   function setSyncType(type) {
     currentSyncType = type;
-    if (type === "leagues") {
+    if (type === "leagues" || currentPlatform === "espn") {
       if (syncTypeUserBtn) {
         syncTypeUserBtn.className =
           "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5";
@@ -703,6 +796,11 @@
   }
 
   function loadSavedPreferences() {
+    const savedPlatform = localStorage.getItem("crossleague_platform");
+    if (savedPlatform === "espn" || savedPlatform === "sleeper") {
+      currentPlatform = savedPlatform;
+    }
+
     const savedSyncType = localStorage.getItem("sleeper_sync_type");
     if (savedSyncType === "leagues" || savedSyncType === "user") {
       currentSyncType = savedSyncType;
@@ -731,13 +829,14 @@
       currentMode = savedMode;
       updateModeUI();
     }
-    setSyncType(currentSyncType);
+    setPlatform(currentPlatform);
     renderCustomLeagueIdChips();
     updateSettingsButtonBadge();
     updateWeekNavigatorUI();
   }
 
   function savePreferences() {
+    localStorage.setItem("crossleague_platform", currentPlatform);
     localStorage.setItem("sleeper_sync_type", currentSyncType);
     if (userIdInput) {
       const username = userIdInput.value.trim();
@@ -779,6 +878,13 @@
     }
     updateSettingsButtonBadge();
     updateWeekNavigatorUI();
+  }
+
+  if (platformSleeperBtn) {
+    platformSleeperBtn.addEventListener("click", () => setPlatform("sleeper"));
+  }
+  if (platformEspnBtn) {
+    platformEspnBtn.addEventListener("click", () => setPlatform("espn"));
   }
 
   if (btnOpenSettingsModal) {
@@ -882,13 +988,14 @@
       return {};
     }
     const params = new URLSearchParams(window.location.search);
+    const platform = params.get("platform") || params.get("p");
     const user =
       params.get("user") || params.get("u") || params.get("username") || params.get("userId");
     const season = params.get("season") || params.get("year");
     const week = params.get("week") || params.get("w");
     const mode = params.get("mode") || params.get("m");
     const leagues = params.get("leagues") || params.get("league_ids");
-    return { user, season, week, mode, leagues };
+    return { platform, user, season, week, mode, leagues };
   }
 
   async function initDefaults() {
@@ -920,6 +1027,10 @@
       userIdInput.value = urlParams.user.trim();
       currentUserName = urlParams.user.trim();
       currentSyncType = "user";
+    }
+
+    if (urlParams.platform) {
+      setPlatform(urlParams.platform.toLowerCase() === "espn" ? "espn" : "sleeper");
     }
 
     if (urlParams.leagues) {
@@ -1153,6 +1264,24 @@
         isDef: false
       };
 
+    // Check ESPN Player Database
+    if (espnPlayersDb && espnPlayersDb[pid]) {
+      const p = espnPlayersDb[pid];
+      const isDef = p.pos === "DEF";
+      const cleanNumericId = String(pid).replace(/^espn_/, "");
+      return {
+        id: pid,
+        name: p.name,
+        pos: p.pos,
+        team: p.team,
+        isDef: isDef,
+        headshotUrl:
+          isDef && p.team
+            ? `https://a.espncdn.com/i/teamlogos/nfl/500/${p.team.toLowerCase()}.png`
+            : `https://a.espncdn.com/i/headshots/nfl/players/full/${cleanNumericId}.png`
+      };
+    }
+
     if (sleeperPlayersDb && sleeperPlayersDb[pid]) {
       const p = sleeperPlayersDb[pid];
       const isDef = p.pos === "DEF";
@@ -1189,6 +1318,652 @@
       isDef: false,
       headshotUrl: `https://sleepercdn.com/content/nfl/players/thumb/${pid}.jpg`
     };
+  }
+
+  /**
+   * ESPN API Gateway & Request Dispatcher (Public Leagues)
+   */
+  async function fetchEspnApi(path) {
+    const urlsToTry = [
+      `${ESPN_BASE_URL}${path}`,
+      `https://corsproxy.io/?${encodeURIComponent(`${ESPN_BASE_URL}${path}`)}`
+    ];
+
+    let lastError = null;
+    for (const targetUrl of urlsToTry) {
+      try {
+        const resp = await fetch(targetUrl, {
+          headers: { Accept: "application/json" }
+        });
+        if (resp.status === 401 || resp.status === 403) {
+          throw new Error(
+            `ESPN League access denied (${resp.status}). The requested ESPN league is private. Only public ESPN leagues are supported in the browser.`
+          );
+        }
+        if (resp.status === 404) {
+          throw new Error(
+            `ESPN League not found (${resp.status}). Please verify the League ID and Season.`
+          );
+        }
+        if (!resp.ok) {
+          throw new Error(`ESPN API error (${resp.status}): ${path}`);
+        }
+        return await resp.json();
+      } catch (err) {
+        lastError = err;
+        if (err.message.includes("access denied") || err.message.includes("not found")) {
+          throw err;
+        }
+      }
+    }
+
+    throw new Error(
+      `Could not connect to ESPN API (${lastError ? lastError.message : "CORS Error"}).`
+    );
+  }
+
+  /**
+   * ESPN League Fetcher & Data Normalizer
+   */
+  async function fetchEspnLeague(rawId, season, targetWeek, mode) {
+    const cleanId = String(rawId)
+      .replace(/^espn:/i, "")
+      .trim();
+    const sNum = parseInt(season, 10) || 2024;
+    const viewParams =
+      "view=mTeam&view=mRoster&view=mMatchup&view=mMatchupScore&view=mSettings&view=mBoxscore&view=mMembers";
+
+    const path =
+      mode === "SEASON_ROLLUP"
+        ? `/apis/v3/games/ffl/seasons/${sNum}/segments/0/leagues/${cleanId}?${viewParams}`
+        : `/apis/v3/games/ffl/seasons/${sNum}/segments/0/leagues/${cleanId}?scoringPeriodId=${targetWeek}&${viewParams}`;
+
+    let rawData;
+    try {
+      rawData = await fetchEspnApi(path);
+    } catch (primaryErr) {
+      // Historical fallback if seasons endpoint gives 404 on an older season
+      if (primaryErr.message.includes("not found")) {
+        try {
+          const histPath =
+            mode === "SEASON_ROLLUP"
+              ? `/apis/v3/games/ffl/leagueHistory/${cleanId}?seasonId=${sNum}&${viewParams}`
+              : `/apis/v3/games/ffl/leagueHistory/${cleanId}?seasonId=${sNum}&scoringPeriodId=${targetWeek}&${viewParams}`;
+          rawData = await fetchEspnApi(histPath);
+        } catch {
+          throw primaryErr;
+        }
+      } else {
+        throw primaryErr;
+      }
+    }
+
+    const leagueObj = Array.isArray(rawData) ? rawData[0] : rawData;
+    if (!leagueObj || (!leagueObj.teams && !leagueObj.settings)) {
+      throw new Error(`Invalid ESPN League data returned for ID ${cleanId}`);
+    }
+
+    const lid = `espn:${cleanId}`;
+    const lname = (leagueObj.settings && leagueObj.settings.name) || `ESPN League ${cleanId}`;
+    const lavatar = null;
+    const rosterCount =
+      (leagueObj.settings && leagueObj.settings.size) ||
+      (leagueObj.teams && leagueObj.teams.length) ||
+      10;
+
+    // Member Map
+    const memberMap = {};
+    (leagueObj.members || []).forEach(m => {
+      memberMap[m.id] = m.displayName || m.firstName || "Manager";
+    });
+
+    // Team Map
+    const teamMap = {};
+    const teamRosters = {};
+    (leagueObj.teams || []).forEach(t => {
+      const ownerId = (t.owners && t.owners[0]) || "";
+      const mgr = memberMap[ownerId] || `Manager ${t.id}`;
+      const tName =
+        t.name || (t.location ? `${t.location} ${t.nickname || ""}`.trim() : `Team ${t.id}`);
+      teamMap[t.id] = {
+        id: t.id,
+        teamName: tName,
+        manager: mgr,
+        logo: t.logo || null
+      };
+      if (t.roster) teamRosters[t.id] = t.roster;
+    });
+
+    const schedule = leagueObj.schedule || [];
+
+    // Helper to process team boxscore entries
+    function parseRosterEntries(roster) {
+      const entries = (roster && roster.entries) || [];
+      const startersList = [];
+      const allPlayersList = [];
+      const playersPointsMap = {};
+      const startersPoints = [];
+      let startersTotal = 0;
+      let benchPoints = 0;
+      let highestBenchScore = 0;
+
+      entries.forEach(e => {
+        const p = e.playerPoolEntry && e.playerPoolEntry.player;
+        if (!p) return;
+        const pid = `espn_${p.id}`;
+        let pts = 0;
+        if (e.playerPoolEntry && typeof e.playerPoolEntry.appliedStatTotal === "number") {
+          pts = e.playerPoolEntry.appliedStatTotal;
+        } else if (typeof e.appliedStatTotal === "number") {
+          pts = e.appliedStatTotal;
+        } else if (e.playerPoolEntry && e.playerPoolEntry.ratings && e.playerPoolEntry.ratings[0]) {
+          pts = e.playerPoolEntry.ratings[0].totalPoints || 0;
+        } else if (p.stats && p.stats.length > 0) {
+          const scoringStat =
+            p.stats.find(s => s.statSourceId === 0 && s.statSplitTypeId === 1) ||
+            p.stats.find(s => s.statSourceId === 0) ||
+            p.stats[0];
+          if (scoringStat && typeof scoringStat.appliedTotal === "number") {
+            pts = scoringStat.appliedTotal;
+          }
+        }
+        pts = Math.round(parseFloat(pts || 0) * 100) / 100;
+
+        const pos = ESPN_POS_MAP[p.defaultPositionId] || "FLEX";
+        const teamAbbrev = ESPN_PRO_TEAMS[p.proTeamId] || "FA";
+
+        espnPlayersDb[pid] = {
+          name: p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim() || `Player ${p.id}`,
+          pos: pos,
+          team: teamAbbrev,
+          isDef: pos === "DEF"
+        };
+
+        allPlayersList.push(pid);
+        playersPointsMap[pid] = pts;
+
+        if (isEspnStarter(e.lineupSlotId)) {
+          startersList.push(pid);
+          startersPoints.push(pts);
+          startersTotal += pts;
+        } else {
+          benchPoints += pts;
+          if (pts > highestBenchScore) highestBenchScore = pts;
+        }
+      });
+
+      // Optimal Lineup Potential
+      const sortedScores = Object.values(playersPointsMap).sort((a, b) => b - a);
+      const starterCount = Math.max(1, startersList.length);
+      const optimalPoints = Math.max(
+        startersTotal,
+        sortedScores.slice(0, starterCount).reduce((a, b) => a + b, 0)
+      );
+
+      return {
+        startersList,
+        allPlayersList,
+        playersPointsMap,
+        startersPoints,
+        startersTotal: Math.round(startersTotal * 100) / 100,
+        benchPoints: Math.round(benchPoints * 100) / 100,
+        optimalPoints: Math.round(optimalPoints * 100) / 100,
+        highestBenchScore: Math.round(highestBenchScore * 100) / 100
+      };
+    }
+
+    if (mode === "SEASON_ROLLUP") {
+      const teamRollups = {};
+      (leagueObj.teams || []).forEach(t => {
+        const tInfo = teamMap[t.id];
+        teamRollups[t.id] = {
+          id: `${lid}-${t.id}`,
+          leagueId: lid,
+          league: lname,
+          leagueAvatar: lavatar,
+          manager: tInfo.manager,
+          teamName: tInfo.teamName,
+          avatar: tInfo.logo,
+          platform: "espn",
+          weeklyScores: [],
+          weeklyPlayerRecords: [],
+          totalPoints: 0,
+          totalBenchPoints: 0,
+          wins: 0,
+          losses: 0,
+          ties: 0,
+          allPlayWins: 0,
+          allPlayLosses: 0,
+          allPlayTies: 0,
+          expectedWins: 0,
+          opponentPointsTotal: 0,
+          efficiencies: []
+        };
+      });
+
+      const weeksToFetch = [];
+      for (let w = 1; w <= targetWeek; w++) weeksToFetch.push(w);
+
+      const weeklyBoxscoreList = await Promise.all(
+        weeksToFetch.map(w =>
+          fetchEspnApi(
+            `/apis/v3/games/ffl/seasons/${sNum}/segments/0/leagues/${cleanId}?scoringPeriodId=${w}&view=mMatchup&view=mMatchupScore&view=mBoxscore&view=mRoster&view=mTeam`
+          ).catch(() => null)
+        )
+      );
+
+      // Process all weeks up to targetWeek
+      for (let w = 1; w <= targetWeek; w++) {
+        const wLeagueObj = Array.isArray(weeklyBoxscoreList[w - 1])
+          ? weeklyBoxscoreList[w - 1][0]
+          : weeklyBoxscoreList[w - 1];
+        const wTeamRosters = {};
+        ((wLeagueObj && wLeagueObj.teams) || []).forEach(t => {
+          if (t.roster) wTeamRosters[t.id] = t.roster;
+        });
+        const wSchedule = (wLeagueObj && wLeagueObj.schedule) || schedule;
+        const weekGames = wSchedule.filter(s => s.matchupPeriodId === w);
+        if (weekGames.length === 0) continue;
+
+        const weekRecords = [];
+        weekGames.forEach(m => {
+          if (!m.home || !teamRollups[m.home.teamId]) return;
+          const homeId = m.home.teamId;
+          const awayId = m.away ? m.away.teamId : null;
+
+          const homeRoster =
+            wTeamRosters[homeId] ||
+            teamRosters[homeId] ||
+            (m.home &&
+              (m.home.rosterForMatchupPeriod ||
+                m.home.rosterForCurrentScoringPeriod ||
+                m.home.rosterForMatchupPeriodDelayed ||
+                m.home.roster)) ||
+            null;
+          const homeParsed = parseRosterEntries(homeRoster);
+          const homePts =
+            Math.round(
+              parseFloat(
+                m.home.totalPoints !== undefined && m.home.totalPoints !== null
+                  ? m.home.totalPoints
+                  : homeParsed.startersTotal || 0
+              ) * 100
+            ) / 100;
+
+          const awayRoster =
+            (m.away &&
+              (wTeamRosters[awayId] ||
+                teamRosters[awayId] ||
+                m.away.rosterForMatchupPeriod ||
+                m.away.rosterForCurrentScoringPeriod ||
+                m.away.rosterForMatchupPeriodDelayed ||
+                m.away.roster)) ||
+            null;
+          const awayParsed = parseRosterEntries(awayRoster);
+          const awayPts =
+            awayId && m.away
+              ? Math.round(
+                  parseFloat(
+                    m.away.totalPoints !== undefined && m.away.totalPoints !== null
+                      ? m.away.totalPoints
+                      : awayParsed.startersTotal || 0
+                  ) * 100
+                ) / 100
+              : 0;
+
+          const homeRec = {
+            teamId: homeId,
+            points: homePts,
+            parsed: homeParsed,
+            opponentPoints: awayPts,
+            outcome: "unpaired"
+          };
+          weekRecords.push(homeRec);
+
+          if (awayId && teamRollups[awayId] && m.away) {
+            const awayRec = {
+              teamId: awayId,
+              points: awayPts,
+              parsed: awayParsed,
+              opponentPoints: homePts,
+              outcome: "unpaired"
+            };
+            weekRecords.push(awayRec);
+
+            if (homePts === 0 && awayPts === 0) {
+              homeRec.outcome = "unplayed";
+              awayRec.outcome = "unplayed";
+            } else if (homePts > awayPts) {
+              homeRec.outcome = "win";
+              awayRec.outcome = "loss";
+            } else if (homePts < awayPts) {
+              homeRec.outcome = "loss";
+              awayRec.outcome = "win";
+            } else {
+              homeRec.outcome = "tie";
+              awayRec.outcome = "tie";
+            }
+          }
+        });
+
+        // Compute All-Play for week w
+        const activeSquads = weekRecords.filter(r => r.points > 0 && r.outcome !== "unplayed");
+        weekRecords.forEach(r => {
+          let apW = 0,
+            apL = 0,
+            apT = 0;
+          activeSquads.forEach(other => {
+            if (other.teamId === r.teamId) return;
+            if (r.points > other.points) apW++;
+            else if (r.points < other.points) apL++;
+            else apT++;
+          });
+          const otherCount = activeSquads.length - 1;
+          const xw = otherCount > 0 ? (apW + 0.5 * apT) / otherCount : 0;
+
+          const t = teamRollups[r.teamId];
+          if (t && (r.points > 0 || r.parsed.startersTotal > 0)) {
+            t.weeklyScores.push(r.points);
+            t.weeklyPlayerRecords.push({
+              week: w,
+              startersList: r.parsed.startersList,
+              allPlayersList: r.parsed.allPlayersList,
+              playersPointsMap: r.parsed.playersPointsMap
+            });
+            t.totalPoints += r.points;
+            t.totalBenchPoints += r.parsed.benchPoints;
+            const eff =
+              r.points > 0 && r.parsed.optimalPoints > 0
+                ? Math.min(100, Math.round((r.points / r.parsed.optimalPoints) * 100))
+                : 100;
+            t.efficiencies.push(eff);
+
+            if (r.outcome === "win") t.wins++;
+            else if (r.outcome === "loss") t.losses++;
+            else if (r.outcome === "tie") t.ties++;
+
+            t.allPlayWins += apW;
+            t.allPlayLosses += apL;
+            t.allPlayTies += apT;
+            t.expectedWins += xw;
+            t.opponentPointsTotal += r.opponentPoints;
+          }
+        });
+      }
+
+      const records = Object.values(teamRollups).map(t => {
+        const weeksCount = t.weeklyScores.length || 1;
+        const avgPts = Math.round((t.totalPoints / weeksCount) * 100) / 100;
+        const roundedTotal = Math.round(t.totalPoints * 100) / 100;
+        const stdDev = calculateStdDev(t.weeklyScores);
+        const highScore = t.weeklyScores.length > 0 ? Math.max(...t.weeklyScores) : 0;
+        const lowScore = t.weeklyScores.length > 0 ? Math.min(...t.weeklyScores) : 0;
+        const avgEff =
+          t.efficiencies.length > 0
+            ? Math.round(t.efficiencies.reduce((a, b) => a + b, 0) / t.efficiencies.length)
+            : 100;
+        const totalAp = t.allPlayWins + t.allPlayLosses + t.allPlayTies;
+        const apWinPct =
+          totalAp > 0 ? Math.round(((t.allPlayWins + 0.5 * t.allPlayTies) / totalAp) * 100) : 0;
+        const actWins = t.wins + 0.5 * t.ties;
+        const expWins = Math.round(t.expectedWins * 100) / 100;
+        const seasonLuck = Math.round((actWins - expWins) * 100) / 100;
+        const avgPa =
+          weeksCount > 0 ? Math.round((t.opponentPointsTotal / weeksCount) * 100) / 100 : 0;
+
+        return {
+          id: t.id,
+          leagueId: t.leagueId,
+          league: t.league,
+          leagueAvatar: t.leagueAvatar,
+          manager: t.manager,
+          teamName: t.teamName,
+          avatar: t.avatar,
+          platform: "espn",
+          points: avgPts,
+          totalPoints: roundedTotal,
+          avgPoints: avgPts,
+          weeksCount: weeksCount,
+          stdDev: stdDev,
+          highScore: highScore,
+          lowScore: lowScore,
+          wins: t.wins,
+          losses: t.losses,
+          ties: t.ties,
+          winPct:
+            t.wins + t.losses + t.ties > 0
+              ? Math.round((t.wins / (t.wins + t.losses + t.ties)) * 100)
+              : 0,
+          allPlayWins: t.allPlayWins,
+          allPlayLosses: t.allPlayLosses,
+          allPlayTies: t.allPlayTies,
+          allPlayWinPct: apWinPct,
+          expectedWins: expWins,
+          actualWins: actWins,
+          luckIndex: seasonLuck,
+          pointsAgainst: avgPa,
+          totalPointsAgainst: Math.round(t.opponentPointsTotal * 100) / 100,
+          benchPoints: Math.round((t.totalBenchPoints / weeksCount) * 100) / 100,
+          efficiency: avgEff,
+          startersTotal: avgPts,
+          weeklyScores: t.weeklyScores,
+          weeklyPlayerRecords: t.weeklyPlayerRecords
+        };
+      });
+
+      return {
+        leagueInfo: {
+          league_id: lid,
+          name: lname,
+          avatar: lavatar,
+          total_rosters: rosterCount,
+          platform: "espn"
+        },
+        records
+      };
+    } else {
+      // Single Week Mode
+      const weekGames = schedule.filter(s => s.matchupPeriodId === targetWeek);
+      const weekRecords = [];
+
+      weekGames.forEach(m => {
+        if (!m.home) return;
+        const homeT = teamMap[m.home.teamId] || {
+          teamName: `Team ${m.home.teamId}`,
+          manager: "Manager",
+          logo: null
+        };
+        const awayT = m.away
+          ? teamMap[m.away.teamId] || {
+              teamName: `Team ${m.away.teamId}`,
+              manager: "Manager",
+              logo: null
+            }
+          : null;
+
+        const homeRoster =
+          teamRosters[m.home.teamId] ||
+          (m.home &&
+            (m.home.rosterForMatchupPeriod ||
+              m.home.rosterForCurrentScoringPeriod ||
+              m.home.rosterForMatchupPeriodDelayed ||
+              m.home.roster)) ||
+          null;
+        const homeParsed = parseRosterEntries(homeRoster);
+        const homePts =
+          Math.round(
+            parseFloat(
+              m.home.totalPoints !== undefined && m.home.totalPoints !== null
+                ? m.home.totalPoints
+                : homeParsed.startersTotal || 0
+            ) * 100
+          ) / 100;
+
+        const awayRoster =
+          (m.away &&
+            (teamRosters[m.away.teamId] ||
+              m.away.rosterForMatchupPeriod ||
+              m.away.rosterForCurrentScoringPeriod ||
+              m.away.rosterForMatchupPeriodDelayed ||
+              m.away.roster)) ||
+          null;
+        const awayParsed = parseRosterEntries(awayRoster);
+        const awayPts =
+          awayT && m.away
+            ? Math.round(
+                parseFloat(
+                  m.away.totalPoints !== undefined && m.away.totalPoints !== null
+                    ? m.away.totalPoints
+                    : awayParsed.startersTotal || 0
+                ) * 100
+              ) / 100
+            : 0;
+
+        const eff =
+          homePts > 0 && homeParsed.optimalPoints > 0
+            ? Math.min(100, Math.round((homePts / homeParsed.optimalPoints) * 100))
+            : 100;
+
+        const homeRec = {
+          id: `${lid}-${m.home.teamId}`,
+          week: targetWeek,
+          points: homePts,
+          manager: homeT.manager,
+          teamName: homeT.teamName,
+          league: lname,
+          leagueId: lid,
+          leagueAvatar: lavatar,
+          ownerId: String(m.home.teamId),
+          avatar: homeT.logo,
+          platform: "espn",
+          matchupId: m.id || m.home.teamId,
+          startersCount: homeParsed.startersList.length,
+          startersList: homeParsed.startersList,
+          allPlayersList: homeParsed.allPlayersList,
+          playersPointsMap: homeParsed.playersPointsMap,
+          startersPoints: homeParsed.startersPoints,
+          benchPoints: homeParsed.benchPoints,
+          startersTotal: homeParsed.startersTotal,
+          optimalPoints: homeParsed.optimalPoints,
+          efficiency: eff,
+          highestBenchScore: homeParsed.highestBenchScore,
+          outcome: "unpaired",
+          opponentName: awayT ? awayT.manager : "Bye Week",
+          opponentTeam: awayT ? awayT.teamName : "Bye",
+          opponentPoints: awayPts,
+          margin: Math.round((homePts - awayPts) * 100) / 100
+        };
+        weekRecords.push(homeRec);
+
+        if (awayT && m.away) {
+          const awayEff =
+            awayPts > 0 && awayParsed.optimalPoints > 0
+              ? Math.min(100, Math.round((awayPts / awayParsed.optimalPoints) * 100))
+              : 100;
+
+          const awayRec = {
+            id: `${lid}-${m.away.teamId}`,
+            week: targetWeek,
+            points: awayPts,
+            manager: awayT.manager,
+            teamName: awayT.teamName,
+            league: lname,
+            leagueId: lid,
+            leagueAvatar: lavatar,
+            ownerId: String(m.away.teamId),
+            avatar: awayT.logo,
+            platform: "espn",
+            matchupId: m.id || m.home.teamId,
+            startersCount: awayParsed.startersList.length,
+            startersList: awayParsed.startersList,
+            allPlayersList: awayParsed.allPlayersList,
+            playersPointsMap: awayParsed.playersPointsMap,
+            startersPoints: awayParsed.startersPoints,
+            benchPoints: awayParsed.benchPoints,
+            startersTotal: awayParsed.startersTotal,
+            optimalPoints: awayParsed.optimalPoints,
+            efficiency: awayEff,
+            highestBenchScore: awayParsed.highestBenchScore,
+            outcome: "unpaired",
+            opponentName: homeT.manager,
+            opponentTeam: homeT.teamName,
+            opponentPoints: homePts,
+            margin: Math.round((awayPts - homePts) * 100) / 100
+          };
+          weekRecords.push(awayRec);
+
+          if (homePts === 0 && awayPts === 0) {
+            homeRec.outcome = "unplayed";
+            awayRec.outcome = "unplayed";
+          } else if (homePts > awayPts) {
+            homeRec.outcome = "win";
+            awayRec.outcome = "loss";
+          } else if (homePts < awayPts) {
+            homeRec.outcome = "loss";
+            awayRec.outcome = "win";
+          } else {
+            homeRec.outcome = "tie";
+            awayRec.outcome = "tie";
+          }
+        }
+      });
+
+      // Calculate All-Play & Luck Index
+      const activeSquads = weekRecords.filter(
+        r => (r.points > 0 || r.startersTotal > 0) && r.outcome !== "unplayed"
+      );
+      const totalInLeague = activeSquads.length;
+
+      weekRecords.forEach(t => {
+        if (t.outcome === "unplayed" || totalInLeague <= 1) {
+          t.allPlayWins = 0;
+          t.allPlayLosses = 0;
+          t.allPlayTies = 0;
+          t.allPlayWinPct = 0;
+          t.expectedWins = 0;
+          t.actualWins = 0;
+          t.luckIndex = 0;
+          t.pointsAgainst = typeof t.opponentPoints === "number" ? t.opponentPoints : 0;
+          return;
+        }
+
+        let apWins = 0,
+          apLosses = 0,
+          apTies = 0;
+        activeSquads.forEach(other => {
+          if (other.id === t.id) return;
+          if (t.points > other.points) apWins++;
+          else if (t.points < other.points) apLosses++;
+          else apTies++;
+        });
+
+        const otherCount = totalInLeague - 1;
+        const apWinPct = otherCount > 0 ? (apWins + 0.5 * apTies) / otherCount : 0;
+        const expWins = Math.round(apWinPct * 100) / 100;
+        const actWin = t.outcome === "win" ? 1 : t.outcome === "tie" ? 0.5 : 0;
+        const luck = Math.round((actWin - expWins) * 100) / 100;
+
+        t.allPlayWins = apWins;
+        t.allPlayLosses = apLosses;
+        t.allPlayTies = apTies;
+        t.allPlayWinPct = Math.round(apWinPct * 100);
+        t.expectedWins = expWins;
+        t.actualWins = actWin;
+        t.luckIndex = luck;
+        t.pointsAgainst = typeof t.opponentPoints === "number" ? t.opponentPoints : 0;
+      });
+
+      return {
+        leagueInfo: {
+          league_id: lid,
+          name: lname,
+          avatar: lavatar,
+          total_rosters: rosterCount,
+          platform: "espn"
+        },
+        records: weekRecords
+      };
+    }
   }
 
   function getPlayerPositionBadge(pos) {
@@ -1448,7 +2223,7 @@
    * Main Fetcher
    */
   async function fetchLeaderboard() {
-    const isLeaguesSync = currentSyncType === "leagues";
+    const isLeaguesSync = currentSyncType === "leagues" || currentPlatform === "espn";
     const inputVal = userIdInput ? userIdInput.value.trim() : "";
     const season = seasonInput ? seasonInput.value : "2024";
     const targetWeek = weekInput ? parseInt(weekInput.value, 10) : 1;
@@ -1458,13 +2233,21 @@
     const hasCustomLeagues = Boolean(customLeagueIds && customLeagueIds.size > 0);
 
     let targetIds = [];
-    if (isLeaguesSync || (!inputVal && (hasPendingLeagues || hasCustomLeagues))) {
+    if (
+      isLeaguesSync ||
+      currentPlatform === "espn" ||
+      (!inputVal && (hasPendingLeagues || hasCustomLeagues))
+    ) {
       targetIds = hasPendingLeagues
         ? Array.from(pendingLeagueIdsFilter)
         : Array.from(customLeagueIds);
 
       if (targetIds.length === 0) {
-        showError("Please enter at least one Sleeper League ID.");
+        showError(
+          currentPlatform === "espn"
+            ? "Please enter at least one ESPN League ID."
+            : "Please enter at least one League ID."
+        );
         return;
       }
 
@@ -1481,328 +2264,357 @@
     }
 
     try {
-      let leaguesData = [];
-      if (targetIds.length > 0) {
-        currentUserId = "";
-        currentUserName = "";
-        currentUserAvatar = "";
-        updateSettingsButtonBadge();
-        await initPlayersDb();
+      const combinedLeaguesData = [];
+      const combinedRecords = [];
+      leaguesMap = {};
 
-        updateProgress(15, "Fetching league metadata...");
-        const fetched = await Promise.all(
-          targetIds.map(lid => apiFetch(`/league/${lid}`).catch(() => null))
+      if (currentPlatform === "espn") {
+        const espnTargetIds = targetIds.map(rawId =>
+          String(rawId)
+            .trim()
+            .replace(/^espn:/, "")
         );
-        leaguesData = fetched.filter(l => l && l.league_id);
+        updateProgress(20, `Fetching ${espnTargetIds.length} ESPN leagues...`);
+        let completedEspn = 0;
 
-        if (!leaguesData || leaguesData.length === 0) {
-          showError(
-            `No valid leagues found for the specified League IDs (${targetIds.join(", ")}).`
-          );
-          return;
-        }
+        await Promise.all(
+          espnTargetIds.map(async espnId => {
+            try {
+              const res = await fetchEspnLeague(espnId, season, targetWeek, mode);
+              if (res && res.leagueInfo) {
+                combinedLeaguesData.push(res.leagueInfo);
+                leaguesMap[res.leagueInfo.league_id] = {
+                  name: res.leagueInfo.name,
+                  avatar: res.leagueInfo.avatar,
+                  platform: "espn",
+                  rosterCount: res.leagueInfo.total_rosters,
+                  scores: (res.records || []).map(r => r.points)
+                };
+                (res.records || []).forEach(r => combinedRecords.push(r));
+              }
+            } catch (err) {
+              console.error(`Error loading ESPN league ${espnId}:`, err);
+              showError(`Error loading ESPN League ${espnId}: ${err.message}`);
+              throw err;
+            } finally {
+              completedEspn++;
+              const percent = 20 + Math.round((completedEspn / espnTargetIds.length) * 75);
+              updateProgress(
+                percent,
+                `Loaded ${completedEspn}/${espnTargetIds.length} ESPN leagues...`
+              );
+            }
+          })
+        );
       } else {
-        const [resolvedId] = await Promise.all([resolveUser(inputVal), initPlayersDb()]);
-        currentUserId = resolvedId;
+        // Sleeper platform ONLY
+        const sleeperTargetIds = targetIds.map(rawId =>
+          String(rawId)
+            .trim()
+            .replace(/^sleeper:/, "")
+        );
+        let sleeperLeaguesData = [];
+        if (!isLeaguesSync && inputVal) {
+          const [resolvedId] = await Promise.all([resolveUser(inputVal), initPlayersDb()]);
+          currentUserId = resolvedId;
+          updateProgress(15, "Fetching active Sleeper leagues...");
+          sleeperLeaguesData = await apiFetch(`/user/${currentUserId}/leagues/nfl/${season}`);
+        } else if (sleeperTargetIds.length > 0) {
+          currentUserId = "";
+          currentUserName = "";
+          currentUserAvatar = "";
+          updateSettingsButtonBadge();
+          await initPlayersDb();
+          updateProgress(15, "Fetching Sleeper league metadata...");
+          const fetched = await Promise.all(
+            sleeperTargetIds.map(lid => apiFetch(`/league/${lid}`).catch(() => null))
+          );
+          sleeperLeaguesData = fetched.filter(l => l && l.league_id);
+        }
 
-        updateProgress(15, "Fetching active leagues...");
-        leaguesData = await apiFetch(`/user/${currentUserId}/leagues/nfl/${season}`);
+        // Process Sleeper leagues if any
+        if (sleeperLeaguesData && sleeperLeaguesData.length > 0) {
+          sleeperLeaguesData.forEach(l => {
+            l.platform = "sleeper";
+            combinedLeaguesData.push(l);
+          });
 
-        if (!leaguesData || leaguesData.length === 0) {
-          showError(`No leagues found for "${inputVal}" in the ${season} season.`);
-          return;
+          if (mode === "SEASON_ROLLUP") {
+            const totalSleeper = sleeperLeaguesData.length;
+            const teamRollups = {};
+            let completedCalls = 0;
+
+            await Promise.all(
+              sleeperLeaguesData.map(async league => {
+                const lid = league.league_id;
+                const lname = league.name || `League ${lid}`;
+                const lavatar = league.avatar || null;
+
+                leaguesMap[lid] = {
+                  name: lname,
+                  avatar: lavatar,
+                  platform: "sleeper",
+                  rosterCount: league.total_rosters || 12,
+                  scores: []
+                };
+
+                try {
+                  const [usersRaw, rostersRaw] = await Promise.all([
+                    apiFetch(`/league/${lid}/users`).catch(() => []),
+                    apiFetch(`/league/${lid}/rosters`).catch(() => [])
+                  ]);
+
+                  const userMap = {};
+                  for (const u of usersRaw) {
+                    const uid = u.user_id;
+                    const meta = u.metadata || {};
+                    userMap[uid] = {
+                      displayName: u.display_name || u.username || "Unknown",
+                      teamName: meta.team_name || null,
+                      avatar: u.avatar || null
+                    };
+                  }
+
+                  const weeksToFetch = [];
+                  for (let w = 1; w <= targetWeek; w++) weeksToFetch.push(w);
+
+                  const weeklyMatchupsList = await Promise.all(
+                    weeksToFetch.map(w => apiFetch(`/league/${lid}/matchups/${w}`).catch(() => []))
+                  );
+
+                  weeksToFetch.forEach((w, idx) => {
+                    const matchupsRaw = weeklyMatchupsList[idx];
+                    const weekRecords = processWeeklyMatchups(
+                      matchupsRaw,
+                      rostersRaw,
+                      userMap,
+                      lid,
+                      lname,
+                      lavatar,
+                      w
+                    );
+
+                    for (const r of weekRecords) {
+                      const rosterId = r.id;
+                      if (!teamRollups[rosterId]) {
+                        teamRollups[rosterId] = {
+                          id: rosterId,
+                          leagueId: lid,
+                          league: lname,
+                          leagueAvatar: lavatar,
+                          manager: r.manager,
+                          teamName: r.teamName,
+                          avatar: r.avatar,
+                          totalPoints: 0,
+                          totalBenchPoints: 0,
+                          wins: 0,
+                          losses: 0,
+                          ties: 0,
+                          allPlayWins: 0,
+                          allPlayLosses: 0,
+                          allPlayTies: 0,
+                          expectedWins: 0,
+                          opponentPointsTotal: 0,
+                          weeklyScores: [],
+                          efficiencies: [],
+                          weeklyPlayerRecords: []
+                        };
+                      }
+
+                      teamRollups[rosterId].totalPoints += r.points;
+                      teamRollups[rosterId].totalBenchPoints += r.benchPoints || 0;
+                      teamRollups[rosterId].weeklyScores.push(r.points);
+                      teamRollups[rosterId].efficiencies.push(r.efficiency || 100);
+                      teamRollups[rosterId].weeklyPlayerRecords.push({
+                        week: w,
+                        startersList: r.startersList || [],
+                        allPlayersList: r.allPlayersList || [],
+                        playersPointsMap: r.playersPointsMap || {}
+                      });
+
+                      if (r.result === "WIN") teamRollups[rosterId].wins += 1;
+                      else if (r.result === "LOSS") teamRollups[rosterId].losses += 1;
+                      else if (r.result === "TIE") teamRollups[rosterId].ties += 1;
+
+                      teamRollups[rosterId].allPlayWins += r.allPlayWins;
+                      teamRollups[rosterId].allPlayLosses += r.allPlayLosses;
+                      teamRollups[rosterId].allPlayTies += r.allPlayTies;
+                      teamRollups[rosterId].expectedWins += r.expectedWins;
+                      teamRollups[rosterId].opponentPointsTotal += r.opponentPoints;
+
+                      leaguesMap[lid].scores.push(r.points);
+                    }
+                  });
+                } catch (err) {
+                  console.error(`Error loading season data for league ${lid}:`, err);
+                } finally {
+                  completedCalls++;
+                  const percent = 25 + Math.round((completedCalls / totalSleeper) * 70);
+                  updateProgress(
+                    percent,
+                    `Processed ${completedCalls}/${totalSleeper} Sleeper leagues...`
+                  );
+                }
+              })
+            );
+
+            const sleeperRollupRecords = Object.values(teamRollups).map(t => {
+              const weeksCount = t.weeklyScores.length || 1;
+              const avgPts = Math.round((t.totalPoints / weeksCount) * 100) / 100;
+              const roundedTotal = Math.round(t.totalPoints * 100) / 100;
+              const stdDev = calculateStdDev(t.weeklyScores);
+              const highScore = t.weeklyScores.length > 0 ? Math.max(...t.weeklyScores) : 0;
+              const lowScore = t.weeklyScores.length > 0 ? Math.min(...t.weeklyScores) : 0;
+              const avgEff =
+                t.efficiencies.length > 0
+                  ? Math.round(t.efficiencies.reduce((a, b) => a + b, 0) / t.efficiencies.length)
+                  : 100;
+
+              const totalAp = t.allPlayWins + t.allPlayLosses + t.allPlayTies;
+              const apWinPct =
+                totalAp > 0
+                  ? Math.round(((t.allPlayWins + 0.5 * t.allPlayTies) / totalAp) * 100)
+                  : 0;
+              const actWins = t.wins + 0.5 * t.ties;
+              const expWins = Math.round(t.expectedWins * 100) / 100;
+              const seasonLuck = Math.round((actWins - expWins) * 100) / 100;
+              const avgPa =
+                weeksCount > 0 ? Math.round((t.opponentPointsTotal / weeksCount) * 100) / 100 : 0;
+
+              return {
+                id: t.id,
+                leagueId: t.leagueId,
+                league: t.league,
+                leagueAvatar: t.leagueAvatar,
+                manager: t.manager,
+                teamName: t.teamName,
+                avatar: t.avatar,
+                platform: "sleeper",
+                points: avgPts,
+                totalPoints: roundedTotal,
+                avgPoints: avgPts,
+                weeksCount: weeksCount,
+                stdDev: stdDev,
+                highScore: highScore,
+                lowScore: lowScore,
+                wins: t.wins,
+                losses: t.losses,
+                ties: t.ties,
+                winPct:
+                  t.wins + t.losses + t.ties > 0
+                    ? Math.round((t.wins / (t.wins + t.losses + t.ties)) * 100)
+                    : 0,
+                allPlayWins: t.allPlayWins,
+                allPlayLosses: t.allPlayLosses,
+                allPlayTies: t.allPlayTies,
+                allPlayWinPct: apWinPct,
+                expectedWins: expWins,
+                actualWins: actWins,
+                luckIndex: seasonLuck,
+                pointsAgainst: avgPa,
+                totalPointsAgainst: Math.round(t.opponentPointsTotal * 100) / 100,
+                benchPoints: Math.round((t.totalBenchPoints / weeksCount) * 100) / 100,
+                efficiency: avgEff,
+                startersTotal: avgPts,
+                weeklyScores: t.weeklyScores,
+                weeklyPlayerRecords: t.weeklyPlayerRecords
+              };
+            });
+
+            sleeperRollupRecords.forEach(r => combinedRecords.push(r));
+          } else {
+            // Sleeper Single Week
+            const totalSleeper = sleeperLeaguesData.length;
+            let completedLeagues = 0;
+
+            await Promise.all(
+              sleeperLeaguesData.map(async league => {
+                const lid = league.league_id;
+                const lname = league.name || `League ${lid}`;
+                const lavatar = league.avatar || null;
+
+                leaguesMap[lid] = {
+                  name: lname,
+                  avatar: lavatar,
+                  platform: "sleeper",
+                  rosterCount: league.total_rosters || 12,
+                  scores: []
+                };
+
+                try {
+                  const [usersRaw, rostersRaw, matchupsRaw] = await Promise.all([
+                    apiFetch(`/league/${lid}/users`).catch(() => []),
+                    apiFetch(`/league/${lid}/rosters`).catch(() => []),
+                    apiFetch(`/league/${lid}/matchups/${targetWeek}`).catch(() => [])
+                  ]);
+
+                  const userMap = {};
+                  for (const u of usersRaw) {
+                    const uid = u.user_id;
+                    const meta = u.metadata || {};
+                    userMap[uid] = {
+                      displayName: u.display_name || u.username || "Unknown",
+                      teamName: meta.team_name || null,
+                      avatar: u.avatar || null
+                    };
+                  }
+
+                  const weekRecords = processWeeklyMatchups(
+                    matchupsRaw,
+                    rostersRaw,
+                    userMap,
+                    lid,
+                    lname,
+                    lavatar,
+                    targetWeek
+                  );
+
+                  weekRecords.forEach(r => {
+                    r.platform = "sleeper";
+                    combinedRecords.push(r);
+                    leaguesMap[lid].scores.push(r.points);
+                  });
+                } catch (err) {
+                  console.error(`Error loading league ${lid}:`, err);
+                } finally {
+                  completedLeagues++;
+                  const percent = 30 + Math.round((completedLeagues / totalSleeper) * 65);
+                  updateProgress(
+                    percent,
+                    `Loaded ${completedLeagues}/${totalSleeper} Sleeper leagues...`
+                  );
+                }
+              })
+            );
+          }
         }
       }
 
-      const totalLeagues = leaguesData.length;
-      leaguesMap = {};
-      allLeaguesData = leaguesData;
+      if (combinedRecords.length === 0) {
+        showError(`No scores found for the requested season/week across selected platforms.`);
+        return;
+      }
 
-      if (mode === "SEASON_ROLLUP") {
-        // Season Rollup Aggregation (Weeks 1 to targetWeek) (#5)
-        updateProgress(
-          25,
-          `Aggregating Weeks 1 through ${targetWeek} across ${totalLeagues} leagues...`
+      rawRecords = combinedRecords;
+      allLeaguesData = combinedLeaguesData;
+
+      if (pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0) {
+        selectedLeagueIds = new Set(
+          combinedLeaguesData
+            .map(l => l.league_id)
+            .filter(
+              id =>
+                pendingLeagueIdsFilter.has(id) ||
+                pendingLeagueIdsFilter.has(String(id).replace(/^espn:/, "")) ||
+                pendingLeagueIdsFilter.has(String(id).replace(/^sleeper:/, ""))
+            )
         );
-
-        const teamRollups = {}; // `${lid}-${rid}` -> aggregate object
-        let completedCalls = 0;
-        const totalCalls = totalLeagues;
-
-        await Promise.all(
-          leaguesData.map(async league => {
-            const lid = league.league_id;
-            const lname = league.name || `League ${lid}`;
-            const lavatar = league.avatar || null;
-
-            leaguesMap[lid] = {
-              name: lname,
-              avatar: lavatar,
-              rosterCount: league.total_rosters || 12,
-              scores: []
-            };
-
-            try {
-              const [usersRaw, rostersRaw] = await Promise.all([
-                apiFetch(`/league/${lid}/users`).catch(() => []),
-                apiFetch(`/league/${lid}/rosters`).catch(() => [])
-              ]);
-
-              const userMap = {};
-              for (const u of usersRaw) {
-                const uid = u.user_id;
-                const meta = u.metadata || {};
-                userMap[uid] = {
-                  displayName: u.display_name || u.username || "Unknown",
-                  teamName: meta.team_name || null,
-                  avatar: u.avatar || null
-                };
-              }
-
-              // Fetch all weeks from 1 to targetWeek
-              const weeksToFetch = [];
-              for (let w = 1; w <= targetWeek; w++) weeksToFetch.push(w);
-
-              const weeklyMatchupsList = await Promise.all(
-                weeksToFetch.map(w => apiFetch(`/league/${lid}/matchups/${w}`).catch(() => []))
-              );
-
-              weeklyMatchupsList.forEach((matchupsRaw, wIdx) => {
-                const wNum = wIdx + 1;
-                if (!matchupsRaw || matchupsRaw.length === 0) return;
-
-                const weekRecords = processWeeklyMatchups(
-                  matchupsRaw,
-                  rostersRaw,
-                  userMap,
-                  lid,
-                  lname,
-                  lavatar,
-                  wNum
-                );
-
-                weekRecords.forEach(r => {
-                  if (!teamRollups[r.id]) {
-                    teamRollups[r.id] = {
-                      id: r.id,
-                      leagueId: r.leagueId,
-                      league: r.league,
-                      leagueAvatar: r.leagueAvatar,
-                      manager: r.manager,
-                      teamName: r.teamName,
-                      avatar: r.avatar,
-                      weeklyScores: [],
-                      weeklyPlayerRecords: [],
-                      totalPoints: 0,
-                      totalBenchPoints: 0,
-                      wins: 0,
-                      losses: 0,
-                      ties: 0,
-                      allPlayWins: 0,
-                      allPlayLosses: 0,
-                      allPlayTies: 0,
-                      expectedWins: 0,
-                      opponentPointsTotal: 0,
-                      efficiencies: []
-                    };
-                  }
-                  if (
-                    r.points > 0 ||
-                    r.startersTotal > 0 ||
-                    (r.startersList && r.startersList.length > 0)
-                  ) {
-                    teamRollups[r.id].weeklyScores.push(r.points);
-                    teamRollups[r.id].weeklyPlayerRecords.push({
-                      week: wNum,
-                      startersList: r.startersList || [],
-                      allPlayersList: r.allPlayersList || [],
-                      playersPointsMap: r.playersPointsMap || {}
-                    });
-                    teamRollups[r.id].totalPoints += r.points;
-                    teamRollups[r.id].totalBenchPoints += r.benchPoints;
-                    teamRollups[r.id].efficiencies.push(r.efficiency);
-
-                    if (r.outcome === "win") teamRollups[r.id].wins++;
-                    else if (r.outcome === "loss") teamRollups[r.id].losses++;
-                    else if (r.outcome === "tie") teamRollups[r.id].ties++;
-
-                    teamRollups[r.id].allPlayWins += r.allPlayWins || 0;
-                    teamRollups[r.id].allPlayLosses += r.allPlayLosses || 0;
-                    teamRollups[r.id].allPlayTies += r.allPlayTies || 0;
-                    teamRollups[r.id].expectedWins += r.expectedWins || 0;
-                    teamRollups[r.id].opponentPointsTotal += r.pointsAgainst || 0;
-
-                    leaguesMap[lid].scores.push(r.points);
-                  }
-                });
-              });
-            } catch (err) {
-              console.error(`Error loading season data for league ${lid}:`, err);
-            } finally {
-              completedCalls++;
-              const percent = 25 + Math.round((completedCalls / totalCalls) * 70);
-              updateProgress(percent, `Processed ${completedCalls}/${totalCalls} leagues...`);
-            }
-          })
-        );
-
-        // Convert teamRollups into finalized records
-        const records = Object.values(teamRollups).map(t => {
-          const weeksCount = t.weeklyScores.length || 1;
-          const avgPts = Math.round((t.totalPoints / weeksCount) * 100) / 100;
-          const roundedTotal = Math.round(t.totalPoints * 100) / 100;
-          const stdDev = calculateStdDev(t.weeklyScores);
-          const highScore = t.weeklyScores.length > 0 ? Math.max(...t.weeklyScores) : 0;
-          const lowScore = t.weeklyScores.length > 0 ? Math.min(...t.weeklyScores) : 0;
-          const avgEff =
-            t.efficiencies.length > 0
-              ? Math.round(t.efficiencies.reduce((a, b) => a + b, 0) / t.efficiencies.length)
-              : 100;
-
-          const totalAp = t.allPlayWins + t.allPlayLosses + t.allPlayTies;
-          const apWinPct =
-            totalAp > 0 ? Math.round(((t.allPlayWins + 0.5 * t.allPlayTies) / totalAp) * 100) : 0;
-          const actWins = t.wins + 0.5 * t.ties;
-          const expWins = Math.round(t.expectedWins * 100) / 100;
-          const seasonLuck = Math.round((actWins - expWins) * 100) / 100;
-          const avgPa =
-            weeksCount > 0 ? Math.round((t.opponentPointsTotal / weeksCount) * 100) / 100 : 0;
-
-          return {
-            id: t.id,
-            leagueId: t.leagueId,
-            league: t.league,
-            leagueAvatar: t.leagueAvatar,
-            manager: t.manager,
-            teamName: t.teamName,
-            avatar: t.avatar,
-            points: avgPts, // Primary ranking metric is Avg PPG in season mode
-            totalPoints: roundedTotal,
-            avgPoints: avgPts,
-            weeksCount: weeksCount,
-            stdDev: stdDev,
-            highScore: highScore,
-            lowScore: lowScore,
-            wins: t.wins,
-            losses: t.losses,
-            ties: t.ties,
-            winPct:
-              t.wins + t.losses + t.ties > 0
-                ? Math.round((t.wins / (t.wins + t.losses + t.ties)) * 100)
-                : 0,
-            allPlayWins: t.allPlayWins,
-            allPlayLosses: t.allPlayLosses,
-            allPlayTies: t.allPlayTies,
-            allPlayWinPct: apWinPct,
-            expectedWins: expWins,
-            actualWins: actWins,
-            luckIndex: seasonLuck,
-            pointsAgainst: avgPa,
-            totalPointsAgainst: Math.round(t.opponentPointsTotal * 100) / 100,
-            benchPoints: Math.round((t.totalBenchPoints / weeksCount) * 100) / 100,
-            efficiency: avgEff,
-            startersTotal: avgPts,
-            weeklyScores: t.weeklyScores,
-            weeklyPlayerRecords: t.weeklyPlayerRecords
-          };
-        });
-
-        if (records.length === 0) {
-          showError(`No season scores found through Week ${targetWeek}.`);
-          return;
+        if (selectedLeagueIds.size === 0) {
+          selectedLeagueIds = new Set(combinedLeaguesData.map(l => l.league_id));
         }
-
-        rawRecords = records;
-        if (pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0) {
-          selectedLeagueIds = new Set(
-            leaguesData.map(l => l.league_id).filter(id => pendingLeagueIdsFilter.has(id))
-          );
-          if (selectedLeagueIds.size === 0) {
-            selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
-          }
-          pendingLeagueIdsFilter = null;
-        } else {
-          selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
-        }
+        pendingLeagueIdsFilter = null;
       } else {
-        // Single Week Mode
-        updateProgress(30, `Loading Week ${targetWeek} rosters across ${totalLeagues} leagues...`);
-
-        let completedLeagues = 0;
-        const records = [];
-
-        await Promise.all(
-          leaguesData.map(async league => {
-            const lid = league.league_id;
-            const lname = league.name || `League ${lid}`;
-            const lavatar = league.avatar || null;
-
-            leaguesMap[lid] = {
-              name: lname,
-              avatar: lavatar,
-              rosterCount: league.total_rosters || 12,
-              scores: []
-            };
-
-            try {
-              const [usersRaw, rostersRaw, matchupsRaw] = await Promise.all([
-                apiFetch(`/league/${lid}/users`).catch(() => []),
-                apiFetch(`/league/${lid}/rosters`).catch(() => []),
-                apiFetch(`/league/${lid}/matchups/${targetWeek}`).catch(() => [])
-              ]);
-
-              const userMap = {};
-              for (const u of usersRaw) {
-                const uid = u.user_id;
-                const meta = u.metadata || {};
-                userMap[uid] = {
-                  displayName: u.display_name || u.username || "Unknown",
-                  teamName: meta.team_name || null,
-                  avatar: u.avatar || null
-                };
-              }
-
-              const weekRecords = processWeeklyMatchups(
-                matchupsRaw,
-                rostersRaw,
-                userMap,
-                lid,
-                lname,
-                lavatar,
-                targetWeek
-              );
-
-              weekRecords.forEach(r => {
-                records.push(r);
-                leaguesMap[lid].scores.push(r.points);
-              });
-            } catch (err) {
-              console.error(`Error loading league ${lid}:`, err);
-            } finally {
-              completedLeagues++;
-              const percent = 30 + Math.round((completedLeagues / totalLeagues) * 65);
-              updateProgress(percent, `Loaded ${completedLeagues}/${totalLeagues} leagues...`);
-            }
-          })
-        );
-
-        if (records.length === 0) {
-          showError(`No scores found for Week ${targetWeek} in ${leaguesData.length} leagues.`);
-          return;
-        }
-
-        rawRecords = records;
-        if (pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0) {
-          selectedLeagueIds = new Set(
-            leaguesData.map(l => l.league_id).filter(id => pendingLeagueIdsFilter.has(id))
-          );
-          if (selectedLeagueIds.size === 0) {
-            selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
-          }
-          pendingLeagueIdsFilter = null;
-        } else {
-          selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
-        }
+        selectedLeagueIds = new Set(combinedLeaguesData.map(l => l.league_id));
       }
 
       setLoading(false);
@@ -1824,7 +2636,7 @@
         targetWeek,
         rawRecords,
         leaguesMap,
-        leaguesData
+        allLeaguesData
       );
 
       const sorted = [...rawRecords].sort((a, b) => b.points - a.points);
@@ -1832,8 +2644,8 @@
         triggerConfetti();
       }
     } catch (err) {
-      console.error("Fetch error:", err);
-      showError(err.message || "Failed to load cross-league data. Check console for details.");
+      console.error("fetchLeaderboard Error:", err);
+      showError(err.message || "Failed to load league data.");
     }
   }
 
@@ -1865,7 +2677,9 @@
             (sample && sample.league) ||
             `League ${lid}`,
           avatar:
-            (leaguesMap[lid] && leaguesMap[lid].avatar) || (sample && sample.leagueAvatar) || null
+            (leaguesMap[lid] && leaguesMap[lid].avatar) || (sample && sample.leagueAvatar) || null,
+          platform:
+            (sample && sample.platform) || (String(lid).startsWith("espn:") ? "espn" : "sleeper")
         };
       });
       if (selectedLeagueIds.size === 0) {
@@ -1913,7 +2727,7 @@
     if (total === 0) {
       leagueDropdownList.innerHTML = `
         <div class="text-[11px] text-slate-500 italic p-3 text-center">
-          Sync your Sleeper account above to view and filter active leagues.
+          Sync your account or League IDs in Settings to view and filter active leagues.
         </div>
       `;
       return;
@@ -1924,6 +2738,10 @@
       const lname = league.name || `League ${lid}`;
       const isChecked = selectedLeagueIds.has(lid);
       const squadCount = rawRecords.filter(r => r.leagueId === lid).length;
+      const isEspn = String(lid).startsWith("espn:") || league.platform === "espn";
+      const platformBadge = isEspn
+        ? `<span class="badge-espn text-[9px] font-bold px-1.5 py-0.5 rounded ml-1.5 align-middle">ESPN</span>`
+        : `<span class="badge-sleeper text-[9px] font-bold px-1.5 py-0.5 rounded ml-1.5 align-middle">Sleeper</span>`;
 
       const item = document.createElement("label");
       item.className =
@@ -1937,8 +2755,9 @@
           class="mt-1 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 transition cursor-pointer flex-shrink-0"
         />
         <div class="flex-1 min-w-0 pr-1">
-          <div class="text-xs font-bold text-slate-200 leading-snug break-words">
-            ${escapeHtml(lname)}
+          <div class="text-xs font-bold text-slate-200 leading-snug break-words flex items-center flex-wrap gap-1">
+            <span>${escapeHtml(lname)}</span>
+            ${platformBadge}
           </div>
           <div class="text-[10px] text-slate-500 font-medium mt-0.5">
             ${squadCount} squads
@@ -2880,8 +3699,13 @@
         </td>
 
         <td class="py-2.5 sm:py-4 px-2 sm:px-4 text-slate-300 font-medium">
-          <div class="text-[11px] sm:text-sm font-bold text-slate-200 break-words leading-snug max-w-[200px] sm:max-w-[260px]">
-            ${escapeHtml(r.league)}
+          <div class="text-[11px] sm:text-sm font-bold text-slate-200 break-words leading-snug max-w-[200px] sm:max-w-[260px] flex items-center flex-wrap gap-1">
+            <span>${escapeHtml(r.league)}</span>
+            ${
+              String(r.leagueId).startsWith("espn:") || r.platform === "espn"
+                ? `<span class="badge-espn text-[9px] font-bold px-1.5 py-0.5 rounded">ESPN</span>`
+                : `<span class="badge-sleeper text-[9px] font-bold px-1.5 py-0.5 rounded">Sleeper</span>`
+            }
           </div>
         </td>
 
@@ -4369,6 +5193,11 @@
           <div class="flex items-center gap-1.5 truncate">
             <span class="text-slate-500">🏆</span>
             <span class="truncate">${escapeHtml(r.league)}</span>
+            ${
+              String(r.leagueId).startsWith("espn:") || r.platform === "espn"
+                ? `<span class="badge-espn text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0">ESPN</span>`
+                : `<span class="badge-sleeper text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0">Sleeper</span>`
+            }
           </div>
         </td>
         <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-center">${actualRecordHtml}</td>
@@ -4855,6 +5684,7 @@
 
     const url = new URL(window.location.href);
     url.search = "";
+    if (currentPlatform === "espn") url.searchParams.set("platform", "espn");
     if (season) url.searchParams.set("season", season);
     if (week) url.searchParams.set("week", week);
     if (mode) url.searchParams.set("mode", mode);
@@ -4867,8 +5697,15 @@
     } else if (customLeagueIds && customLeagueIds.size > 0) {
       leagueIds = Array.from(customLeagueIds);
     }
-    if (leagueIds.length > 0) {
-      url.searchParams.set("leagues", leagueIds.join(","));
+    const cleanLeagueIds = leagueIds
+      .map(id =>
+        String(id)
+          .replace(/^(espn|sleeper):/i, "")
+          .trim()
+      )
+      .filter(Boolean);
+    if (cleanLeagueIds.length > 0) {
+      url.searchParams.set("leagues", cleanLeagueIds.join(","));
     }
 
     url.hash = `#${currentTab}`;
@@ -5056,6 +5893,72 @@
       }, 2500);
     }
   }
+
+  function clearAllData() {
+    const confirmed = window.confirm(
+      "Are you sure you want to clear all stored data, cached leagues, credentials, and settings? This will reset CrossLeague to its default state."
+    );
+    if (!confirmed) return;
+
+    try {
+      localStorage.clear();
+    } catch (e) {
+      console.warn("Could not clear localStorage:", e);
+    }
+
+    // Reset in-memory state
+    rawRecords = [];
+    allLeaguesData = [];
+    leaguesMap = {};
+    selectedLeagueIds.clear();
+    customLeagueIds.clear();
+    currentUserId = "";
+    currentUserName = "";
+    currentUserAvatar = "";
+    currentPlatform = "sleeper";
+    currentSyncType = "user";
+
+    // Reset input fields
+    if (userIdInput) userIdInput.value = "";
+    if (customLeagueIdInput) customLeagueIdInput.value = "";
+    if (seasonInput) seasonInput.value = "2026";
+    if (weekInput) weekInput.value = "1";
+    if (modeSelect) modeSelect.value = "WEEKLY";
+
+    // Reset UI selections
+    setPlatform("sleeper");
+    setSyncType("user");
+    updateModeUI();
+
+    // Reset Dropdowns & Badges
+    renderCustomLeagueIdChips();
+    renderLeagueDropdown();
+    updateSettingsButtonBadge();
+
+    // Reset View State
+    if (reportContent) reportContent.classList.add("hidden");
+    if (initialState) initialState.classList.remove("hidden");
+    if (skeletonLoader) skeletonLoader.classList.add("hidden");
+    if (syncControlCenter) syncControlCenter.classList.add("hidden");
+    if (liveSyncIndicator) liveSyncIndicator.classList.add("hidden");
+    if (headerSeasonBadge) headerSeasonBadge.classList.add("hidden");
+    if (headerWeekBadge) headerWeekBadge.classList.add("hidden");
+    if (shareUrlBtn) shareUrlBtn.classList.add("hidden");
+    if (copyRecapBtn) copyRecapBtn.classList.add("hidden");
+    if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
+
+    // Close Settings Modal
+    closeSettingsModal();
+
+    // Reset URL query parameters and hash
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+
+    showToast("All data and cached settings cleared.", "🧹");
+  }
+
+  window.clearAllData = clearAllData;
 
   function loadEmbeddedReport(data) {
     if (!data) return false;
@@ -5604,6 +6507,7 @@
   if (shareReportBtn && shareReportBtn !== downloadReportBtn)
     shareReportBtn.addEventListener("click", downloadReport);
   if (copyRecapBtn) copyRecapBtn.addEventListener("click", copyChatRecap);
+  if (clearDataBtn) clearDataBtn.addEventListener("click", clearAllData);
 
   window.shareUrl = shareUrl;
   window.downloadReport = downloadReport;

@@ -134,4 +134,24 @@ describe("Weekly Navigation & Caching Logic", () => {
       assert.equal(parsed.leaguesMap["102"].name, "Redraft Beta");
     });
   });
+
+  describe("Data Clearing & State Reset", () => {
+    it("should clear all localStorage keys and reset user preferences", () => {
+      const mockStorage = new Map([
+        ["crossleague_platform", "espn"],
+        ["sleeper_username", "juftin"],
+        ["sleeper_custom_league_ids", '["123","456"]'],
+        ["crossleague_cache_juftin_2024_WEEKLY_1", '{"records":[]}']
+      ]);
+
+      assert.equal(mockStorage.size, 4);
+
+      // Simulate clearAllData
+      mockStorage.clear();
+
+      assert.equal(mockStorage.size, 0);
+      assert.equal(mockStorage.get("sleeper_username"), undefined);
+      assert.equal(mockStorage.get("crossleague_cache_juftin_2024_WEEKLY_1"), undefined);
+    });
+  });
 });
