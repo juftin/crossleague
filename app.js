@@ -287,7 +287,9 @@
         records: records,
         leaguesMap: leagues,
         allLeaguesData: allLeagues,
-        selectedLeagueIds: Array.from(selectedLeagueIds)
+        selectedLeagueIds: Array.from(selectedLeagueIds),
+        playersDb: sleeperPlayersDb || {},
+        espnPlayersDb: espnPlayersDb || {}
       };
       const serialized = JSON.stringify(payload);
       const keys = new Set();
@@ -295,6 +297,10 @@
       if (queryUser) keys.add(getCacheKey(queryUser, season, mode, week));
       if (userName) keys.add(getCacheKey(userName, season, mode, week));
       if (userId) keys.add(getCacheKey(userId, season, mode, week));
+      if (customLeagueIds && customLeagueIds.size > 0) {
+        const sortedLeagueIds = Array.from(customLeagueIds).sort().join(",");
+        keys.add(getCacheKey(`leagues:${sortedLeagueIds}`, season, mode, week));
+      }
       keys.forEach(k => {
         localStorage.setItem(k, serialized);
       });
@@ -330,6 +336,13 @@
       updateWeekNavigatorUI();
     }
     updateSettingsButtonBadge();
+
+    if (data.playersDb && Object.keys(data.playersDb).length > 0) {
+      sleeperPlayersDb = data.playersDb;
+    }
+    if (data.espnPlayersDb && Object.keys(data.espnPlayersDb).length > 0) {
+      espnPlayersDb = { ...espnPlayersDb, ...data.espnPlayersDb };
+    }
 
     rawRecords = (data.records || []).map(r => ({
       ...r,
@@ -397,7 +410,10 @@
 
   function tryLoadFromCache(overrideWeek = null) {
     try {
-      const user = userIdInput ? userIdInput.value.trim() : "";
+      let user = userIdInput ? userIdInput.value.trim() : "";
+      if (!user && customLeagueIds && customLeagueIds.size > 0) {
+        user = `leagues:${Array.from(customLeagueIds).sort().join(",")}`;
+      }
       const season = seasonInput ? seasonInput.value : "";
       const mode = modeSelect ? modeSelect.value : "WEEKLY";
       const week =
@@ -1206,11 +1222,21 @@
       const cached = localStorage.getItem("sleeper_players_v3");
       if (cached) {
         sleeperPlayersDb = JSON.parse(cached);
-        return sleeperPlayersDb;
       }
     } catch (e) {
       console.warn("Could not read player cache:", e);
     }
+
+    try {
+      const cachedEspn = localStorage.getItem("crossleague_espn_players_v1");
+      if (cachedEspn) {
+        espnPlayersDb = { ...espnPlayersDb, ...JSON.parse(cachedEspn) };
+      }
+    } catch (e) {
+      console.warn("Could not read ESPN player cache:", e);
+    }
+
+    if (sleeperPlayersDb && Object.keys(sleeperPlayersDb).length > 0) return sleeperPlayersDb;
 
     if (isFetchingPlayersDb) return;
     isFetchingPlayersDb = true;
@@ -1437,7 +1463,7 @@
     const schedule = leagueObj.schedule || [];
 
     // Helper to process team boxscore entries
-    function parseRosterEntries(roster) {
+    function parseRosterEntries(roster, targetWeekNum = targetWeek) {
       const entries = (roster && roster.entries) || [];
       const startersList = [];
       const allPlayersList = [];
@@ -1452,20 +1478,32 @@
         if (!p) return;
         const pid = `espn_${p.id}`;
         let pts = 0;
-        if (e.playerPoolEntry && typeof e.playerPoolEntry.appliedStatTotal === "number") {
-          pts = e.playerPoolEntry.appliedStatTotal;
+        if (p.stats && Array.isArray(p.stats) && p.stats.length > 0) {
+          const weekStat = p.stats.find(
+            s =>
+              s.statSourceId === 0 && s.statSplitTypeId === 1 && s.scoringPeriodId === targetWeekNum
+          );
+          if (weekStat && typeof weekStat.appliedTotal === "number") {
+            pts = weekStat.appliedTotal;
+          } else {
+            const scoringStat =
+              p.stats.find(s => s.statSourceId === 0 && s.statSplitTypeId === 1) ||
+              p.stats.find(s => s.statSourceId === 0) ||
+              p.stats[0];
+            if (scoringStat && typeof scoringStat.appliedTotal === "number") {
+              pts = scoringStat.appliedTotal;
+            }
+          }
         } else if (typeof e.appliedStatTotal === "number") {
           pts = e.appliedStatTotal;
+        } else if (
+          e.playerPoolEntry &&
+          typeof e.playerPoolEntry.appliedStatTotal === "number" &&
+          targetWeekNum === 1
+        ) {
+          pts = e.playerPoolEntry.appliedStatTotal;
         } else if (e.playerPoolEntry && e.playerPoolEntry.ratings && e.playerPoolEntry.ratings[0]) {
           pts = e.playerPoolEntry.ratings[0].totalPoints || 0;
-        } else if (p.stats && p.stats.length > 0) {
-          const scoringStat =
-            p.stats.find(s => s.statSourceId === 0 && s.statSplitTypeId === 1) ||
-            p.stats.find(s => s.statSourceId === 0) ||
-            p.stats[0];
-          if (scoringStat && typeof scoringStat.appliedTotal === "number") {
-            pts = scoringStat.appliedTotal;
-          }
         }
         pts = Math.round(parseFloat(pts || 0) * 100) / 100;
 
@@ -1491,6 +1529,12 @@
           if (pts > highestBenchScore) highestBenchScore = pts;
         }
       });
+
+      try {
+        localStorage.setItem("crossleague_espn_players_v1", JSON.stringify(espnPlayersDb));
+      } catch {
+        // quota safe
+      }
 
       // Optimal Lineup Potential
       const sortedScores = Object.values(playersPointsMap).sort((a, b) => b - a);
@@ -1580,7 +1624,7 @@
                 m.home.rosterForMatchupPeriodDelayed ||
                 m.home.roster)) ||
             null;
-          const homeParsed = parseRosterEntries(homeRoster);
+          const homeParsed = parseRosterEntries(homeRoster, w);
           const homePts =
             Math.round(
               parseFloat(
@@ -1599,7 +1643,7 @@
                 m.away.rosterForMatchupPeriodDelayed ||
                 m.away.roster)) ||
             null;
-          const awayParsed = parseRosterEntries(awayRoster);
+          const awayParsed = parseRosterEntries(awayRoster, w);
           const awayPts =
             awayId && m.away
               ? Math.round(
@@ -1789,7 +1833,7 @@
               m.home.rosterForMatchupPeriodDelayed ||
               m.home.roster)) ||
           null;
-        const homeParsed = parseRosterEntries(homeRoster);
+        const homeParsed = parseRosterEntries(homeRoster, targetWeek);
         const homePts =
           Math.round(
             parseFloat(
@@ -1807,7 +1851,7 @@
               m.away.rosterForMatchupPeriodDelayed ||
               m.away.roster)) ||
           null;
-        const awayParsed = parseRosterEntries(awayRoster);
+        const awayParsed = parseRosterEntries(awayRoster, targetWeek);
         const awayPts =
           awayT && m.away
             ? Math.round(
@@ -5795,7 +5839,8 @@
       leaguesMap: exportedLeaguesMap,
       allLeaguesData: exportedAllLeaguesData,
       selectedLeagueIds: exportedLeagueIds,
-      playersDb: sleeperPlayersDb || {}
+      playersDb: sleeperPlayersDb || {},
+      espnPlayersDb: espnPlayersDb || {}
     };
 
     // Grab stylesheet content if external
@@ -5983,6 +6028,9 @@
 
     if (data.playersDb && Object.keys(data.playersDb).length > 0) {
       sleeperPlayersDb = data.playersDb;
+    }
+    if (data.espnPlayersDb && Object.keys(data.espnPlayersDb).length > 0) {
+      espnPlayersDb = { ...espnPlayersDb, ...data.espnPlayersDb };
     }
 
     rawRecords = (data.records || []).map(r => ({

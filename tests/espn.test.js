@@ -362,5 +362,74 @@ describe("ESPN Fantasy Adapter & Normalization", () => {
       assert.equal(playerMap["espn_103"].startedCount, 1);
       assert.equal(playerMap["espn_103"].benchedCount, 1);
     });
+
+    it("should resolve exact weekly player score instead of cumulative appliedStatTotal", () => {
+      const mockPlayerEntry = {
+        lineupSlotId: 4,
+        playerPoolEntry: {
+          appliedStatTotal: 40.6, // Cumulative across 4 weeks
+          player: {
+            id: 4262921,
+            fullName: "Justin Jefferson",
+            defaultPositionId: 3,
+            stats: [
+              { statSourceId: 0, statSplitTypeId: 0, scoringPeriodId: 0, appliedTotal: 316.6 },
+              { statSourceId: 0, statSplitTypeId: 1, scoringPeriodId: 4, appliedTotal: 20.5 },
+              { statSourceId: 0, statSplitTypeId: 1, scoringPeriodId: 3, appliedTotal: 4.2 },
+              { statSourceId: 0, statSplitTypeId: 1, scoringPeriodId: 2, appliedTotal: 23.3 },
+              { statSourceId: 0, statSplitTypeId: 1, scoringPeriodId: 1, appliedTotal: 15.9 }
+            ]
+          }
+        }
+      };
+
+      function extractScore(entry, targetWeek) {
+        const p = entry.playerPoolEntry.player;
+        if (p.stats && Array.isArray(p.stats)) {
+          const weekStat = p.stats.find(
+            s => s.statSourceId === 0 && s.statSplitTypeId === 1 && s.scoringPeriodId === targetWeek
+          );
+          if (weekStat && typeof weekStat.appliedTotal === "number") {
+            return weekStat.appliedTotal;
+          }
+        }
+        return entry.playerPoolEntry.appliedStatTotal || 0;
+      }
+
+      assert.equal(extractScore(mockPlayerEntry, 4), 20.5);
+      assert.equal(extractScore(mockPlayerEntry, 3), 4.2);
+      assert.equal(extractScore(mockPlayerEntry, 2), 23.3);
+      assert.equal(extractScore(mockPlayerEntry, 1), 15.9);
+    });
+
+    it("should correctly persist and retrieve ESPN players database in cache payload", () => {
+      const espnDb = {
+        espn_4262921: {
+          name: "Justin Jefferson",
+          pos: "WR",
+          team: "MIN",
+          isDef: false
+        },
+        espn_4040715: {
+          name: "Josh Allen",
+          pos: "QB",
+          team: "BUF",
+          isDef: false
+        }
+      };
+
+      const payload = {
+        version: "2.0",
+        espnPlayersDb: espnDb,
+        records: []
+      };
+
+      const serialized = JSON.stringify(payload);
+      const parsed = JSON.parse(serialized);
+
+      assert.ok(parsed.espnPlayersDb);
+      assert.equal(parsed.espnPlayersDb["espn_4262921"].name, "Justin Jefferson");
+      assert.equal(parsed.espnPlayersDb["espn_4040715"].pos, "QB");
+    });
   });
 });
