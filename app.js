@@ -4600,105 +4600,192 @@
     const allPlayLeader = sortedByAllPlay[0];
     const shareUrl = buildShareableUrl();
 
-    let text = "";
+    const titleText = isSeason
+      ? `Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})`
+      : `Week ${week} Fantasy Recap (${season})`;
+
+    let plainText = "";
+    let htmlText = "";
+
     if (isSeason) {
-      text = `[**Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})**](${shareUrl})\n\n`;
+      plainText = `*${titleText}*\n${shareUrl}\n\n`;
+      htmlText = `<p><a href="${shareUrl}"><strong><u>${escapeHtml(titleText)}</u></strong></a></p><br>`;
 
-      text += `*__The Podium (Avg PPG)__*\n`;
-      if (first)
-        text += `• 🥇 *#1* ${first.manager} (${first.teamName}) — *${first.points.toFixed(2)} PPG* (${(first.totalPoints || 0).toFixed(1)} PF, ${first.wins || 0}W-${first.losses || 0}L) • _${first.league}_\n`;
-      if (second)
-        text += `• 🥈 *#2* ${second.manager} (${second.teamName}) — *${second.points.toFixed(2)} PPG* (${(second.totalPoints || 0).toFixed(1)} PF, ${second.wins || 0}W-${second.losses || 0}L) • _${second.league}_\n`;
-      if (third)
-        text += `• 🥉 *#3* ${third.manager} (${third.teamName}) — *${third.points.toFixed(2)} PPG* (${(third.totalPoints || 0).toFixed(1)} PF, ${third.wins || 0}W-${third.losses || 0}L) • _${third.league}_\n\n`;
+      plainText += `*The Podium (Avg PPG)*\n`;
+      htmlText += `<p><strong><u>The Podium (Avg PPG)</u></strong></p>`;
+      if (first) {
+        plainText += `• 🥇 *#1* ${first.manager} (${first.teamName}) — *${first.points.toFixed(2)} PPG* (${(first.totalPoints || 0).toFixed(1)} PF, ${first.wins || 0}W-${first.losses || 0}L) • _${first.league}_\n`;
+        htmlText += `<p>• 🥇 <strong>#1</strong> ${escapeHtml(first.manager)} (${escapeHtml(first.teamName)}) — <strong>${first.points.toFixed(2)} PPG</strong> (${(first.totalPoints || 0).toFixed(1)} PF, ${first.wins || 0}W-${first.losses || 0}L) • <em>${escapeHtml(first.league)}</em></p>`;
+      }
+      if (second) {
+        plainText += `• 🥈 *#2* ${second.manager} (${second.teamName}) — *${second.points.toFixed(2)} PPG* (${(second.totalPoints || 0).toFixed(1)} PF, ${second.wins || 0}W-${second.losses || 0}L) • _${second.league}_\n`;
+        htmlText += `<p>• 🥈 <strong>#2</strong> ${escapeHtml(second.manager)} (${escapeHtml(second.teamName)}) — <strong>${second.points.toFixed(2)} PPG</strong> (${(second.totalPoints || 0).toFixed(1)} PF, ${second.wins || 0}W-${second.losses || 0}L) • <em>${escapeHtml(second.league)}</em></p>`;
+      }
+      if (third) {
+        plainText += `• 🥉 *#3* ${third.manager} (${third.teamName}) — *${third.points.toFixed(2)} PPG* (${(third.totalPoints || 0).toFixed(1)} PF, ${third.wins || 0}W-${third.losses || 0}L) • _${third.league}_\n\n`;
+        htmlText += `<p>• 🥉 <strong>#3</strong> ${escapeHtml(third.manager)} (${escapeHtml(third.teamName)}) — <strong>${third.points.toFixed(2)} PPG</strong> (${(third.totalPoints || 0).toFixed(1)} PF, ${third.wins || 0}W-${third.losses || 0}L) • <em>${escapeHtml(third.league)}</em></p><br>`;
+      } else {
+        plainText += `\n`;
+        htmlText += `<br>`;
+      }
 
-      text += `*__Superlatives Showcase__*\n`;
-      if (badBeat)
-        text += `• 💔 *Season Heartbreak:* ${badBeat.manager} (${badBeat.teamName}) — *${(badBeat.points || 0).toFixed(1)} PPG* with a ${badBeat.wins || 0}W-${badBeat.losses || 0}L record • _${badBeat.league}_\n`;
-      if (luckyEscape)
-        text += `• 🪄 *Teflon Squad:* ${luckyEscape.manager} (${luckyEscape.teamName}) — *${(luckyEscape.points || 0).toFixed(1)} PPG* with a ${luckyEscape.wins || 0}W-${luckyEscape.losses || 0}L winning record • _${luckyEscape.league}_\n`;
-      if (benchKing && benchKing.benchPoints > 0)
-        text += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) — *${benchKing.benchPoints.toFixed(1)} pts* left on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
+      plainText += `*Superlatives Showcase*\n`;
+      htmlText += `<p><strong><u>Superlatives Showcase</u></strong></p>`;
+      if (badBeat) {
+        plainText += `• 💔 *Season Heartbreak:* ${badBeat.manager} (${badBeat.teamName}) — *${(badBeat.points || 0).toFixed(1)} PPG* with a ${badBeat.wins || 0}W-${badBeat.losses || 0}L record • _${badBeat.league}_\n`;
+        htmlText += `<p>• 💔 <strong>Season Heartbreak:</strong> ${escapeHtml(badBeat.manager)} (${escapeHtml(badBeat.teamName)}) — <strong>${(badBeat.points || 0).toFixed(1)} PPG</strong> with a ${badBeat.wins || 0}W-${badBeat.losses || 0}L record • <em>${escapeHtml(badBeat.league)}</em></p>`;
+      }
+      if (luckyEscape) {
+        plainText += `• 🪄 *Teflon Squad:* ${luckyEscape.manager} (${luckyEscape.teamName}) — *${(luckyEscape.points || 0).toFixed(1)} PPG* with a ${luckyEscape.wins || 0}W-${luckyEscape.losses || 0}L winning record • _${luckyEscape.league}_\n`;
+        htmlText += `<p>• 🪄 <strong>Teflon Squad:</strong> ${escapeHtml(luckyEscape.manager)} (${escapeHtml(luckyEscape.teamName)}) — <strong>${(luckyEscape.points || 0).toFixed(1)} PPG</strong> with a ${luckyEscape.wins || 0}W-${luckyEscape.losses || 0}L winning record • <em>${escapeHtml(luckyEscape.league)}</em></p>`;
+      }
+      if (benchKing && benchKing.benchPoints > 0) {
+        plainText += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) — *${benchKing.benchPoints.toFixed(1)} pts* left on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
+        htmlText += `<p>• 🪑 <strong>Bench Heavyweight:</strong> ${escapeHtml(benchKing.manager)} (${escapeHtml(benchKing.teamName)}) — <strong>${benchKing.benchPoints.toFixed(1)} pts</strong> left on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • <em>${escapeHtml(benchKing.league)}</em></p><br>`;
+      } else {
+        plainText += `\n`;
+        htmlText += `<br>`;
+      }
 
-      text += `*__Schedule Luck & All-Play__*\n`;
+      plainText += `*Schedule Luck & All-Play*\n`;
+      htmlText += `<p><strong><u>Schedule Luck & All-Play</u></strong></p>`;
       if (luckiest) {
         const luckStr = `${(luckiest.luckIndex || 0) >= 0 ? "+" : ""}${(luckiest.luckIndex || 0).toFixed(2)}`;
-        text += `• 🍀 *Luckiest Squad:* ${luckiest.manager} — *${luckStr} Luck Index* (${luckiest.wins || 0}W actual vs ${(luckiest.expectedWins || 0).toFixed(2)} xW) • _${luckiest.league}_\n`;
+        plainText += `• 🍀 *Luckiest Squad:* ${luckiest.manager} — *${luckStr} Luck Index* (${luckiest.wins || 0}W actual vs ${(luckiest.expectedWins || 0).toFixed(2)} xW) • _${luckiest.league}_\n`;
+        htmlText += `<p>• 🍀 <strong>Luckiest Squad:</strong> ${escapeHtml(luckiest.manager)} — <strong>${luckStr} Luck Index</strong> (${luckiest.wins || 0}W actual vs ${(luckiest.expectedWins || 0).toFixed(2)} xW) • <em>${escapeHtml(luckiest.league)}</em></p>`;
       }
       if (unluckiest) {
         const unluckStr = `${(unluckiest.luckIndex || 0) >= 0 ? "+" : ""}${(unluckiest.luckIndex || 0).toFixed(2)}`;
-        text += `• 💔 *Toughest Schedule:* ${unluckiest.manager} — *${unluckStr} Luck Index* (${unluckiest.wins || 0}W actual vs ${(unluckiest.expectedWins || 0).toFixed(2)} xW) • _${unluckiest.league}_\n`;
+        plainText += `• 💔 *Toughest Schedule:* ${unluckiest.manager} — *${unluckStr} Luck Index* (${unluckiest.wins || 0}W actual vs ${(unluckiest.expectedWins || 0).toFixed(2)} xW) • _${unluckiest.league}_\n`;
+        htmlText += `<p>• 💔 <strong>Toughest Schedule:</strong> ${escapeHtml(unluckiest.manager)} — <strong>${unluckStr} Luck Index</strong> (${unluckiest.wins || 0}W actual vs ${(unluckiest.expectedWins || 0).toFixed(2)} xW) • <em>${escapeHtml(unluckiest.league)}</em></p>`;
       }
       if (allPlayLeader) {
-        text += `• ⚡ *All-Play Dominance:* ${allPlayLeader.manager} — *${allPlayLeader.allPlayWinPct || 0}% All-Play Win Rate* (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • _${allPlayLeader.league}_\n\n`;
+        plainText += `• ⚡ *All-Play Dominance:* ${allPlayLeader.manager} — *${allPlayLeader.allPlayWinPct || 0}% All-Play Win Rate* (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • _${allPlayLeader.league}_\n\n`;
+        htmlText += `<p>• ⚡ <strong>All-Play Dominance:</strong> ${escapeHtml(allPlayLeader.manager)} — <strong>${allPlayLeader.allPlayWinPct || 0}% All-Play Win Rate</strong> (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • <em>${escapeHtml(allPlayLeader.league)}</em></p><br>`;
+      } else {
+        plainText += `\n`;
+        htmlText += `<br>`;
       }
 
-      text += `*__Overview__*\n`;
-      text += `• 👑 *Power League:* ${topLeagueName} (Avg: *${topLeagueAvg.toFixed(2)} PPG*)\n`;
-      if (first && lowest)
-        text += `• 🔥 *Peak PPG:* ${first.points.toFixed(2)} (${first.manager}) | ❄️ *Lowest PPG:* ${lowest.points.toFixed(2)} (${lowest.manager})\n`;
-      text += `• 📈 *Benchmark:* Avg: *${avgScore.toFixed(2)} PPG* | Median: *${medianScore.toFixed(2)} PPG*\n`;
-      text += `• 🏟️ *Scope:* ${totalLeagues} Leagues | ${totalSquads} Squads`;
+      plainText += `*Overview*\n`;
+      htmlText += `<p><strong><u>Overview</u></strong></p>`;
+      plainText += `• 👑 *Power League:* ${topLeagueName} (Avg: *${topLeagueAvg.toFixed(2)} PPG*)\n`;
+      htmlText += `<p>• 👑 <strong>Power League:</strong> ${escapeHtml(topLeagueName)} (Avg: <strong>${topLeagueAvg.toFixed(2)} PPG</strong>)</p>`;
+      if (first && lowest) {
+        plainText += `• 🔥 *Peak PPG:* ${first.points.toFixed(2)} (${first.manager}) | ❄️ *Lowest PPG:* ${lowest.points.toFixed(2)} (${lowest.manager})\n`;
+        htmlText += `<p>• 🔥 <strong>Peak PPG:</strong> ${first.points.toFixed(2)} (${escapeHtml(first.manager)}) | ❄️ <strong>Lowest PPG:</strong> ${lowest.points.toFixed(2)} (${escapeHtml(lowest.manager)})</p>`;
+      }
+      plainText += `• 📈 *Benchmark:* Avg: *${avgScore.toFixed(2)} PPG* | Median: *${medianScore.toFixed(2)} PPG*\n`;
+      htmlText += `<p>• 📈 <strong>Benchmark:</strong> Avg: <strong>${avgScore.toFixed(2)} PPG</strong> | Median: <strong>${medianScore.toFixed(2)} PPG</strong></p>`;
+      plainText += `• 🏟️ *Scope:* ${totalLeagues} Leagues | ${totalSquads} Squads`;
+      htmlText += `<p>• 🏟️ <strong>Scope:</strong> ${totalLeagues} Leagues | ${totalSquads} Squads</p>`;
     } else {
-      text = `[**Week ${week} Fantasy Recap (${season})**](${shareUrl})\n\n`;
+      plainText = `*${titleText}*\n${shareUrl}\n\n`;
+      htmlText = `<p><a href="${shareUrl}"><strong><u>${escapeHtml(titleText)}</u></strong></a></p><br>`;
 
-      text += `*__The Podium (Top Scores)__*\n`;
-      if (first)
-        text += `• 🥇 *#1* ${first.manager} (${first.teamName}) — *${first.points.toFixed(2)} pts* • _${first.league}_\n`;
-      if (second)
-        text += `• 🥈 *#2* ${second.manager} (${second.teamName}) — *${second.points.toFixed(2)} pts* • _${second.league}_\n`;
-      if (third)
-        text += `• 🥉 *#3* ${third.manager} (${third.teamName}) — *${third.points.toFixed(2)} pts* • _${third.league}_\n\n`;
+      plainText += `*The Podium (Top Scores)*\n`;
+      htmlText += `<p><strong><u>The Podium (Top Scores)</u></strong></p>`;
+      if (first) {
+        plainText += `• 🥇 *#1* ${first.manager} (${first.teamName}) — *${first.points.toFixed(2)} pts* • _${first.league}_\n`;
+        htmlText += `<p>• 🥇 <strong>#1</strong> ${escapeHtml(first.manager)} (${escapeHtml(first.teamName)}) — <strong>${first.points.toFixed(2)} pts</strong> • <em>${escapeHtml(first.league)}</em></p>`;
+      }
+      if (second) {
+        plainText += `• 🥈 *#2* ${second.manager} (${second.teamName}) — *${second.points.toFixed(2)} pts* • _${second.league}_\n`;
+        htmlText += `<p>• 🥈 <strong>#2</strong> ${escapeHtml(second.manager)} (${escapeHtml(second.teamName)}) — <strong>${second.points.toFixed(2)} pts</strong> • <em>${escapeHtml(second.league)}</em></p>`;
+      }
+      if (third) {
+        plainText += `• 🥉 *#3* ${third.manager} (${third.teamName}) — *${third.points.toFixed(2)} pts* • _${third.league}_\n\n`;
+        htmlText += `<p>• 🥉 <strong>#3</strong> ${escapeHtml(third.manager)} (${escapeHtml(third.teamName)}) — <strong>${third.points.toFixed(2)} pts</strong> • <em>${escapeHtml(third.league)}</em></p><br>`;
+      } else {
+        plainText += `\n`;
+        htmlText += `<br>`;
+      }
 
-      text += `*__Superlatives Showcase__*\n`;
-      if (badBeat)
-        text += `• 💔 *The Bad Beat:* ${badBeat.manager} (${badBeat.teamName}) scored *${badBeat.points.toFixed(2)} pts* and lost by ${Math.abs(badBeat.margin || 0).toFixed(2)} to ${badBeat.opponentName || "rival"} • _${badBeat.league}_\n`;
-      if (luckyEscape)
-        text += `• 🪄 *The Lucky Escape:* ${luckyEscape.manager} (${luckyEscape.teamName}) won with *${luckyEscape.points.toFixed(2)} pts* vs ${luckyEscape.opponentName || "rival"} • _${luckyEscape.league}_\n`;
-      if (benchKing && benchKing.benchPoints > 0)
-        text += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) left *${benchKing.benchPoints.toFixed(2)} pts* on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
+      plainText += `*Superlatives Showcase*\n`;
+      htmlText += `<p><strong><u>Superlatives Showcase</u></strong></p>`;
+      if (badBeat) {
+        plainText += `• 💔 *The Bad Beat:* ${badBeat.manager} (${badBeat.teamName}) scored *${badBeat.points.toFixed(2)} pts* and lost by ${Math.abs(badBeat.margin || 0).toFixed(2)} to ${badBeat.opponentName || "rival"} • _${badBeat.league}_\n`;
+        htmlText += `<p>• 💔 <strong>The Bad Beat:</strong> ${escapeHtml(badBeat.manager)} (${escapeHtml(badBeat.teamName)}) scored <strong>${badBeat.points.toFixed(2)} pts</strong> and lost by ${Math.abs(badBeat.margin || 0).toFixed(2)} to ${escapeHtml(badBeat.opponentName || "rival")} • <em>${escapeHtml(badBeat.league)}</em></p>`;
+      }
+      if (luckyEscape) {
+        plainText += `• 🪄 *The Lucky Escape:* ${luckyEscape.manager} (${luckyEscape.teamName}) won with *${luckyEscape.points.toFixed(2)} pts* vs ${luckyEscape.opponentName || "rival"} • _${luckyEscape.league}_\n`;
+        htmlText += `<p>• 🪄 <strong>The Lucky Escape:</strong> ${escapeHtml(luckyEscape.manager)} (${escapeHtml(luckyEscape.teamName)}) won with <strong>${luckyEscape.points.toFixed(2)} pts</strong> vs ${escapeHtml(luckyEscape.opponentName || "rival")} • <em>${escapeHtml(luckyEscape.league)}</em></p>`;
+      }
+      if (benchKing && benchKing.benchPoints > 0) {
+        plainText += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) left *${benchKing.benchPoints.toFixed(2)} pts* on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
+        htmlText += `<p>• 🪑 <strong>Bench Heavyweight:</strong> ${escapeHtml(benchKing.manager)} (${escapeHtml(benchKing.teamName)}) left <strong>${benchKing.benchPoints.toFixed(2)} pts</strong> on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • <em>${escapeHtml(benchKing.league)}</em></p><br>`;
+      } else {
+        plainText += `\n`;
+        htmlText += `<br>`;
+      }
 
-      text += `*__Schedule Luck & All-Play__*\n`;
+      plainText += `*Schedule Luck & All-Play*\n`;
+      htmlText += `<p><strong><u>Schedule Luck & All-Play</u></strong></p>`;
       if (luckiest) {
         const luckStr = `${(luckiest.luckIndex || 0) >= 0 ? "+" : ""}${(luckiest.luckIndex || 0).toFixed(2)}`;
-        text += `• 🍀 *Luckiest Draw:* ${luckiest.manager} — *${luckStr} Luck Index* (${(luckiest.expectedWins || 0).toFixed(2)} xW) • _${luckiest.league}_\n`;
+        plainText += `• 🍀 *Luckiest Draw:* ${luckiest.manager} — *${luckStr} Luck Index* (${(luckiest.expectedWins || 0).toFixed(2)} xW) • _${luckiest.league}_\n`;
+        htmlText += `<p>• 🍀 <strong>Luckiest Draw:</strong> ${escapeHtml(luckiest.manager)} — <strong>${luckStr} Luck Index</strong> (${(luckiest.expectedWins || 0).toFixed(2)} xW) • <em>${escapeHtml(luckiest.league)}</em></p>`;
       }
       if (unluckiest) {
         const unluckStr = `${(unluckiest.luckIndex || 0) >= 0 ? "+" : ""}${(unluckiest.luckIndex || 0).toFixed(2)}`;
-        text += `• 💔 *Toughest Draw:* ${unluckiest.manager} — *${unluckStr} Luck Index* (${(unluckiest.expectedWins || 0).toFixed(2)} xW) • _${unluckiest.league}_\n`;
+        plainText += `• 💔 *Toughest Draw:* ${unluckiest.manager} — *${unluckStr} Luck Index* (${(unluckiest.expectedWins || 0).toFixed(2)} xW) • _${unluckiest.league}_\n`;
+        htmlText += `<p>• 💔 <strong>Toughest Draw:</strong> ${escapeHtml(unluckiest.manager)} — <strong>${unluckStr} Luck Index</strong> (${(unluckiest.expectedWins || 0).toFixed(2)} xW) • <em>${escapeHtml(unluckiest.league)}</em></p>`;
       }
       if (allPlayLeader) {
-        text += `• ⚡ *All-Play Leader:* ${allPlayLeader.manager} — *${allPlayLeader.allPlayWinPct || 0}% Win Rate* (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • _${allPlayLeader.league}_\n\n`;
+        plainText += `• ⚡ *All-Play Leader:* ${allPlayLeader.manager} — *${allPlayLeader.allPlayWinPct || 0}% Win Rate* (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • _${allPlayLeader.league}_\n\n`;
+        htmlText += `<p>• ⚡ <strong>All-Play Leader:</strong> ${escapeHtml(allPlayLeader.manager)} — <strong>${allPlayLeader.allPlayWinPct || 0}% Win Rate</strong> (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • <em>${escapeHtml(allPlayLeader.league)}</em></p><br>`;
+      } else {
+        plainText += `\n`;
+        htmlText += `<br>`;
       }
 
-      text += `*__Overview__*\n`;
-      text += `• 👑 *Power League:* ${topLeagueName} (Avg: *${topLeagueAvg.toFixed(2)} pts*)\n`;
-      if (first && lowest)
-        text += `• 🔥 *Peak Score:* ${first.points.toFixed(2)} pts (${first.manager}) | ❄️ *Lowest Score:* ${lowest.points.toFixed(2)} pts (${lowest.manager})\n`;
-      text += `• 📈 *Benchmark:* Avg: *${avgScore.toFixed(2)} pts* | Median: *${medianScore.toFixed(2)} pts* | Spread: *${(first.points - lowest.points).toFixed(2)} pts*\n`;
-      text += `• 🏟️ *Scope:* ${totalLeagues} Leagues | ${totalSquads} Squads`;
+      plainText += `*Overview*\n`;
+      htmlText += `<p><strong><u>Overview</u></strong></p>`;
+      plainText += `• 👑 *Power League:* ${topLeagueName} (Avg: *${topLeagueAvg.toFixed(2)} pts*)\n`;
+      htmlText += `<p>• 👑 <strong>Power League:</strong> ${escapeHtml(topLeagueName)} (Avg: <strong>${topLeagueAvg.toFixed(2)} pts</strong>)</p>`;
+      if (first && lowest) {
+        plainText += `• 🔥 *Peak Score:* ${first.points.toFixed(2)} pts (${first.manager}) | ❄️ *Lowest Score:* ${lowest.points.toFixed(2)} pts (${lowest.manager})\n`;
+        htmlText += `<p>• 🔥 <strong>Peak Score:</strong> ${first.points.toFixed(2)} pts (${escapeHtml(first.manager)}) | ❄️ <strong>Lowest Score:</strong> ${lowest.points.toFixed(2)} pts (${escapeHtml(lowest.manager)})</p>`;
+      }
+      plainText += `• 📈 *Benchmark:* Avg: *${avgScore.toFixed(2)} pts* | Median: *${medianScore.toFixed(2)} pts* | Spread: *${(first.points - lowest.points).toFixed(2)} pts*\n`;
+      htmlText += `<p>• 📈 <strong>Benchmark:</strong> Avg: <strong>${avgScore.toFixed(2)} pts</strong> | Median: <strong>${medianScore.toFixed(2)} pts</strong> | Spread: <strong>${(first.points - lowest.points).toFixed(2)} pts</strong></p>`;
+      plainText += `• 🏟️ *Scope:* ${totalLeagues} Leagues | ${totalSquads} Squads`;
+      htmlText += `<p>• 🏟️ <strong>Scope:</strong> ${totalLeagues} Leagues | ${totalSquads} Squads</p>`;
     }
 
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          showToast("Recap copied to clipboard!", "📋");
-          if (copyRecapBtnText) {
-            const orig = copyRecapBtnText.textContent;
-            copyRecapBtnText.textContent = "Recap Copied! 📋";
-            setTimeout(() => {
-              copyRecapBtnText.textContent = orig;
-            }, 2500);
-          }
-        })
-        .catch(err => {
-          console.warn("Clipboard API failed, fallback to textarea:", err);
-          fallbackCopyText(text);
-        });
-    } else {
-      fallbackCopyText(text);
+    async function executeCopy() {
+      try {
+        if (
+          typeof ClipboardItem !== "undefined" &&
+          navigator.clipboard &&
+          navigator.clipboard.write
+        ) {
+          const item = new ClipboardItem({
+            "text/html": new Blob([htmlText], { type: "text/html" }),
+            "text/plain": new Blob([plainText], { type: "text/plain" })
+          });
+          await navigator.clipboard.write([item]);
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(plainText);
+        } else {
+          fallbackCopyText(plainText);
+          return;
+        }
+        showToast("Recap copied to clipboard!", "📋");
+        if (copyRecapBtnText) {
+          const orig = copyRecapBtnText.textContent;
+          copyRecapBtnText.textContent = "Recap Copied! 📋";
+          setTimeout(() => {
+            copyRecapBtnText.textContent = orig;
+          }, 2500);
+        }
+      } catch (err) {
+        console.warn("ClipboardItem write failed, fallback to plain text:", err);
+        fallbackCopyText(plainText);
+      }
     }
+
+    executeCopy();
   }
 
   function fallbackCopyText(text) {
