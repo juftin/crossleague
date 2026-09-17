@@ -9,6 +9,10 @@ body {
   min-height: 100vh;
 }
 
+.hidden {
+  display: none !important;
+}
+
 body::before {
   content: "";
   position: fixed;

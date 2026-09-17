@@ -39,7 +39,7 @@ const currentInlinedCss = indexHtml
   .trim();
 
 // JS bundle injection markers
-const startRegex = /<!--\s*Application Logic\s*-->\s*<script>/i;
+const startRegex = /<!--\s*Application Logic\s*-->\s*<script[^>]*>/i;
 const endRegex = /<\/script>\s*<\/body>/i;
 
 const startMatch = indexHtml.match(startRegex);

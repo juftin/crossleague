@@ -80,7 +80,7 @@ describe("Bundle & Syntax Integrity", () => {
     const appJs = fs.readFileSync(appJsPath, "utf8").trim();
     const indexHtml = fs.readFileSync(indexHtmlPath, "utf8");
 
-    const startRegex = /<!--\s*Application Logic\s*-->\s*<script>/i;
+    const startRegex = /<!--\s*Application Logic\s*-->\s*<script[^>]*>/i;
     const endRegex = /<\/script>\s*<\/body>/i;
 
     const startMatch = indexHtml.match(startRegex);
