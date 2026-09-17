@@ -281,7 +281,7 @@ a {
     </style>
   </head>
   <body
-    class="text-slate-100 min-h-screen antialiased flex flex-col selection:bg-emerald-500 selection:text-slate-950 overflow-x-hidden"
+    class="text-slate-100 min-h-screen antialiased flex flex-col selection:bg-emerald-500 selection:text-slate-950 overflow-x-clip"
   >
     <!-- Header (Full-Width Fluid) -->
     <header
@@ -913,11 +913,11 @@ a {
         <!-- VIEW SELECTOR TABS (Desktop Sticky Navigation Sub-Header) -->
         <div
           id="tabNavigationContainer"
-          class="hidden sm:flex sticky top-[74px] z-30 -mx-3 sm:-mx-8 lg:-mx-12 px-3 sm:px-8 lg:px-12 py-2.5 bg-slate-950/95 backdrop-blur-xl border-b border-slate-800/80 shadow-lg shadow-black/20 items-center justify-start gap-3 transition-all"
+          class="hidden sm:flex sticky top-0 sm:top-[65px] z-30 w-full py-2.5 bg-slate-950/95 backdrop-blur-xl border-b border-slate-800/80 shadow-lg shadow-black/20 items-center transition-all"
         >
           <nav
             aria-label="Dashboard views"
-            class="flex items-center gap-1 sm:gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800 text-xs sm:text-sm font-bold overflow-x-auto no-scrollbar touch-scroll max-w-full"
+            class="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1.5 p-1.5 bg-slate-900/90 rounded-2xl border border-slate-800 text-xs sm:text-sm font-bold shadow-inner"
           >
             <!-- 1. Awards Tab -->
             <button
@@ -925,7 +925,7 @@ a {
               id="tabAwards"
               onclick="switchTab('awards')"
               title="Awards & Podium (Press 1)"
-              class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 font-bold cursor-pointer active:scale-95 shadow-sm"
+              class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap font-bold cursor-pointer active:scale-95 shadow-sm text-center"
             >
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -948,7 +948,7 @@ a {
               id="tabLeaderboard"
               onclick="switchTab('leaderboard')"
               title="Full Leaderboard (Press 2)"
-              class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer active:scale-95"
+              class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
             >
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -971,7 +971,7 @@ a {
               id="tabVisuals"
               onclick="switchTab('visuals')"
               title="Score Analytics & Charts (Press 3)"
-              class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer active:scale-95"
+              class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
             >
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -994,7 +994,7 @@ a {
               id="tabLeagueGrid"
               onclick="switchTab('leagueGrid')"
               title="League vs League Comparison (Press 4)"
-              class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer active:scale-95"
+              class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
             >
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -1017,7 +1017,7 @@ a {
               id="tabLuck"
               onclick="switchTab('luck')"
               title="Luck Index & Schedule Matrix (Press 5)"
-              class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer active:scale-95"
+              class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
             >
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -1040,7 +1040,7 @@ a {
               id="tabPlayers"
               onclick="switchTab('players')"
               title="Player Analytics & Heatmap (Press 6)"
-              class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer active:scale-95"
+              class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
             >
               <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -7145,9 +7145,9 @@ a {
     const viewLuck = document.getElementById("viewLuck");
 
     const desktopInactive =
-      "px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer active:scale-95";
+      "flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center";
     const desktopActive =
-      "px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 font-bold cursor-pointer active:scale-95 shadow-sm";
+      "flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap font-bold cursor-pointer active:scale-95 shadow-sm text-center";
 
     const mobileInactive =
       "flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-bold gap-1 min-w-[50px] text-slate-400 hover:text-slate-200 border border-transparent active:scale-95 touch-manipulation cursor-pointer";

@@ -4429,9 +4429,9 @@
     const viewLuck = document.getElementById("viewLuck");
 
     const desktopInactive =
-      "px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer active:scale-95";
+      "flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center";
     const desktopActive =
-      "px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 font-bold cursor-pointer active:scale-95 shadow-sm";
+      "flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap font-bold cursor-pointer active:scale-95 shadow-sm text-center";
 
     const mobileInactive =
       "flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-bold gap-1 min-w-[50px] text-slate-400 hover:text-slate-200 border border-transparent active:scale-95 touch-manipulation cursor-pointer";
