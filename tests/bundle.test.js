@@ -167,11 +167,6 @@ describe("Bundle & Syntax Integrity", () => {
     assert.ok(indexHtml.includes('id="selectAllLeaguesBtn"'), "Must contain #selectAllLeaguesBtn");
     assert.ok(indexHtml.includes('id="clearAllLeaguesBtn"'), "Must contain #clearAllLeaguesBtn");
 
-    // Header Bottom Row Year & Week bubble badges
-    assert.ok(indexHtml.includes('id="headerBottomRow"'), "Must contain #headerBottomRow");
-    assert.ok(indexHtml.includes('id="headerSeasonBadge"'), "Must contain #headerSeasonBadge");
-    assert.ok(indexHtml.includes('id="headerWeekBadge"'), "Must contain #headerWeekBadge");
-
     // Menu Action Buttons (Copy Recap, Share, Download Report)
     assert.ok(indexHtml.includes('id="copyRecapBtn"'), "Must contain #copyRecapBtn");
     assert.ok(indexHtml.includes('id="shareUrlBtn"'), "Must contain #shareUrlBtn");

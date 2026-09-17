@@ -2008,7 +2008,7 @@
   }
 
   /**
-   * Superlatives Showcase Deck (6 Cards: Bad Beat, Lucky Escape, Bench Heavyweight, Luckiest Draw, Toughest Schedule, Cardiac Kid)
+   * Superlatives Showcase Deck (Bad Beat, Lucky Escape, Bench Heavyweight)
    */
   function renderSuperlatives(records = getActiveRecords()) {
     if (!badBeatCard || !luckyEscapeCard || !benchMvpCard) return;
@@ -2034,19 +2034,25 @@
             "text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 hover:border-rose-400/70"
           );
           badBeatCard.innerHTML = `
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0 flex-1">
-                ${titleComponent}
-                <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(badBeat.manager)}</div>
-                <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(badBeat.teamName)}</div>
-                <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(badBeat.league)}">
-                  <span class="text-sm flex-shrink-0">🏆</span>
-                  <span class="truncate">${escapeHtml(badBeat.league)}</span>
+            <div class="flex flex-col justify-between h-full space-y-3">
+              <div>
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-rose-500/20">
+                  ${titleComponent}
+                  <div class="text-right flex-shrink-0">
+                    <span class="text-lg sm:text-xl font-mono font-black text-rose-400">${badBeat.points.toFixed(2)} <span class="text-xs font-semibold text-rose-300/80">pts</span></span>
+                  </div>
+                </div>
+                <div class="mt-3 space-y-1">
+                  <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(badBeat.manager)}">${escapeHtml(badBeat.manager)}</div>
+                  <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(badBeat.teamName)}">${escapeHtml(badBeat.teamName)}</div>
+                  <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(badBeat.league)}">
+                    <span class="text-xs flex-shrink-0">🏆</span>
+                    <span class="truncate">${escapeHtml(badBeat.league)}</span>
+                  </div>
                 </div>
               </div>
-              <div class="text-right flex-shrink-0">
-                <div class="text-xl sm:text-2xl font-mono font-black text-rose-400">${badBeat.points.toFixed(2)} <span class="text-xs font-semibold text-rose-300/80">pts</span></div>
-                <div class="text-xs text-slate-400 font-semibold mt-1">Lost by ${Math.abs(badBeat.margin).toFixed(2)} to ${escapeHtml(badBeat.opponentName || "Rival")}</div>
+              <div class="pt-2.5 border-t border-slate-800/80 text-xs text-slate-400 font-semibold truncate">
+                Lost by ${Math.abs(badBeat.margin).toFixed(2)} to ${escapeHtml(badBeat.opponentName || "Rival")}
               </div>
             </div>
           `;
@@ -2077,19 +2083,25 @@
             "text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 hover:border-rose-400/70"
           );
           badBeatCard.innerHTML = `
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0 flex-1">
-                ${titleComponent}
-                <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(badBeat.manager)}</div>
-                <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(badBeat.teamName)}</div>
-                <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(badBeat.league)}">
-                  <span class="text-sm flex-shrink-0">🏆</span>
-                  <span class="truncate">${escapeHtml(badBeat.league)}</span>
+            <div class="flex flex-col justify-between h-full space-y-3">
+              <div>
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-rose-500/20">
+                  ${titleComponent}
+                  <div class="text-right flex-shrink-0">
+                    <span class="text-lg sm:text-xl font-mono font-black text-rose-400">${(badBeat.points || 0).toFixed(1)} <span class="text-xs font-semibold text-rose-300/80">PPG</span></span>
+                  </div>
+                </div>
+                <div class="mt-3 space-y-1">
+                  <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(badBeat.manager)}">${escapeHtml(badBeat.manager)}</div>
+                  <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(badBeat.teamName)}">${escapeHtml(badBeat.teamName)}</div>
+                  <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(badBeat.league)}">
+                    <span class="text-xs flex-shrink-0">🏆</span>
+                    <span class="truncate">${escapeHtml(badBeat.league)}</span>
+                  </div>
                 </div>
               </div>
-              <div class="text-right flex-shrink-0">
-                <div class="text-xl sm:text-2xl font-mono font-black text-rose-400">${(badBeat.points || 0).toFixed(1)} <span class="text-xs font-semibold text-rose-300/80">PPG</span></div>
-                <div class="text-xs text-slate-400 font-semibold mt-1">${badBeat.wins || 0}W-${badBeat.losses || 0}L (${badBeat.winPct || 0}%)</div>
+              <div class="pt-2.5 border-t border-slate-800/80 text-xs text-slate-400 font-semibold truncate">
+                ${badBeat.wins || 0}W-${badBeat.losses || 0}L (${badBeat.winPct || 0}%) • ${(badBeat.totalPoints || 0).toFixed(1)} Total PF
               </div>
             </div>
           `;
@@ -2112,19 +2124,25 @@
             "text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400/70"
           );
           luckyEscapeCard.innerHTML = `
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0 flex-1">
-                ${titleComponent}
-                <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(luckyEscape.manager)}</div>
-                <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(luckyEscape.teamName)}</div>
-                <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(luckyEscape.league)}">
-                  <span class="text-sm flex-shrink-0">🏆</span>
-                  <span class="truncate">${escapeHtml(luckyEscape.league)}</span>
+            <div class="flex flex-col justify-between h-full space-y-3">
+              <div>
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-emerald-500/20">
+                  ${titleComponent}
+                  <div class="text-right flex-shrink-0">
+                    <span class="text-lg sm:text-xl font-mono font-black text-emerald-400">${luckyEscape.points.toFixed(2)} <span class="text-xs font-semibold text-emerald-300/80">pts</span></span>
+                  </div>
+                </div>
+                <div class="mt-3 space-y-1">
+                  <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(luckyEscape.manager)}">${escapeHtml(luckyEscape.manager)}</div>
+                  <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(luckyEscape.teamName)}">${escapeHtml(luckyEscape.teamName)}</div>
+                  <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(luckyEscape.league)}">
+                    <span class="text-xs flex-shrink-0">🏆</span>
+                    <span class="truncate">${escapeHtml(luckyEscape.league)}</span>
+                  </div>
                 </div>
               </div>
-              <div class="text-right flex-shrink-0">
-                <div class="text-xl sm:text-2xl font-mono font-black text-emerald-400">${luckyEscape.points.toFixed(2)} <span class="text-xs font-semibold text-emerald-300/80">pts</span></div>
-                <div class="text-xs text-slate-400 font-semibold mt-1">Won by ${Math.abs(luckyEscape.margin).toFixed(2)} vs ${escapeHtml(luckyEscape.opponentName || "Rival")}</div>
+              <div class="pt-2.5 border-t border-slate-800/80 text-xs text-slate-400 font-semibold truncate">
+                Won by ${Math.abs(luckyEscape.margin).toFixed(2)} vs ${escapeHtml(luckyEscape.opponentName || "Rival")}
               </div>
             </div>
           `;
@@ -2155,19 +2173,25 @@
             "text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400/70"
           );
           luckyEscapeCard.innerHTML = `
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0 flex-1">
-                ${titleComponent}
-                <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(luckyEscape.manager)}</div>
-                <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(luckyEscape.teamName)}</div>
-                <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(luckyEscape.league)}">
-                  <span class="text-sm flex-shrink-0">🏆</span>
-                  <span class="truncate">${escapeHtml(luckyEscape.league)}</span>
+            <div class="flex flex-col justify-between h-full space-y-3">
+              <div>
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-emerald-500/20">
+                  ${titleComponent}
+                  <div class="text-right flex-shrink-0">
+                    <span class="text-lg sm:text-xl font-mono font-black text-emerald-400">${(luckyEscape.points || 0).toFixed(1)} <span class="text-xs font-semibold text-emerald-300/80">PPG</span></span>
+                  </div>
+                </div>
+                <div class="mt-3 space-y-1">
+                  <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(luckyEscape.manager)}">${escapeHtml(luckyEscape.manager)}</div>
+                  <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(luckyEscape.teamName)}">${escapeHtml(luckyEscape.teamName)}</div>
+                  <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(luckyEscape.league)}">
+                    <span class="text-xs flex-shrink-0">🏆</span>
+                    <span class="truncate">${escapeHtml(luckyEscape.league)}</span>
+                  </div>
                 </div>
               </div>
-              <div class="text-right flex-shrink-0">
-                <div class="text-xl sm:text-2xl font-mono font-black text-emerald-400">${(luckyEscape.points || 0).toFixed(1)} <span class="text-xs font-semibold text-emerald-300/80">PPG</span></div>
-                <div class="text-xs text-slate-400 font-semibold mt-1">${luckyEscape.wins || 0}W-${luckyEscape.losses || 0}L (${luckyEscape.winPct || 0}%)</div>
+              <div class="pt-2.5 border-t border-slate-800/80 text-xs text-slate-400 font-semibold truncate">
+                ${luckyEscape.wins || 0}W-${luckyEscape.losses || 0}L (${luckyEscape.winPct || 0}%)
               </div>
             </div>
           `;
@@ -2189,19 +2213,25 @@
           "text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-500/30 hover:border-amber-400/70"
         );
         benchMvpCard.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0 flex-1">
-              ${titleComponent}
-              <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(benchKing.manager)}</div>
-              <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(benchKing.teamName)}</div>
-              <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(benchKing.league)}">
-                <span class="text-sm flex-shrink-0">🏆</span>
-                <span class="truncate">${escapeHtml(benchKing.league)}</span>
+          <div class="flex flex-col justify-between h-full space-y-3">
+            <div>
+              <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-amber-500/20">
+                ${titleComponent}
+                <div class="text-right flex-shrink-0">
+                  <span class="text-lg sm:text-xl font-mono font-black text-amber-300">${benchKing.benchPoints.toFixed(2)} <span class="text-xs font-semibold text-amber-300/80">pts</span></span>
+                </div>
+              </div>
+              <div class="mt-3 space-y-1">
+                <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(benchKing.manager)}">${escapeHtml(benchKing.manager)}</div>
+                <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(benchKing.teamName)}">${escapeHtml(benchKing.teamName)}</div>
+                <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(benchKing.league)}">
+                  <span class="text-xs flex-shrink-0">🏆</span>
+                  <span class="truncate">${escapeHtml(benchKing.league)}</span>
+                </div>
               </div>
             </div>
-            <div class="text-right flex-shrink-0">
-              <div class="text-xl sm:text-2xl font-mono font-black text-amber-300">${benchKing.benchPoints.toFixed(2)} <span class="text-xs font-semibold text-amber-300/80">pts</span></div>
-              <div class="text-xs text-slate-400 font-semibold mt-1">${benchKing.efficiency ?? 100}% Lineup Efficiency</div>
+            <div class="pt-2.5 border-t border-slate-800/80 text-xs text-slate-400 font-semibold truncate">
+              ${benchKing.efficiency ?? 100}% Lineup Efficiency
             </div>
           </div>
         `;
@@ -2315,14 +2345,14 @@
           </div>
         </div>
 
-        <div class="mt-5 pt-3 border-t border-slate-800/80 flex items-baseline justify-between">
+        <div class="mt-5 pt-3 border-t border-slate-800/80 flex flex-wrap sm:flex-nowrap items-baseline justify-between gap-2">
           <div>
             <div class="text-xs uppercase font-bold text-slate-400">${metricLabel}</div>
             <div class="${slot.scoreSize} font-black ${slot.color} font-mono leading-none mt-1.5">
               ${t.points.toFixed(2)}
             </div>
           </div>
-          <div class="text-xs font-semibold text-slate-400 text-right">
+          <div class="text-xs font-semibold text-slate-400 sm:text-right min-w-0">
             ${subMetric}
           </div>
         </div>
@@ -4598,7 +4628,6 @@
       return ptsB - ptsA;
     });
     const allPlayLeader = sortedByAllPlay[0];
-    const shareUrl = buildShareableUrl();
 
     const titleText = isSeason
       ? `Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})`
@@ -4608,8 +4637,8 @@
     let htmlText = "";
 
     if (isSeason) {
-      plainText = `*${titleText}*\n${shareUrl}\n\n`;
-      htmlText = `<p><a href="${shareUrl}"><strong><u>${escapeHtml(titleText)}</u></strong></a></p><br>`;
+      plainText = `*${titleText}*\n\n`;
+      htmlText = `<p><strong><u>${escapeHtml(titleText)}</u></strong></p><br>`;
 
       plainText += `*The Podium (Avg PPG)*\n`;
       htmlText += `<p><strong><u>The Podium (Avg PPG)</u></strong></p>`;
@@ -4680,8 +4709,8 @@
       plainText += `• 🏟️ *Scope:* ${totalLeagues} Leagues | ${totalSquads} Squads`;
       htmlText += `<p>• 🏟️ <strong>Scope:</strong> ${totalLeagues} Leagues | ${totalSquads} Squads</p>`;
     } else {
-      plainText = `*${titleText}*\n${shareUrl}\n\n`;
-      htmlText = `<p><a href="${shareUrl}"><strong><u>${escapeHtml(titleText)}</u></strong></a></p><br>`;
+      plainText = `*${titleText}*\n\n`;
+      htmlText = `<p><strong><u>${escapeHtml(titleText)}</u></strong></p><br>`;
 
       plainText += `*The Podium (Top Scores)*\n`;
       htmlText += `<p><strong><u>The Podium (Top Scores)</u></strong></p>`;

@@ -2,17 +2,9 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 describe("Chat Recap Formatter", () => {
-  const formatWeeklyRecap = ({
-    week,
-    season,
-    top3,
-    badBeat,
-    luckyEscape,
-    benchKing,
-    shareUrl = "https://crossleague.app/?season=2024&week=1#awards"
-  }) => {
+  const formatWeeklyRecap = ({ week, season, top3, badBeat, luckyEscape, benchKing }) => {
     const titleText = `Week ${week} Fantasy Recap (${season})`;
-    let plainText = `*${titleText}*\n${shareUrl}\n\n`;
+    let plainText = `*${titleText}*\n\n`;
     plainText += `*The Podium (Top Scores)*\n`;
     if (top3[0])
       plainText += `• 🥇 *#1* ${top3[0].manager} (${top3[0].teamName}) — *${top3[0].points.toFixed(2)} pts* • _${top3[0].league}_\n`;
@@ -29,7 +21,7 @@ describe("Chat Recap Formatter", () => {
     if (benchKing)
       plainText += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) left *${benchKing.benchPoints.toFixed(2)} pts* on bench (${benchKing.efficiency}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
 
-    let htmlText = `<p><a href="${shareUrl}"><strong><u>${titleText}</u></strong></a></p><br>`;
+    let htmlText = `<p><strong><u>${titleText}</u></strong></p><br>`;
     htmlText += `<p><strong><u>The Podium (Top Scores)</u></strong></p>`;
     if (top3[0])
       htmlText += `<p>• 🥇 <strong>#1</strong> ${top3[0].manager} (${top3[0].teamName}) — <strong>${top3[0].points.toFixed(2)} pts</strong> • <em>${top3[0].league}</em></p>`;
@@ -37,7 +29,7 @@ describe("Chat Recap Formatter", () => {
     return { plainText, htmlText };
   };
 
-  it("should generate valid rich HTML and clean plain-text recap with bold/underlined headings and embedded link", () => {
+  it("should generate valid rich HTML and clean plain-text recap with bold headings and without URL", () => {
     const data = {
       week: 1,
       season: 2024,
@@ -73,25 +65,17 @@ describe("Chat Recap Formatter", () => {
     const { plainText, htmlText } = formatWeeklyRecap(data);
 
     // Plain text assertions
-    assert.ok(
-      plainText.includes(
-        "*Week 1 Fantasy Recap (2024)*\nhttps://crossleague.app/?season=2024&week=1#awards"
-      )
-    );
+    assert.ok(plainText.startsWith("*Week 1 Fantasy Recap (2024)*\n\n"));
     assert.ok(plainText.includes("*The Podium (Top Scores)*"));
     assert.ok(plainText.includes("• 🥇 *#1* Alice"));
-    assert.ok(
-      !plainText.includes("[*"),
-      "Plain text should not contain unparsed Markdown link syntax"
-    );
+    assert.ok(!plainText.includes("http"), "Plain text should not contain URL");
 
     // HTML assertions for rich text clipboards (Slack / Docs / Mail)
     assert.ok(
-      htmlText.includes(
-        '<a href="https://crossleague.app/?season=2024&week=1#awards"><strong><u>Week 1 Fantasy Recap (2024)</u></strong></a>'
-      )
+      htmlText.startsWith("<p><strong><u>Week 1 Fantasy Recap (2024)</u></strong></p><br>")
     );
     assert.ok(htmlText.includes("<p><strong><u>The Podium (Top Scores)</u></strong></p>"));
     assert.ok(htmlText.includes("<strong>#1</strong> Alice"));
+    assert.ok(!htmlText.includes("<a href="), "HTML text should not contain <a> tag");
   });
 });
