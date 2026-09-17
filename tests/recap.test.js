@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 describe("Chat Recap Formatter", () => {
   const formatWeeklyRecap = ({ week, season, top3, badBeat, luckyEscape, benchKing }) => {
-    const titleText = `Week ${week} Fantasy Recap (${season})`;
+    const titleText = `🏈 Week ${week} Fantasy Recap (${season})`;
     let plainText = `*${titleText}*\n\n`;
     plainText += `*The Podium (Top Scores)*\n`;
     if (top3[0])
@@ -21,7 +21,7 @@ describe("Chat Recap Formatter", () => {
     if (benchKing)
       plainText += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) left *${benchKing.benchPoints.toFixed(2)} pts* on bench (${benchKing.efficiency}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
 
-    let htmlText = `<p><strong><u>${titleText}</u></strong></p><br>`;
+    let htmlText = `<p><strong>${titleText}</strong></p><br>`;
     htmlText += `<p><strong><u>The Podium (Top Scores)</u></strong></p>`;
     if (top3[0])
       htmlText += `<p>• 🥇 <strong>#1</strong> ${top3[0].manager} (${top3[0].teamName}) — <strong>${top3[0].points.toFixed(2)} pts</strong> • <em>${top3[0].league}</em></p>`;
@@ -65,15 +65,13 @@ describe("Chat Recap Formatter", () => {
     const { plainText, htmlText } = formatWeeklyRecap(data);
 
     // Plain text assertions
-    assert.ok(plainText.startsWith("*Week 1 Fantasy Recap (2024)*\n\n"));
+    assert.ok(plainText.startsWith("*🏈 Week 1 Fantasy Recap (2024)*\n\n"));
     assert.ok(plainText.includes("*The Podium (Top Scores)*"));
     assert.ok(plainText.includes("• 🥇 *#1* Alice"));
     assert.ok(!plainText.includes("http"), "Plain text should not contain URL");
 
     // HTML assertions for rich text clipboards (Slack / Docs / Mail)
-    assert.ok(
-      htmlText.startsWith("<p><strong><u>Week 1 Fantasy Recap (2024)</u></strong></p><br>")
-    );
+    assert.ok(htmlText.startsWith("<p><strong>🏈 Week 1 Fantasy Recap (2024)</strong></p><br>"));
     assert.ok(htmlText.includes("<p><strong><u>The Podium (Top Scores)</u></strong></p>"));
     assert.ok(htmlText.includes("<strong>#1</strong> Alice"));
     assert.ok(!htmlText.includes("<a href="), "HTML text should not contain <a> tag");

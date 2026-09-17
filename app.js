@@ -4630,15 +4630,15 @@
     const allPlayLeader = sortedByAllPlay[0];
 
     const titleText = isSeason
-      ? `Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})`
-      : `Week ${week} Fantasy Recap (${season})`;
+      ? `🏈 Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})`
+      : `🏈 Week ${week} Fantasy Recap (${season})`;
 
     let plainText = "";
     let htmlText = "";
 
     if (isSeason) {
       plainText = `*${titleText}*\n\n`;
-      htmlText = `<p><strong><u>${escapeHtml(titleText)}</u></strong></p><br>`;
+      htmlText = `<p><strong>${escapeHtml(titleText)}</strong></p><br>`;
 
       plainText += `*The Podium (Avg PPG)*\n`;
       htmlText += `<p><strong><u>The Podium (Avg PPG)</u></strong></p>`;
@@ -4710,7 +4710,7 @@
       htmlText += `<p>• 🏟️ <strong>Scope:</strong> ${totalLeagues} Leagues | ${totalSquads} Squads</p>`;
     } else {
       plainText = `*${titleText}*\n\n`;
-      htmlText = `<p><strong><u>${escapeHtml(titleText)}</u></strong></p><br>`;
+      htmlText = `<p><strong>${escapeHtml(titleText)}</strong></p><br>`;
 
       plainText += `*The Podium (Top Scores)*\n`;
       htmlText += `<p><strong><u>The Podium (Top Scores)</u></strong></p>`;
