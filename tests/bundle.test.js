@@ -21,6 +21,15 @@ describe("Bundle & Syntax Integrity", () => {
     }, "app.js should compile without syntax errors");
   });
 
+  it("should save preferences before a page refresh or navigation", () => {
+    const code = fs.readFileSync(appJsPath, "utf8");
+    assert.match(
+      code,
+      /window\.addEventListener\("pagehide", savePreferences\)/,
+      "The current username and settings must be saved when leaving the page"
+    );
+  });
+
   it("should have valid JavaScript syntax in scripts/bundle.js", () => {
     const bundleScriptPath = path.join(rootDir, "scripts", "bundle.js");
     assert.doesNotThrow(() => {

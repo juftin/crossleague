@@ -2484,6 +2484,10 @@
     });
   }
 
+  // Some browsers restore or autofill fields without firing input/change events.
+  // Capture the visible values immediately before a refresh or navigation.
+  window.addEventListener("pagehide", savePreferences);
+
   if (modeSelect) {
     modeSelect.addEventListener("change", () => {
       updateModeUI();
