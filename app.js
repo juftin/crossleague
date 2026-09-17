@@ -430,6 +430,36 @@
       if (raw) {
         const data = JSON.parse(raw);
         if (data && data.version === "2.0" && data.records && data.records.length > 0) {
+          // Strict settings matching
+          if (String(data.season) !== String(season)) return false;
+          if (data.mode !== mode) return false;
+          if (parseInt(data.week, 10) !== parseInt(week, 10)) return false;
+
+          const cachedPlatform = data.records[0]?.platform || "sleeper";
+          if (cachedPlatform !== currentPlatform) return false;
+
+          if (currentSyncType === "leagues" && customLeagueIds.size > 0) {
+            const cachedLids = new Set(
+              (data.allLeaguesData || []).map(l =>
+                String(l.league_id).replace(/^(espn|sleeper):/, "")
+              )
+            );
+            const expectedLids = Array.from(customLeagueIds).map(id =>
+              String(id).replace(/^(espn|sleeper):/, "")
+            );
+            const allMatch = expectedLids.every(id => cachedLids.has(id));
+            if (!allMatch) return false;
+          }
+
+          if (currentSyncType === "user" && userIdInput && userIdInput.value.trim()) {
+            const queryUser = userIdInput.value.trim().toLowerCase();
+            const cachedUserName = (data.user?.name || "").toLowerCase();
+            const cachedUserId = (data.user?.id || "").toLowerCase();
+            if (cachedUserName !== queryUser && cachedUserId !== queryUser) {
+              return false;
+            }
+          }
+
           return loadCachedData(data);
         }
       }
@@ -1021,6 +1051,35 @@
 
     const urlParams = getUrlParams();
 
+    if (urlParams.platform) {
+      setPlatform(urlParams.platform.toLowerCase() === "espn" ? "espn" : "sleeper");
+    }
+
+    if (urlParams.user) {
+      currentSyncType = "user";
+      if (userIdInput) userIdInput.value = urlParams.user.trim();
+      currentUserName = urlParams.user.trim();
+      currentUserId = "";
+      customLeagueIds.clear();
+      pendingLeagueIdsFilter = null;
+    }
+
+    if (urlParams.leagues) {
+      const ids = urlParams.leagues
+        .split(",")
+        .map(id => id.trim())
+        .filter(Boolean);
+      pendingLeagueIdsFilter = new Set(ids);
+      customLeagueIds.clear();
+      ids.forEach(id => customLeagueIds.add(id));
+      if (!urlParams.user) {
+        currentSyncType = "leagues";
+        if (userIdInput) userIdInput.value = "";
+        currentUserName = "";
+        currentUserId = "";
+      }
+    }
+
     if (urlParams.season && seasonInput) {
       seasonInput.value = String(urlParams.season);
     } else if (!localStorage.getItem("sleeper_season") && seasonInput) {
@@ -1037,28 +1096,6 @@
       modeSelect.value = normalizedMode;
       currentMode = normalizedMode;
       updateModeUI();
-    }
-
-    if (urlParams.user && userIdInput) {
-      userIdInput.value = urlParams.user.trim();
-      currentUserName = urlParams.user.trim();
-      currentSyncType = "user";
-    }
-
-    if (urlParams.platform) {
-      setPlatform(urlParams.platform.toLowerCase() === "espn" ? "espn" : "sleeper");
-    }
-
-    if (urlParams.leagues) {
-      const ids = urlParams.leagues
-        .split(",")
-        .map(id => id.trim())
-        .filter(Boolean);
-      pendingLeagueIdsFilter = new Set(ids);
-      ids.forEach(id => customLeagueIds.add(id));
-      if (!urlParams.user) {
-        currentSyncType = "leagues";
-      }
     }
 
     setSyncType(currentSyncType);
@@ -6579,6 +6616,24 @@
     }
     await initDefaults();
     updateModeUI();
+
+    const urlParams = getUrlParams();
+    const hasQueryParams = Boolean(
+      urlParams.platform ||
+      urlParams.user ||
+      urlParams.season ||
+      urlParams.week ||
+      urlParams.mode ||
+      urlParams.leagues
+    );
+
+    if (hasQueryParams) {
+      rawRecords = [];
+      allLeaguesData = [];
+      leaguesMap = {};
+      selectedLeagueIds.clear();
+    }
+
     const hasLoadedCache = tryLoadFromCache();
     if (
       !hasLoadedCache &&

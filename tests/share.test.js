@@ -164,4 +164,114 @@ describe("Shareable URL & Parameter Extraction", () => {
     assert.equal(parsed.searchParams.get("week"), "1");
     assert.equal(parsed.hash, "#power");
   });
+
+  it("should wipe prior custom leagues and switch syncType when loading query params with leagues", () => {
+    // Simulate previous local state with existing custom leagues and user
+    let customLeagueIds = new Set(["old_league_1", "old_league_2"]);
+    let currentSyncType = "user";
+    let userId = "old_user";
+
+    const queryParams = { leagues: "1664455,998877", platform: "espn", season: "2024", week: "1" };
+
+    if (queryParams.leagues) {
+      const ids = queryParams.leagues
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+      customLeagueIds.clear(); // Must wipe old custom leagues
+      ids.forEach(id => customLeagueIds.add(id));
+      if (!queryParams.user) {
+        currentSyncType = "leagues";
+        userId = "";
+      }
+    }
+
+    assert.equal(currentSyncType, "leagues");
+    assert.equal(userId, "");
+    assert.deepEqual(Array.from(customLeagueIds), ["1664455", "998877"]);
+    assert.equal(customLeagueIds.has("old_league_1"), false);
+  });
+
+  it("should invalidate cache if cached settings or platform do not match current query parameters", () => {
+    const cachedData = {
+      version: "2.0",
+      season: "2024",
+      week: 1,
+      mode: "WEEKLY",
+      records: [{ id: "espn-1", platform: "espn", points: 100 }],
+      allLeaguesData: [{ league_id: "espn:1664455" }]
+    };
+
+    function validateCache(cache, currentSettings) {
+      if (!cache || cache.version !== "2.0") return false;
+      if (String(cache.season) !== String(currentSettings.season)) return false;
+      if (cache.mode !== currentSettings.mode) return false;
+      if (parseInt(cache.week, 10) !== parseInt(currentSettings.week, 10)) return false;
+      if ((cache.records[0]?.platform || "sleeper") !== currentSettings.platform) return false;
+
+      if (currentSettings.syncType === "leagues" && currentSettings.customLeagueIds.size > 0) {
+        const cachedLids = new Set(
+          (cache.allLeaguesData || []).map(l => String(l.league_id).replace(/^(espn|sleeper):/, ""))
+        );
+        const expectedLids = Array.from(currentSettings.customLeagueIds).map(id =>
+          String(id).replace(/^(espn|sleeper):/, "")
+        );
+        const allMatch = expectedLids.every(id => cachedLids.has(id));
+        if (!allMatch) return false;
+      }
+      return true;
+    }
+
+    // Matching settings -> valid
+    assert.equal(
+      validateCache(cachedData, {
+        season: "2024",
+        week: 1,
+        mode: "WEEKLY",
+        platform: "espn",
+        syncType: "leagues",
+        customLeagueIds: new Set(["1664455"])
+      }),
+      true
+    );
+
+    // Mismatched platform (sleeper requested, espn in cache) -> invalid
+    assert.equal(
+      validateCache(cachedData, {
+        season: "2024",
+        week: 1,
+        mode: "WEEKLY",
+        platform: "sleeper",
+        syncType: "leagues",
+        customLeagueIds: new Set(["1664455"])
+      }),
+      false
+    );
+
+    // Mismatched week (week 2 requested, week 1 in cache) -> invalid
+    assert.equal(
+      validateCache(cachedData, {
+        season: "2024",
+        week: 2,
+        mode: "WEEKLY",
+        platform: "espn",
+        syncType: "leagues",
+        customLeagueIds: new Set(["1664455"])
+      }),
+      false
+    );
+
+    // Mismatched leagues (league 999999 requested, not in cache) -> invalid
+    assert.equal(
+      validateCache(cachedData, {
+        season: "2024",
+        week: 1,
+        mode: "WEEKLY",
+        platform: "espn",
+        syncType: "leagues",
+        customLeagueIds: new Set(["999999"])
+      }),
+      false
+    );
+  });
 });
