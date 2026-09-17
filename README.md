@@ -46,7 +46,7 @@
    # or
    python3 -m http.server 8000
    ```
-3. Enter your Sleeper username or numeric User ID, select a season and matchup week, and click **Sync Leagues**.
+3. Configure your Sleeper username in **⚙️ Settings**, then navigate weeks seamlessly with automatic data loading and caching.
 
 ### Query Parameters
 

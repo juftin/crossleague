@@ -24,6 +24,9 @@
   let leaguesMap = {};
   let allLeaguesData = [];
   let selectedLeagueIds = new Set();
+  let pendingLeagueIdsFilter = null;
+  let currentSyncType = "user";
+  let customLeagueIds = new Set();
   let currentSortColumn = "Points";
   let currentSortAsc = false;
   let currentTierFilter = "ALL";
@@ -40,6 +43,20 @@
   const filterForm = document.getElementById("filterForm");
   const modeSelect = document.getElementById("modeSelect");
   const weekLabelText = document.getElementById("weekLabelText");
+  const syncTypeUserBtn = document.getElementById("syncTypeUserBtn");
+  const syncTypeLeaguesBtn = document.getElementById("syncTypeLeaguesBtn");
+  const userSyncPanel = document.getElementById("userSyncPanel");
+  const leaguesSyncPanel = document.getElementById("leaguesSyncPanel");
+  const customLeagueIdInput = document.getElementById("customLeagueIdInput");
+  const btnAddCustomLeagueId = document.getElementById("btnAddCustomLeagueId");
+  const customLeaguesDropdownContainer = document.getElementById("customLeaguesDropdownContainer");
+  const customLeaguesDropdownBtn = document.getElementById("customLeaguesDropdownBtn");
+  const customLeaguesDropdownLabel = document.getElementById("customLeaguesDropdownLabel");
+  const customLeaguesDropdownChevron = document.getElementById("customLeaguesDropdownChevron");
+  const customLeaguesDropdownMenu = document.getElementById("customLeaguesDropdownMenu");
+  const customLeagueIdsChips = document.getElementById("customLeagueIdsChips");
+  const btnClearCustomLeagueIds = document.getElementById("btnClearCustomLeagueIds");
+  const leagueIdsCountBadge = document.getElementById("leagueIdsCountBadge");
   const userIdInput = document.getElementById("userIdInput");
   const seasonInput = document.getElementById("seasonInput");
   const weekInput = document.getElementById("weekInput");
@@ -63,11 +80,18 @@
   const rowCount = document.getElementById("rowCount");
   const exportCsvBtn = document.getElementById("exportCsvBtn");
   const copyRecapBtn = document.getElementById("copyRecapBtn");
+  const copyRecapBtnText = document.getElementById("copyRecapBtnText");
+  const shareUrlBtn = document.getElementById("shareUrlBtn");
+  const shareUrlBtnText = document.getElementById("shareUrlBtnText");
+  const downloadReportBtn =
+    document.getElementById("downloadReportBtn") || document.getElementById("shareReportBtn");
+  const downloadReportBtnText =
+    document.getElementById("downloadReportBtnText") ||
+    document.getElementById("shareReportBtnText");
+  const shareReportBtn = downloadReportBtn;
+  const shareReportBtnText = downloadReportBtnText;
   const noResultsFound = document.getElementById("noResultsFound");
   const podiumCards = document.getElementById("podiumCards");
-  const podiumWeekBadge = document.getElementById("podiumWeekBadge");
-  const shareReportBtn = document.getElementById("shareReportBtn");
-  const shareReportBtnText = document.getElementById("shareReportBtnText");
   const snapshotIndicator = document.getElementById("snapshotIndicator");
   const selectAllLeaguesBtn = document.getElementById("selectAllLeaguesBtn");
   const clearAllLeaguesBtn = document.getElementById("clearAllLeaguesBtn");
@@ -82,6 +106,28 @@
   const liveSyncIndicator = document.getElementById("liveSyncIndicator");
   const snapshotSubtitle = document.getElementById("snapshotSubtitle");
   const toastContainer = document.getElementById("toastContainer");
+
+  // Header Status & Navigation Bubbles
+  const headerBottomRow = document.getElementById("headerBottomRow");
+  const playerSeasonBadge = document.getElementById("playerSeasonBadge");
+  const headerSeasonBadge = document.getElementById("headerSeasonBadge");
+  const headerSeasonValue = document.getElementById("headerSeasonValue");
+  const headerWeekBadge = document.getElementById("headerWeekBadge");
+  const headerWeekValue = document.getElementById("headerWeekValue");
+
+  // Settings Dropdown & Modal Elements
+  const btnOpenSettingsModal = document.getElementById("btnOpenSettingsModal");
+  const settingsModal = document.getElementById("settingsModal");
+  const settingsBackdrop = document.getElementById("settingsBackdrop");
+  const btnCloseSettingsModal = document.getElementById("btnCloseSettingsModal");
+  const btnCancelSettingsModal = document.getElementById("btnCancelSettingsModal");
+  const settingsBtnUserBadge = document.getElementById("settingsBtnUserBadge");
+  const settingsDropdownContainer = document.getElementById("settingsDropdownContainer");
+  const settingsDropdownChevron = document.getElementById("settingsDropdownChevron");
+
+  // Week Navigator Elements
+  const weekDisplayValue = document.getElementById("weekDisplayValue");
+  const weekStatusBadge = document.getElementById("weekStatusBadge");
 
   // Superlative DOM Cards
   const badBeatCard = document.getElementById("badBeatCard");
@@ -108,25 +154,13 @@
   const noPlayersFound = document.getElementById("noPlayersFound");
   const playerSearchInput = document.getElementById("playerSearchInput");
   const playerStatusFilter = document.getElementById("playerStatusFilter");
-
-  const queryParams = new URLSearchParams(window.location.search);
-  const queryUserId = queryParams.get("userId")?.trim();
-  const queryWeek = parseInt(queryParams.get("week"), 10);
-  const queryLeagueIds = new Set(
-    [...queryParams.getAll("leagueId"), ...(queryParams.get("leagueIds") || "").split(",")]
-      .map(leagueId => leagueId.trim())
-      .filter(Boolean)
-  );
-
-  // Populate Week Select Options (1 to 18) if not already present
-  if (weekInput && weekInput.options.length === 0) {
-    for (let w = 1; w <= 18; w++) {
-      const opt = document.createElement("option");
-      opt.value = w;
-      opt.textContent = `Week ${w}`;
-      weekInput.appendChild(opt);
-    }
-  }
+  // NFL State & Played Weeks Tracking
+  let nflState = {
+    season: new Date().getFullYear(),
+    week: 1,
+    display_week: 1,
+    season_type: "regular"
+  };
 
   // Helper: Toast Notifications
   function showToast(message, icon = "✨") {
@@ -155,6 +189,19 @@
     return `crossleague_cache_${u}_${season}_${mode}_${week}`;
   }
 
+  function isWeekFinished(season, week, state = nflState) {
+    const s = parseInt(season, 10);
+    const w = parseInt(week, 10);
+    if (!state || !state.season) return false;
+    if (s < state.season) return true;
+    if (s === state.season) {
+      if (state.season_type === "post") return true;
+      const currentNflWeek = state.week || 1;
+      return w < currentNflWeek;
+    }
+    return false;
+  }
+
   function saveDataToCache(
     userId,
     userName,
@@ -170,6 +217,7 @@
       const payload = {
         version: "2.0",
         cachedAt: new Date().toISOString(),
+        isFinished: isWeekFinished(season, week),
         mode: mode,
         user: {
           id: userId,
@@ -183,10 +231,15 @@
         allLeaguesData: allLeagues,
         selectedLeagueIds: Array.from(selectedLeagueIds)
       };
-      const queryUser = userIdInput.value.trim() || userName || userId;
-      const key = getCacheKey(queryUser, season, mode, week);
-      localStorage.setItem(key, JSON.stringify(payload));
-      localStorage.setItem("crossleague_last_cache_key", key);
+      const serialized = JSON.stringify(payload);
+      const keys = new Set();
+      const queryUser = userIdInput ? userIdInput.value.trim() : "";
+      if (queryUser) keys.add(getCacheKey(queryUser, season, mode, week));
+      if (userName) keys.add(getCacheKey(userName, season, mode, week));
+      if (userId) keys.add(getCacheKey(userId, season, mode, week));
+      keys.forEach(k => {
+        localStorage.setItem(k, serialized);
+      });
     } catch (e) {
       console.warn("Could not save to localStorage cache:", e);
     }
@@ -216,7 +269,9 @@
     }
     if (weekInput && data.week) {
       weekInput.value = String(data.week);
+      updateWeekNavigatorUI();
     }
+    updateSettingsButtonBadge();
 
     rawRecords = (data.records || []).map(r => ({
       ...r,
@@ -232,20 +287,48 @@
     }));
 
     leaguesMap = data.leaguesMap || {};
-    allLeaguesData = data.allLeaguesData || [];
-    selectedLeagueIds = new Set(
-      data.selectedLeagueIds && data.selectedLeagueIds.length > 0
-        ? data.selectedLeagueIds
-        : allLeaguesData.map(l => l.league_id)
-    );
-    applyQueryLeagueFilter();
+    allLeaguesData =
+      data.allLeaguesData && data.allLeaguesData.length > 0
+        ? data.allLeaguesData
+        : Array.from(new Set(rawRecords.map(r => r.leagueId))).map(lid => {
+            const sample = rawRecords.find(r => r.leagueId === lid);
+            return {
+              league_id: lid,
+              name:
+                (leaguesMap[lid] && leaguesMap[lid].name) ||
+                (sample && sample.league) ||
+                `League ${lid}`,
+              avatar:
+                (leaguesMap[lid] && leaguesMap[lid].avatar) ||
+                (sample && sample.leagueAvatar) ||
+                null
+            };
+          });
+
+    if (pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0) {
+      selectedLeagueIds = new Set(
+        allLeaguesData.map(l => l.league_id).filter(id => pendingLeagueIdsFilter.has(id))
+      );
+      if (selectedLeagueIds.size === 0) {
+        selectedLeagueIds = new Set(allLeaguesData.map(l => l.league_id));
+      }
+      pendingLeagueIdsFilter = null;
+    } else {
+      selectedLeagueIds = new Set(
+        data.selectedLeagueIds && data.selectedLeagueIds.length > 0
+          ? data.selectedLeagueIds
+          : allLeaguesData.map(l => l.league_id)
+      );
+    }
 
     setLoading(false);
-    initialState.classList.add("hidden");
-    skeletonLoader.classList.add("hidden");
-    reportContent.classList.remove("hidden");
-    shareReportBtn.classList.remove("hidden");
+    if (initialState) initialState.classList.add("hidden");
+    if (skeletonLoader) skeletonLoader.classList.add("hidden");
+    if (reportContent) reportContent.classList.remove("hidden");
     if (copyRecapBtn) copyRecapBtn.classList.remove("hidden");
+    if (shareUrlBtn) shareUrlBtn.classList.remove("hidden");
+    if (downloadReportBtn) downloadReportBtn.classList.remove("hidden");
+    if (exportCsvBtn) exportCsvBtn.classList.remove("hidden");
 
     initPlayersDb();
     renderLeagueDropdown();
@@ -254,22 +337,21 @@
     return true;
   }
 
-  function tryLoadFromCache() {
+  function tryLoadFromCache(overrideWeek = null) {
     try {
       const user = userIdInput ? userIdInput.value.trim() : "";
       const season = seasonInput ? seasonInput.value : "";
       const mode = modeSelect ? modeSelect.value : "WEEKLY";
-      const week = weekInput ? parseInt(weekInput.value, 10) : 1;
+      const week =
+        overrideWeek !== null
+          ? parseInt(overrideWeek, 10)
+          : weekInput
+            ? parseInt(weekInput.value, 10)
+            : 1;
 
       if (!user) return false;
-      let raw = localStorage.getItem(getCacheKey(user, season, mode, week));
-
-      if (!raw) {
-        const lastKey = localStorage.getItem("crossleague_last_cache_key");
-        if (lastKey && lastKey.toLowerCase().includes(user.toLowerCase())) {
-          raw = localStorage.getItem(lastKey);
-        }
-      }
+      const key = getCacheKey(user, season, mode, week);
+      const raw = localStorage.getItem(key);
 
       if (raw) {
         const data = JSON.parse(raw);
@@ -302,60 +384,379 @@
     }
   }
 
+  function openSettingsModal() {
+    if (settingsModal) {
+      settingsModal.classList.remove("hidden");
+      if (settingsBackdrop) settingsBackdrop.classList.remove("hidden");
+      document.body.classList.add("overflow-hidden");
+      if (settingsDropdownChevron) settingsDropdownChevron.classList.add("rotate-180");
+      if (btnOpenSettingsModal) btnOpenSettingsModal.setAttribute("aria-expanded", "true");
+      if (userIdInput && window.innerWidth >= 640) {
+        setTimeout(() => userIdInput.focus(), 50);
+      }
+    }
+  }
+
+  function closeSettingsModal() {
+    if (settingsModal) {
+      settingsModal.classList.add("hidden");
+      if (settingsBackdrop) settingsBackdrop.classList.add("hidden");
+      if (leagueDropdownMenu) leagueDropdownMenu.classList.add("hidden");
+      if (leagueDropdownChevron) leagueDropdownChevron.classList.remove("rotate-180");
+      if (leagueDropdownBtn) leagueDropdownBtn.setAttribute("aria-expanded", "false");
+      const luckModal = document.getElementById("luckMethodologyModal");
+      if (!luckModal || luckModal.classList.contains("hidden")) {
+        document.body.classList.remove("overflow-hidden");
+      }
+      if (settingsDropdownChevron) settingsDropdownChevron.classList.remove("rotate-180");
+      if (btnOpenSettingsModal) btnOpenSettingsModal.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function toggleSettingsDropdown(e) {
+    if (e) e.stopPropagation();
+    if (settingsModal && !settingsModal.classList.contains("hidden")) {
+      closeSettingsModal();
+    } else {
+      if (leagueDropdownMenu && !leagueDropdownMenu.classList.contains("hidden")) {
+        leagueDropdownMenu.classList.add("hidden");
+        if (leagueDropdownChevron) leagueDropdownChevron.classList.remove("rotate-180");
+        if (leagueDropdownBtn) leagueDropdownBtn.setAttribute("aria-expanded", "false");
+      }
+      openSettingsModal();
+    }
+  }
+
+  function updateSettingsButtonBadge() {
+    let u = "";
+    if (currentSyncType === "leagues") {
+      const count = customLeagueIds.size || (allLeaguesData ? allLeaguesData.length : 0);
+      if (count > 0) {
+        u = `${count} ${count === 1 ? "League" : "Leagues"}`;
+      }
+    } else {
+      u = (userIdInput ? userIdInput.value.trim() : "") || currentUserName;
+    }
+
+    if (settingsBtnUserBadge) {
+      if (currentSyncType === "leagues" && u) {
+        settingsBtnUserBadge.textContent = `🏆 ${u}`;
+        settingsBtnUserBadge.classList.remove("text-slate-400", "border-slate-700/60");
+        settingsBtnUserBadge.classList.add("text-emerald-400", "border-emerald-500/30");
+      } else if (u) {
+        settingsBtnUserBadge.textContent = `@${u}`;
+        settingsBtnUserBadge.classList.remove("text-slate-400", "border-slate-700/60");
+        settingsBtnUserBadge.classList.add("text-emerald-400", "border-emerald-500/30");
+      } else {
+        settingsBtnUserBadge.textContent = "No sync source";
+        settingsBtnUserBadge.classList.remove("text-emerald-400", "border-emerald-500/30");
+        settingsBtnUserBadge.classList.add("text-slate-400", "border-slate-700/60");
+      }
+    }
+    if (btnOpenSettingsModal) {
+      if (currentSyncType === "leagues" && u) {
+        btnOpenSettingsModal.title = `Settings (${u})`;
+      } else {
+        btnOpenSettingsModal.title = u ? `Settings (@${u})` : "User & League Settings";
+      }
+    }
+    if (headerSeasonValue && seasonInput) {
+      headerSeasonValue.textContent = seasonInput.value;
+    }
+  }
+
+  function getMaxPlayedWeek() {
+    const selectedSeason =
+      parseInt(seasonInput ? seasonInput.value : nflState.season, 10) || nflState.season;
+    const currentNflSeason = nflState.season;
+
+    if (selectedSeason < currentNflSeason) {
+      // Past NFL seasons have all regular season weeks (1-18) played
+      return 18;
+    } else if (selectedSeason > currentNflSeason) {
+      // Future season - no weeks played yet
+      return 1;
+    } else {
+      // Current season
+      if (nflState.season_type === "post") {
+        return 18;
+      } else if (nflState.season_type === "pre") {
+        return 1;
+      } else {
+        // Regular season - played weeks up to current display_week / week
+        const currentWeek = Math.max(1, Math.min(18, nflState.display_week || nflState.week || 1));
+        return currentWeek;
+      }
+    }
+  }
+
+  function updateWeekNavigatorUI() {
+    if (!weekInput) return;
+    const maxPlayed = getMaxPlayedWeek();
+    let currentWeek = parseInt(weekInput.value, 10) || 1;
+
+    // Clamp current week to valid range [1, maxPlayed]
+    if (currentWeek > maxPlayed) {
+      currentWeek = maxPlayed;
+      weekInput.value = String(currentWeek);
+      savePreferences();
+    } else if (currentWeek < 1) {
+      currentWeek = 1;
+      weekInput.value = String(currentWeek);
+      savePreferences();
+    }
+
+    // Update display text
+    const weekLabel =
+      currentMode === "SEASON_ROLLUP"
+        ? currentWeek === 1
+          ? "Week 1 Rollup"
+          : `Weeks 1–${currentWeek}`
+        : `Week ${currentWeek}`;
+
+    if (weekDisplayValue) {
+      weekDisplayValue.textContent = weekLabel;
+    }
+    if (headerWeekValue) {
+      headerWeekValue.textContent = weekLabel;
+    }
+    if (headerSeasonValue && seasonInput) {
+      headerSeasonValue.textContent = seasonInput.value;
+    }
+    if (playerSeasonBadge && seasonInput) {
+      playerSeasonBadge.textContent = seasonInput.value;
+    }
+
+    // Update status badge
+    if (weekStatusBadge) {
+      const selectedSeason =
+        parseInt(seasonInput ? seasonInput.value : nflState.season, 10) || nflState.season;
+      if (selectedSeason < nflState.season) {
+        weekStatusBadge.textContent = "Final";
+        weekStatusBadge.className =
+          "text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/60 text-slate-400";
+      } else if (currentWeek < maxPlayed) {
+        weekStatusBadge.textContent = "Played";
+        weekStatusBadge.className =
+          "text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/30 text-emerald-400";
+      } else if (currentWeek === maxPlayed && nflState.season_type === "regular") {
+        weekStatusBadge.textContent = "Current";
+        weekStatusBadge.className =
+          "text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 animate-pulse";
+      } else {
+        weekStatusBadge.textContent = "Week 1";
+        weekStatusBadge.className =
+          "text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/60 text-slate-400";
+      }
+    }
+
+    // Update prev/next button states
+    if (prevWeekBtn) {
+      const canGoPrev = currentWeek > 1;
+      prevWeekBtn.disabled = !canGoPrev;
+      if (canGoPrev) {
+        prevWeekBtn.classList.remove("opacity-40", "cursor-not-allowed");
+        prevWeekBtn.classList.add("hover:bg-slate-800", "cursor-pointer");
+        prevWeekBtn.title = `Previous Week (Week ${currentWeek - 1}) • Press ←`;
+      } else {
+        prevWeekBtn.classList.add("opacity-40", "cursor-not-allowed");
+        prevWeekBtn.classList.remove("hover:bg-slate-800", "cursor-pointer");
+        prevWeekBtn.title = "At first week (Week 1)";
+      }
+    }
+
+    if (nextWeekBtn) {
+      const canGoNext = currentWeek < maxPlayed;
+      nextWeekBtn.disabled = !canGoNext;
+      if (canGoNext) {
+        nextWeekBtn.classList.remove("opacity-40", "cursor-not-allowed");
+        nextWeekBtn.classList.add("hover:bg-slate-800", "cursor-pointer");
+        nextWeekBtn.title = `Next Week (Week ${currentWeek + 1}) • Press →`;
+      } else {
+        nextWeekBtn.classList.add("opacity-40", "cursor-not-allowed");
+        nextWeekBtn.classList.remove("hover:bg-slate-800", "cursor-pointer");
+        if (currentWeek >= 18) {
+          nextWeekBtn.title = "At end of regular season (Week 18)";
+        } else {
+          nextWeekBtn.title = `Week ${currentWeek + 1} has not been played yet`;
+        }
+      }
+    }
+  }
+
+  function addCustomLeagueIds(str) {
+    if (!str) return;
+    const parts = str
+      .split(/[\s,;\n\t]+/)
+      .map(s => s.trim().replace(/^#/, ""))
+      .filter(s => s.length > 0 && /^\d+$/.test(s));
+
+    if (parts.length === 0 && str.trim()) {
+      showToast("League IDs should be numeric.", "⚠️");
+      return;
+    }
+
+    parts.forEach(id => customLeagueIds.add(id));
+    renderCustomLeagueIdChips();
+    savePreferences();
+    updateSettingsButtonBadge();
+
+    // Auto-open dropdown on adding IDs so user sees the added items
+    if (customLeaguesDropdownMenu && customLeaguesDropdownMenu.classList.contains("hidden")) {
+      customLeaguesDropdownMenu.classList.remove("hidden");
+      if (customLeaguesDropdownChevron) customLeaguesDropdownChevron.classList.add("rotate-180");
+      if (customLeaguesDropdownBtn) customLeaguesDropdownBtn.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  function removeCustomLeagueId(id) {
+    customLeagueIds.delete(id);
+    renderCustomLeagueIdChips();
+    savePreferences();
+    updateSettingsButtonBadge();
+  }
+
+  function clearCustomLeagueIds() {
+    customLeagueIds.clear();
+    renderCustomLeagueIdChips();
+    savePreferences();
+    updateSettingsButtonBadge();
+  }
+
+  function renderCustomLeagueIdChips() {
+    if (!customLeagueIdsChips) return;
+    customLeagueIdsChips.innerHTML = "";
+
+    if (customLeagueIds.size === 0) {
+      const placeholder = document.createElement("div");
+      placeholder.id = "noLeagueIdsPlaceholder";
+      placeholder.className = "text-[11px] text-slate-500 italic p-1";
+      placeholder.textContent = "No League IDs added yet. Paste or enter IDs above.";
+      customLeagueIdsChips.appendChild(placeholder);
+    } else {
+      customLeagueIds.forEach(id => {
+        const chip = document.createElement("div");
+        chip.className =
+          "inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800 text-slate-200 border border-slate-700/80 text-xs font-mono group";
+        chip.innerHTML = `
+          <span class="text-[10px] text-emerald-400 font-bold">#</span>
+          <span>${escapeHtml(id)}</span>
+          <button
+            type="button"
+            class="text-slate-400 hover:text-rose-400 transition cursor-pointer ml-0.5 p-0.5"
+            title="Remove League ID"
+            aria-label="Remove League ${escapeHtml(id)}"
+          >
+            ✕
+          </button>
+        `;
+        const rmBtn = chip.querySelector("button");
+        rmBtn.addEventListener("click", e => {
+          e.stopPropagation();
+          removeCustomLeagueId(id);
+        });
+        customLeagueIdsChips.appendChild(chip);
+      });
+    }
+
+    if (leagueIdsCountBadge) {
+      leagueIdsCountBadge.textContent = `${customLeagueIds.size} ${customLeagueIds.size === 1 ? "ID" : "IDs"}`;
+    }
+    if (customLeaguesDropdownLabel) {
+      if (customLeagueIds.size === 0) {
+        customLeaguesDropdownLabel.textContent = "View Added IDs";
+      } else if (customLeagueIds.size === 1) {
+        customLeaguesDropdownLabel.textContent = "1 League ID Added";
+      } else {
+        customLeaguesDropdownLabel.textContent = `${customLeagueIds.size} League IDs Added`;
+      }
+    }
+  }
+
+  function setSyncType(type) {
+    currentSyncType = type;
+    if (type === "leagues") {
+      if (syncTypeUserBtn) {
+        syncTypeUserBtn.className =
+          "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5";
+      }
+      if (syncTypeLeaguesBtn) {
+        syncTypeLeaguesBtn.className =
+          "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-200 bg-slate-800 shadow-sm flex items-center justify-center gap-1.5";
+      }
+      if (userSyncPanel) userSyncPanel.classList.add("hidden");
+      if (leaguesSyncPanel) leaguesSyncPanel.classList.remove("hidden");
+    } else {
+      if (syncTypeUserBtn) {
+        syncTypeUserBtn.className =
+          "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-200 bg-slate-800 shadow-sm flex items-center justify-center gap-1.5";
+      }
+      if (syncTypeLeaguesBtn) {
+        syncTypeLeaguesBtn.className =
+          "flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5";
+      }
+      if (userSyncPanel) userSyncPanel.classList.remove("hidden");
+      if (leaguesSyncPanel) leaguesSyncPanel.classList.add("hidden");
+    }
+    updateSettingsButtonBadge();
+    savePreferences();
+  }
+
   function loadSavedPreferences() {
+    const savedSyncType = localStorage.getItem("sleeper_sync_type");
+    if (savedSyncType === "leagues" || savedSyncType === "user") {
+      currentSyncType = savedSyncType;
+    }
+    const savedCustomLeagues = localStorage.getItem("sleeper_custom_league_ids");
+    if (savedCustomLeagues) {
+      try {
+        const parsed = JSON.parse(savedCustomLeagues);
+        if (Array.isArray(parsed)) {
+          customLeagueIds = new Set(parsed.filter(Boolean));
+        }
+      } catch (e) {
+        console.warn("Could not parse saved custom league IDs:", e);
+      }
+    }
     const savedUser =
       localStorage.getItem("sleeper_username") || localStorage.getItem("sleeper_user_id");
-    if (userIdInput && (queryUserId || savedUser)) userIdInput.value = queryUserId || savedUser;
+    if (savedUser && userIdInput) userIdInput.value = savedUser;
     const savedSeason = localStorage.getItem("sleeper_season");
     if (savedSeason && seasonInput) seasonInput.value = savedSeason;
     const savedWeek = localStorage.getItem("sleeper_week");
-    if (weekInput) {
-      if (queryWeek >= 1 && queryWeek <= 18) {
-        weekInput.value = String(queryWeek);
-      } else if (savedWeek) {
-        weekInput.value = savedWeek;
-      }
-    }
+    if (savedWeek && weekInput) weekInput.value = savedWeek;
     const savedMode = localStorage.getItem("sleeper_mode");
     if (savedMode && modeSelect) {
       modeSelect.value = savedMode;
       currentMode = savedMode;
       updateModeUI();
     }
+    setSyncType(currentSyncType);
+    renderCustomLeagueIdChips();
+    updateSettingsButtonBadge();
+    updateWeekNavigatorUI();
   }
 
   function savePreferences() {
+    localStorage.setItem("sleeper_sync_type", currentSyncType);
     if (userIdInput) {
       const username = userIdInput.value.trim();
       localStorage.setItem("sleeper_username", username);
-      // Keep the old key so returning users retain their saved value after upgrading.
       localStorage.setItem("sleeper_user_id", username);
     }
     if (seasonInput) localStorage.setItem("sleeper_season", seasonInput.value);
     if (weekInput) localStorage.setItem("sleeper_week", weekInput.value);
     if (modeSelect) localStorage.setItem("sleeper_mode", modeSelect.value);
-  }
-
-  function applyQueryLeagueFilter() {
-    if (queryLeagueIds.size === 0) return;
-
-    const availableLeagueIds = new Set(allLeaguesData.map(league => league.league_id));
-    const matchingLeagueIds = [...queryLeagueIds].filter(leagueId =>
-      availableLeagueIds.has(leagueId)
-    );
-
-    if (matchingLeagueIds.length > 0) {
-      selectedLeagueIds = new Set(matchingLeagueIds);
-    }
+    localStorage.setItem("sleeper_custom_league_ids", JSON.stringify(Array.from(customLeagueIds)));
+    updateSettingsButtonBadge();
   }
 
   function updateModeUI() {
     if (!modeSelect) return;
     currentMode = modeSelect.value;
     if (currentMode === "SEASON_ROLLUP") {
+      if (headerBottomRow) headerBottomRow.classList.add("hidden");
       if (weekLabelText) weekLabelText.textContent = "Through Week";
-      if (prevWeekBtn) prevWeekBtn.classList.add("hidden");
-      if (nextWeekBtn) nextWeekBtn.classList.add("hidden");
       if (scoreTierSelect) {
         scoreTierSelect.innerHTML = `
           <option value="ALL">All Averages</option>
@@ -365,9 +766,8 @@
         `;
       }
     } else {
+      if (headerBottomRow) headerBottomRow.classList.remove("hidden");
       if (weekLabelText) weekLabelText.textContent = "Matchup Week";
-      if (prevWeekBtn) prevWeekBtn.classList.remove("hidden");
-      if (nextWeekBtn) nextWeekBtn.classList.remove("hidden");
       if (scoreTierSelect) {
         scoreTierSelect.innerHTML = `
           <option value="ALL">All Scores</option>
@@ -377,14 +777,45 @@
         `;
       }
     }
+    updateSettingsButtonBadge();
+    updateWeekNavigatorUI();
+  }
+
+  if (btnOpenSettingsModal) {
+    btnOpenSettingsModal.addEventListener("click", toggleSettingsDropdown);
+  }
+  if (btnCloseSettingsModal) {
+    btnCloseSettingsModal.addEventListener("click", e => {
+      e.stopPropagation();
+      closeSettingsModal();
+    });
+  }
+  if (btnCancelSettingsModal) {
+    btnCancelSettingsModal.addEventListener("click", e => {
+      e.stopPropagation();
+      closeSettingsModal();
+    });
+  }
+  if (settingsBackdrop) {
+    settingsBackdrop.addEventListener("click", e => {
+      e.stopPropagation();
+      closeSettingsModal();
+    });
+  }
+  if (settingsModal) {
+    settingsModal.addEventListener("click", e => {
+      e.stopPropagation();
+    });
   }
 
   if (userIdInput) {
     userIdInput.addEventListener("input", () => {
       savePreferences();
+      updateSettingsButtonBadge();
     });
     userIdInput.addEventListener("change", () => {
       savePreferences();
+      updateSettingsButtonBadge();
     });
   }
 
@@ -396,64 +827,136 @@
     modeSelect.addEventListener("change", () => {
       updateModeUI();
       savePreferences();
+      updateSettingsButtonBadge();
+      updateWeekNavigatorUI();
       if (!tryLoadFromCache()) {
         fetchLeaderboard();
       }
     });
   }
 
-  prevWeekBtn.addEventListener("click", () => {
-    let current = parseInt(weekInput.value, 10);
-    if (current > 1) {
-      weekInput.value = String(current - 1);
+  if (prevWeekBtn) {
+    prevWeekBtn.addEventListener("click", () => {
+      let current = parseInt(weekInput.value, 10) || 1;
+      if (current > 1) {
+        const targetWeek = current - 1;
+        weekInput.value = String(targetWeek);
+        savePreferences();
+        updateWeekNavigatorUI();
+        if (!tryLoadFromCache(targetWeek)) {
+          fetchLeaderboard();
+        }
+      }
+    });
+  }
+
+  if (nextWeekBtn) {
+    nextWeekBtn.addEventListener("click", () => {
+      let current = parseInt(weekInput.value, 10) || 1;
+      const maxPlayed = getMaxPlayedWeek();
+      if (current < maxPlayed) {
+        const targetWeek = current + 1;
+        weekInput.value = String(targetWeek);
+        savePreferences();
+        updateWeekNavigatorUI();
+        if (!tryLoadFromCache(targetWeek)) {
+          fetchLeaderboard();
+        }
+      }
+    });
+  }
+
+  if (seasonInput) {
+    seasonInput.addEventListener("change", () => {
       savePreferences();
+      updateSettingsButtonBadge();
+      updateWeekNavigatorUI();
       if (!tryLoadFromCache()) {
         fetchLeaderboard();
       }
-    }
-  });
+    });
+  }
 
-  nextWeekBtn.addEventListener("click", () => {
-    let current = parseInt(weekInput.value, 10);
-    if (current < 18) {
-      weekInput.value = String(current + 1);
-      savePreferences();
-      if (!tryLoadFromCache()) {
-        fetchLeaderboard();
-      }
+  function getUrlParams() {
+    if (typeof window === "undefined" || !window.location || !window.location.search) {
+      return {};
     }
-  });
-
-  weekInput.addEventListener("change", () => {
-    savePreferences();
-    if (!tryLoadFromCache()) {
-      fetchLeaderboard();
-    }
-  });
-
-  seasonInput.addEventListener("change", () => {
-    savePreferences();
-    if (!tryLoadFromCache()) {
-      fetchLeaderboard();
-    }
-  });
+    const params = new URLSearchParams(window.location.search);
+    const user =
+      params.get("user") || params.get("u") || params.get("username") || params.get("userId");
+    const season = params.get("season") || params.get("year");
+    const week = params.get("week") || params.get("w");
+    const mode = params.get("mode") || params.get("m");
+    const leagues = params.get("leagues") || params.get("league_ids");
+    return { user, season, week, mode, leagues };
+  }
 
   async function initDefaults() {
     const currentYear = new Date().getFullYear();
     populateSeasonOptions(currentYear);
     loadSavedPreferences();
-    if (!localStorage.getItem("sleeper_season") && seasonInput) {
+
+    const urlParams = getUrlParams();
+
+    if (urlParams.season && seasonInput) {
+      seasonInput.value = String(urlParams.season);
+    } else if (!localStorage.getItem("sleeper_season") && seasonInput) {
       seasonInput.value = String(currentYear);
     }
+
+    if (urlParams.week && weekInput) {
+      weekInput.value = String(urlParams.week);
+    }
+
+    if (urlParams.mode && modeSelect) {
+      const normalizedMode =
+        urlParams.mode.toUpperCase() === "SEASON_ROLLUP" ? "SEASON_ROLLUP" : "WEEKLY";
+      modeSelect.value = normalizedMode;
+      currentMode = normalizedMode;
+      updateModeUI();
+    }
+
+    if (urlParams.user && userIdInput) {
+      userIdInput.value = urlParams.user.trim();
+      currentUserName = urlParams.user.trim();
+      currentSyncType = "user";
+    }
+
+    if (urlParams.leagues) {
+      const ids = urlParams.leagues
+        .split(",")
+        .map(id => id.trim())
+        .filter(Boolean);
+      pendingLeagueIdsFilter = new Set(ids);
+      ids.forEach(id => customLeagueIds.add(id));
+      if (!urlParams.user) {
+        currentSyncType = "leagues";
+      }
+    }
+
+    setSyncType(currentSyncType);
+    renderCustomLeagueIdChips();
+
     try {
       const resp = await fetch(`${BASE_URL}/state/nfl`);
       if (resp.ok) {
         const state = await resp.json();
-        if (!localStorage.getItem("sleeper_season") && state.season && seasonInput) {
+        nflState = {
+          season: parseInt(state.season, 10) || currentYear,
+          week: parseInt(state.week, 10) || 1,
+          display_week: parseInt(state.display_week, 10) || parseInt(state.week, 10) || 1,
+          season_type: state.season_type || "regular"
+        };
+        if (
+          !urlParams.season &&
+          !localStorage.getItem("sleeper_season") &&
+          state.season &&
+          seasonInput
+        ) {
           seasonInput.value = String(state.season);
         }
-        if (!localStorage.getItem("sleeper_week") && weekInput) {
-          const defaultWeek = state.display_week || state.week || 1;
+        if (!urlParams.week && !localStorage.getItem("sleeper_week") && weekInput) {
+          const defaultWeek = nflState.display_week || nflState.week || 1;
           if (defaultWeek >= 1 && defaultWeek <= 18) {
             weekInput.value = String(defaultWeek);
           }
@@ -462,6 +965,24 @@
     } catch (err) {
       console.warn("Could not fetch NFL state for defaults:", err);
     }
+
+    const hasSharedLeagues = Boolean(
+      (pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0) ||
+      (currentSyncType === "leagues" && customLeagueIds.size > 0)
+    );
+    const hasSavedUser =
+      Boolean(urlParams.user) ||
+      Boolean(localStorage.getItem("sleeper_user_id")) ||
+      Boolean(userIdInput && userIdInput.value.trim()) ||
+      hasSharedLeagues;
+    if (!hasSavedUser) {
+      openSettingsModal();
+    } else {
+      closeSettingsModal();
+    }
+    updateSettingsButtonBadge();
+    updateWeekNavigatorUI();
+    renderLeagueDropdown();
   }
 
   async function apiFetch(endpoint) {
@@ -480,46 +1001,57 @@
         if (userData && userData.user_id) {
           currentUserName = userData.display_name || userData.username || cleaned;
           currentUserAvatar = userData.avatar || "";
+          updateSettingsButtonBadge();
           return userData.user_id;
         }
       } catch {
         // Fallback to numeric user ID
       }
       currentUserName = cleaned;
+      updateSettingsButtonBadge();
       return cleaned;
     }
 
     const userData = await apiFetch(`/user/${cleaned}`);
-    if (!userData || !userData.user_id) {
-      throw new Error(`Could not find a Sleeper user matching "${cleaned}"`);
+    if (userData && userData.user_id) {
+      currentUserName = userData.display_name || userData.username || cleaned;
+      currentUserAvatar = userData.avatar || "";
+      updateSettingsButtonBadge();
+      return userData.user_id;
     }
-    currentUserName = userData.display_name || userData.username || cleaned;
-    currentUserAvatar = userData.avatar || "";
-    return userData.user_id;
+    throw new Error(`User "${cleaned}" not found on Sleeper.`);
   }
 
-  function setLoading(isLoading, text = "Loading...") {
+  function setLoading(isLoading, text = "Loading data from Sleeper API...") {
     if (isLoading) {
-      loadBtn.disabled = true;
-      loadBtn.classList.add("opacity-75", "cursor-not-allowed");
-      btnText.textContent = "Syncing...";
-      btnIcon.classList.add("animate-spin");
-      statusContainer.classList.remove("hidden");
-      errorBanner.classList.add("hidden");
-      skeletonLoader.classList.remove("hidden");
-      reportContent.classList.add("hidden");
-      initialState.classList.add("hidden");
-      if (leagueDropdownContainer) leagueDropdownContainer.classList.add("hidden");
-      statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> ${text}`;
-      progressBar.style.width = "5%";
-      progressText.textContent = "5%";
+      if (loadBtn) {
+        loadBtn.disabled = true;
+        loadBtn.classList.add("opacity-75", "cursor-not-allowed");
+      }
+      if (btnText) btnText.textContent = "Loading...";
+      if (btnIcon) btnIcon.classList.add("animate-spin");
+      if (prevWeekBtn) prevWeekBtn.disabled = true;
+      if (nextWeekBtn) nextWeekBtn.disabled = true;
+      if (statusContainer) statusContainer.classList.remove("hidden");
+      if (errorBanner) errorBanner.classList.add("hidden");
+      if (skeletonLoader) skeletonLoader.classList.remove("hidden");
+      if (reportContent) reportContent.classList.add("hidden");
+      if (initialState) initialState.classList.add("hidden");
+      if (statusText) {
+        statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> ${text}`;
+      }
+      if (progressBar) progressBar.style.width = "5%";
+      if (progressText) progressText.textContent = "5%";
     } else {
-      loadBtn.disabled = false;
-      loadBtn.classList.remove("opacity-75", "cursor-not-allowed");
-      btnText.textContent = "Sync All Leagues";
-      btnIcon.classList.remove("animate-spin");
-      statusContainer.classList.add("hidden");
-      skeletonLoader.classList.add("hidden");
+      if (loadBtn) {
+        loadBtn.disabled = false;
+        loadBtn.classList.remove("opacity-75", "cursor-not-allowed");
+      }
+      if (btnText) btnText.textContent = "Load";
+      if (btnIcon) btnIcon.classList.remove("animate-spin");
+      updateWeekNavigatorUI();
+      if (statusContainer) statusContainer.classList.add("hidden");
+      if (skeletonLoader) skeletonLoader.classList.add("hidden");
     }
   }
 
@@ -533,7 +1065,6 @@
   function showError(msg) {
     errorMessage.textContent = msg;
     errorBanner.classList.remove("hidden");
-    if (leagueDropdownContainer) leagueDropdownContainer.classList.add("hidden");
     setLoading(false);
     initialState.classList.remove("hidden");
   }
@@ -917,29 +1448,70 @@
    * Main Fetcher
    */
   async function fetchLeaderboard() {
-    const inputVal = userIdInput.value.trim();
-    const season = seasonInput.value;
-    const targetWeek = parseInt(weekInput.value, 10);
+    const isLeaguesSync = currentSyncType === "leagues";
+    const inputVal = userIdInput ? userIdInput.value.trim() : "";
+    const season = seasonInput ? seasonInput.value : "2024";
+    const targetWeek = weekInput ? parseInt(weekInput.value, 10) : 1;
     const mode = modeSelect ? modeSelect.value : "WEEKLY";
 
-    if (!inputVal) {
-      showError("Please enter a Sleeper username or numeric User ID.");
-      return;
+    const hasPendingLeagues = Boolean(pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0);
+    const hasCustomLeagues = Boolean(customLeagueIds && customLeagueIds.size > 0);
+
+    let targetIds = [];
+    if (isLeaguesSync || (!inputVal && (hasPendingLeagues || hasCustomLeagues))) {
+      targetIds = hasPendingLeagues
+        ? Array.from(pendingLeagueIdsFilter)
+        : Array.from(customLeagueIds);
+
+      if (targetIds.length === 0) {
+        showError("Please enter at least one Sleeper League ID.");
+        return;
+      }
+
+      savePreferences();
+      setLoading(true, `Fetching data for ${targetIds.length} leagues...`);
+    } else {
+      if (!inputVal) {
+        showError("Please enter a Sleeper username or numeric User ID.");
+        return;
+      }
+
+      savePreferences();
+      setLoading(true, "Looking up Sleeper profile...");
     }
 
-    savePreferences();
-    setLoading(true, "Looking up Sleeper profile...");
-
     try {
-      const [resolvedId] = await Promise.all([resolveUser(inputVal), initPlayersDb()]);
-      currentUserId = resolvedId;
+      let leaguesData = [];
+      if (targetIds.length > 0) {
+        currentUserId = "";
+        currentUserName = "";
+        currentUserAvatar = "";
+        updateSettingsButtonBadge();
+        await initPlayersDb();
 
-      updateProgress(15, "Fetching active leagues...");
-      const leaguesData = await apiFetch(`/user/${currentUserId}/leagues/nfl/${season}`);
+        updateProgress(15, "Fetching league metadata...");
+        const fetched = await Promise.all(
+          targetIds.map(lid => apiFetch(`/league/${lid}`).catch(() => null))
+        );
+        leaguesData = fetched.filter(l => l && l.league_id);
 
-      if (!leaguesData || leaguesData.length === 0) {
-        showError(`No leagues found for "${inputVal}" in the ${season} season.`);
-        return;
+        if (!leaguesData || leaguesData.length === 0) {
+          showError(
+            `No valid leagues found for the specified League IDs (${targetIds.join(", ")}).`
+          );
+          return;
+        }
+      } else {
+        const [resolvedId] = await Promise.all([resolveUser(inputVal), initPlayersDb()]);
+        currentUserId = resolvedId;
+
+        updateProgress(15, "Fetching active leagues...");
+        leaguesData = await apiFetch(`/user/${currentUserId}/leagues/nfl/${season}`);
+
+        if (!leaguesData || leaguesData.length === 0) {
+          showError(`No leagues found for "${inputVal}" in the ${season} season.`);
+          return;
+        }
       }
 
       const totalLeagues = leaguesData.length;
@@ -1141,7 +1713,17 @@
         }
 
         rawRecords = records;
-        selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
+        if (pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0) {
+          selectedLeagueIds = new Set(
+            leaguesData.map(l => l.league_id).filter(id => pendingLeagueIdsFilter.has(id))
+          );
+          if (selectedLeagueIds.size === 0) {
+            selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
+          }
+          pendingLeagueIdsFilter = null;
+        } else {
+          selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
+        }
       } else {
         // Single Week Mode
         updateProgress(30, `Loading Week ${targetWeek} rosters across ${totalLeagues} leagues...`);
@@ -1210,16 +1792,27 @@
         }
 
         rawRecords = records;
-        selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
+        if (pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0) {
+          selectedLeagueIds = new Set(
+            leaguesData.map(l => l.league_id).filter(id => pendingLeagueIdsFilter.has(id))
+          );
+          if (selectedLeagueIds.size === 0) {
+            selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
+          }
+          pendingLeagueIdsFilter = null;
+        } else {
+          selectedLeagueIds = new Set(leaguesData.map(l => l.league_id));
+        }
       }
 
       setLoading(false);
       initialState.classList.add("hidden");
       reportContent.classList.remove("hidden");
-      shareReportBtn.classList.remove("hidden");
       if (copyRecapBtn) copyRecapBtn.classList.remove("hidden");
+      if (shareUrlBtn) shareUrlBtn.classList.remove("hidden");
+      if (downloadReportBtn) downloadReportBtn.classList.remove("hidden");
+      if (exportCsvBtn) exportCsvBtn.classList.remove("hidden");
 
-      applyQueryLeagueFilter();
       renderLeagueDropdown();
       refreshDashboard();
       saveDataToCache(
@@ -1262,38 +1855,68 @@
     if (!leagueDropdownList) return;
     leagueDropdownList.innerHTML = "";
 
+    if ((!allLeaguesData || allLeaguesData.length === 0) && rawRecords && rawRecords.length > 0) {
+      allLeaguesData = Array.from(new Set(rawRecords.map(r => r.leagueId))).map(lid => {
+        const sample = rawRecords.find(r => r.leagueId === lid);
+        return {
+          league_id: lid,
+          name:
+            (leaguesMap[lid] && leaguesMap[lid].name) ||
+            (sample && sample.league) ||
+            `League ${lid}`,
+          avatar:
+            (leaguesMap[lid] && leaguesMap[lid].avatar) || (sample && sample.leagueAvatar) || null
+        };
+      });
+      if (selectedLeagueIds.size === 0) {
+        selectedLeagueIds = new Set(allLeaguesData.map(l => l.league_id));
+      }
+    }
+
     const total = allLeaguesData.length;
     const active = selectedLeagueIds.size;
 
     if (leagueDropdownContainer) {
-      if (total > 0) {
-        leagueDropdownContainer.classList.remove("hidden");
-      } else {
-        leagueDropdownContainer.classList.add("hidden");
-      }
+      leagueDropdownContainer.classList.remove("hidden");
     }
 
-    if (active === total && total > 0) {
-      leagueDropdownLabel.textContent = `All Leagues (${total})`;
-    } else if (active === 0) {
-      leagueDropdownLabel.textContent = "No Leagues Selected";
-    } else if (active === 1) {
-      const singleId = Array.from(selectedLeagueIds)[0];
-      const l = leaguesMap[singleId] || allLeaguesData.find(x => x.league_id === singleId);
-      leagueDropdownLabel.textContent = l ? l.name : "1 League Selected";
-    } else {
-      leagueDropdownLabel.textContent = `${active} of ${total} Leagues Selected`;
+    if (leagueDropdownLabel) {
+      if (active === total && total > 0) {
+        leagueDropdownLabel.textContent = `All Leagues (${total})`;
+      } else if (active === 0 && total > 0) {
+        leagueDropdownLabel.textContent = "No Leagues Selected";
+      } else if (active === 1 && total > 0) {
+        const singleId = Array.from(selectedLeagueIds)[0];
+        const l = leaguesMap[singleId] || allLeaguesData.find(x => x.league_id === singleId);
+        leagueDropdownLabel.textContent = l ? l.name : "1 League Selected";
+      } else if (total > 0) {
+        leagueDropdownLabel.textContent = `${active} of ${total} Leagues Selected`;
+      } else {
+        leagueDropdownLabel.textContent = "No leagues synced yet";
+      }
     }
 
     if (leagueDropdownBadge) {
-      leagueDropdownBadge.textContent = `${active} / ${total}`;
-      if (active === 0) {
+      leagueDropdownBadge.textContent = total > 0 ? `${active} / ${total}` : "0";
+      if (active === 0 && total > 0) {
         leagueDropdownBadge.className =
-          "text-[10px] font-bold text-rose-400 bg-rose-950/80 px-2 py-0.5 rounded-full border border-rose-500/30 font-mono";
+          "text-[10px] font-bold text-rose-400 bg-rose-950/80 px-1.5 py-0.5 rounded-full border border-rose-500/30 font-mono";
       } else {
         leagueDropdownBadge.className =
-          "text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30 font-mono";
+          "text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded-full border border-emerald-500/30 font-mono";
       }
+    }
+
+    if (selectAllLeaguesBtn) selectAllLeaguesBtn.disabled = total === 0;
+    if (clearAllLeaguesBtn) clearAllLeaguesBtn.disabled = total === 0;
+
+    if (total === 0) {
+      leagueDropdownList.innerHTML = `
+        <div class="text-[11px] text-slate-500 italic p-3 text-center">
+          Sync your Sleeper account above to view and filter active leagues.
+        </div>
+      `;
+      return;
     }
 
     allLeaguesData.forEach(league => {
@@ -1357,6 +1980,34 @@
   }
 
   /**
+   * Helper: Generate interactive card title with clickable / hovering popover description
+   */
+  function createCardTitleWithInfo(
+    titleHtml,
+    infoDescription,
+    triggerClasses = "",
+    popoverClass = ""
+  ) {
+    return `
+      <div class="relative inline-block card-info-wrapper">
+        <button
+          type="button"
+          class="card-info-trigger ${triggerClasses} cursor-pointer select-none group inline-flex items-center gap-1.5 focus:outline-none transition"
+          aria-expanded="false"
+        >
+          <span>${titleHtml}</span>
+          <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+        </button>
+        <div class="card-info-popover ${popoverClass}" role="tooltip">
+          <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+            ${infoDescription}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
    * Superlatives Showcase Deck (6 Cards: Bad Beat, Lucky Escape, Bench Heavyweight, Luckiest Draw, Toughest Schedule, Cardiac Kid)
    */
   function renderSuperlatives(records = getActiveRecords()) {
@@ -1370,22 +2021,22 @@
 
     // 1. The Bad Beat 💔: Highest scoring loser
     if (badBeatCard) {
+      badBeatCard.removeAttribute("title");
       if (!isSeason) {
         const losers = records
           .filter(r => r.outcome === "loss" && r.points > 0)
           .sort((a, b) => b.points - a.points);
         const badBeat = losers[0];
         if (badBeat) {
-          badBeatCard.setAttribute(
-            "title",
-            `The Bad Beat 💔: Awarded to ${badBeat.manager} (${badBeat.league}) for suffering a loss despite putting up a massive ${badBeat.points.toFixed(2)} pts.`
+          const titleComponent = createCardTitleWithInfo(
+            "The Bad Beat 💔",
+            "Highest-scoring squad across all leagues that lost their matchup this week.",
+            "text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 hover:border-rose-400/70"
           );
           badBeatCard.innerHTML = `
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0 flex-1">
-                <span class="text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 inline-flex items-center gap-1 cursor-help" title="The Bad Beat 💔: Highest-scoring squad across all leagues that lost their matchup this week.">
-                  <span>The Bad Beat 💔</span>
-                </span>
+                ${titleComponent}
                 <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(badBeat.manager)}</div>
                 <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(badBeat.teamName)}</div>
                 <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(badBeat.league)}">
@@ -1400,9 +2051,14 @@
             </div>
           `;
         } else {
+          const titleComponent = createCardTitleWithInfo(
+            "The Bad Beat 💔",
+            "Highest-scoring squad across all leagues that lost their matchup this week.",
+            "text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700"
+          );
           badBeatCard.innerHTML = `
             <div class="flex items-center justify-between">
-              <span class="text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">The Bad Beat 💔</span>
+              ${titleComponent}
             </div>
             <div class="text-xs sm:text-sm text-slate-500 italic mt-3">No completed matchup losses recorded.</div>
           `;
@@ -1415,16 +2071,15 @@
           losingSquads[0] ||
           [...records].sort((a, b) => (b.pointsAgainst || 0) - (a.pointsAgainst || 0))[0];
         if (badBeat) {
-          badBeatCard.setAttribute(
-            "title",
-            `Season Heartbreak 💔: ${badBeat.manager} posted high scoring (${(badBeat.points || 0).toFixed(1)} PPG) but has a ${badBeat.wins || 0}W-${badBeat.losses || 0}L record.`
+          const titleComponent = createCardTitleWithInfo(
+            "Season Heartbreak 💔",
+            "Highest scoring team across all leagues with a losing head-to-head record.",
+            "text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 hover:border-rose-400/70"
           );
           badBeatCard.innerHTML = `
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0 flex-1">
-                <span class="text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 inline-flex items-center gap-1 cursor-help" title="Season Heartbreak 💔: Highest scoring team with a losing record.">
-                  <span>Season Heartbreak 💔</span>
-                </span>
+                ${titleComponent}
                 <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(badBeat.manager)}</div>
                 <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(badBeat.teamName)}</div>
                 <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(badBeat.league)}">
@@ -1444,22 +2099,22 @@
 
     // 2. The Lucky Escape 🪄: Lowest scoring winner
     if (luckyEscapeCard) {
+      luckyEscapeCard.removeAttribute("title");
       if (!isSeason) {
         const winners = records
           .filter(r => r.outcome === "win" && r.points > 0)
           .sort((a, b) => a.points - b.points);
         const luckyEscape = winners[0];
         if (luckyEscape) {
-          luckyEscapeCard.setAttribute(
-            "title",
-            `The Lucky Escape 🪄: Awarded to ${luckyEscape.manager} (${luckyEscape.league}) for winning with only ${luckyEscape.points.toFixed(2)} pts.`
+          const titleComponent = createCardTitleWithInfo(
+            "The Lucky Escape 🪄",
+            "Lowest-scoring squad across all leagues that managed to win their matchup this week.",
+            "text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400/70"
           );
           luckyEscapeCard.innerHTML = `
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0 flex-1">
-                <span class="text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 inline-flex items-center gap-1 cursor-help" title="The Lucky Escape 🪄: Lowest-scoring squad across all leagues that won their matchup this week.">
-                  <span>The Lucky Escape 🪄</span>
-                </span>
+                ${titleComponent}
                 <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(luckyEscape.manager)}</div>
                 <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(luckyEscape.teamName)}</div>
                 <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(luckyEscape.league)}">
@@ -1474,9 +2129,14 @@
             </div>
           `;
         } else {
+          const titleComponent = createCardTitleWithInfo(
+            "The Lucky Escape 🪄",
+            "Lowest-scoring squad across all leagues that managed to win their matchup this week.",
+            "text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700"
+          );
           luckyEscapeCard.innerHTML = `
             <div class="flex items-center justify-between">
-              <span class="text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">The Lucky Escape 🪄</span>
+              ${titleComponent}
             </div>
             <div class="text-xs sm:text-sm text-slate-500 italic mt-3">No completed matchup wins recorded.</div>
           `;
@@ -1489,16 +2149,15 @@
           winningSquads[0] ||
           [...records].sort((a, b) => (a.pointsAgainst || 0) - (b.pointsAgainst || 0))[0];
         if (luckyEscape) {
-          luckyEscapeCard.setAttribute(
-            "title",
-            `Teflon Squad 🪄: ${luckyEscape.manager} has a winning record (${luckyEscape.wins || 0}W-${luckyEscape.losses || 0}L) despite averaging ${(luckyEscape.points || 0).toFixed(1)} PPG.`
+          const titleComponent = createCardTitleWithInfo(
+            "Teflon Squad 🪄",
+            "Lowest scoring squad across all leagues that maintained a winning record.",
+            "text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400/70"
           );
           luckyEscapeCard.innerHTML = `
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0 flex-1">
-                <span class="text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 inline-flex items-center gap-1 cursor-help" title="Teflon Squad 🪄: Lowest scoring team with a winning record.">
-                  <span>Teflon Squad 🪄</span>
-                </span>
+                ${titleComponent}
                 <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(luckyEscape.manager)}</div>
                 <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(luckyEscape.teamName)}</div>
                 <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(luckyEscape.league)}">
@@ -1518,21 +2177,21 @@
 
     // 3. Bench Heavyweight 🪑: Manager with most bench points
     if (benchMvpCard) {
+      benchMvpCard.removeAttribute("title");
       const sortedBench = records
         .filter(r => (r.benchPoints || 0) > 0)
         .sort((a, b) => b.benchPoints - a.benchPoints);
       const benchKing = sortedBench[0];
       if (benchKing && benchKing.benchPoints > 0) {
-        benchMvpCard.setAttribute(
-          "title",
-          `Bench Heavyweight 🪑: Awarded to ${benchKing.manager} for leaving ${benchKing.benchPoints.toFixed(2)} pts on the bench.`
+        const titleComponent = createCardTitleWithInfo(
+          "Bench Heavyweight 🪑",
+          "Squad with the most bench points left unstarted on their roster.",
+          "text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-500/30 hover:border-amber-400/70"
         );
         benchMvpCard.innerHTML = `
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1">
-              <span class="text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-500/30 inline-flex items-center gap-1 cursor-help" title="Bench Heavyweight 🪑: Squad with the most bench points left unstarted.">
-                <span>Bench Heavyweight 🪑</span>
-              </span>
+              ${titleComponent}
               <div class="text-base sm:text-lg font-black text-white truncate mt-2">${escapeHtml(benchKing.manager)}</div>
               <div class="text-xs sm:text-sm text-slate-400 truncate mt-0.5">${escapeHtml(benchKing.teamName)}</div>
               <div class="text-xs sm:text-sm font-bold text-slate-300 mt-2 break-words leading-snug flex items-center gap-1.5" title="League: ${escapeHtml(benchKing.league)}">
@@ -1547,9 +2206,14 @@
           </div>
         `;
       } else {
+        const titleComponent = createCardTitleWithInfo(
+          "Bench Heavyweight 🪑",
+          "Squad with the most bench points left unstarted on their roster.",
+          "text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700"
+        );
         benchMvpCard.innerHTML = `
           <div class="flex items-center justify-between">
-            <span class="text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">Bench Heavyweight 🪑</span>
+            ${titleComponent}
           </div>
           <div class="text-xs sm:text-sm text-slate-500 italic mt-3">No bench scoring recorded yet.</div>
         `;
@@ -1562,9 +2226,6 @@
     podiumCards.innerHTML = "";
 
     const isSeason = currentMode === "SEASON_ROLLUP";
-    if (podiumWeekBadge) {
-      podiumWeekBadge.textContent = isSeason ? "Season Rollup" : `Week ${weekInput.value}`;
-    }
     const sorted = [...records].sort((a, b) => b.points - a.points);
     const top3 = sorted.slice(0, 3);
 
@@ -1606,7 +2267,7 @@
       if (!t) return;
 
       const card = document.createElement("div");
-      card.className = `glass-card ${slot.glow} ${slot.orderClass} ${slot.cardClass} rounded-2xl flex flex-col justify-between relative overflow-hidden`;
+      card.className = `glass-card ${slot.glow} ${slot.orderClass} ${slot.cardClass} rounded-2xl flex flex-col justify-between relative`;
 
       const metricLabel = isSeason ? "Average PPG" : "Total Points";
       const effVal = typeof t.efficiency === "number" && !isNaN(t.efficiency) ? t.efficiency : 100;
@@ -1620,12 +2281,22 @@
         ? `<img src="${avatarUrl}" class="${avatarSize} rounded-full object-cover border border-slate-700 flex-shrink-0" alt="" onerror="this.remove()">`
         : "";
 
+      const titleComponent = createCardTitleWithInfo(
+        slot.title,
+        slot.rank === 1
+          ? isSeason
+            ? "1st Place Champion with highest average points per game across all leagues."
+            : "Weekly Cross-League Champion with highest score."
+          : slot.rank === 2
+            ? "2nd Place Runner-Up across all participating leagues."
+            : "3rd Place Podium Finisher across all participating leagues.",
+        `text-xs font-black tracking-wider uppercase ${slot.color} hover:underline`
+      );
+
       card.innerHTML = `
         <div>
           <div class="flex items-center justify-between">
-            <span class="text-xs font-black tracking-wider uppercase ${slot.color}">
-              ${slot.title}
-            </span>
+            ${titleComponent}
             <span class="text-2xl">${slot.medal}</span>
           </div>
           <div class="mt-3 flex items-center gap-3">
@@ -1662,7 +2333,6 @@
   }
 
   function renderSummaryCards(records = getActiveRecords(), activeLeagues = getActiveLeaguesMap()) {
-    const isSeason = currentMode === "SEASON_ROLLUP";
     const totalSquads = records.length;
     const totalActiveLeagues = Object.keys(activeLeagues || {}).length;
 
@@ -1685,8 +2355,6 @@
         document.getElementById("statAvgScore").textContent = "0.00";
       if (document.getElementById("statMedianScore"))
         document.getElementById("statMedianScore").textContent = "Median: 0.00";
-      if (document.getElementById("statSpread"))
-        document.getElementById("statSpread").textContent = "Score Spread: 0 pts";
       if (document.getElementById("statTopLeagueAvg"))
         document.getElementById("statTopLeagueAvg").textContent = "0.00";
       if (document.getElementById("statTopLeagueName"))
@@ -1756,15 +2424,6 @@
     if (document.getElementById("statMedianScore")) {
       document.getElementById("statMedianScore").textContent =
         `Median: ${medianPts.toFixed(2)} pts`;
-    }
-
-    if (document.getElementById("statSpread")) {
-      if (topOverall && lowestOverall) {
-        const spread = (topOverall.points - lowestOverall.points).toFixed(2);
-        document.getElementById("statSpread").textContent = isSeason
-          ? `Avg PPG Spread: ${spread} pts (Peak: ${topOverall.points.toFixed(1)} | Floor: ${lowestOverall.points.toFixed(1)})`
-          : `Score Spread: ${spread} pts (High: ${topOverall.points} | Low: ${lowestOverall.points})`;
-      }
     }
 
     // Power League Benchmark
@@ -2080,33 +2739,33 @@
 
       tr.className = "transition-colors hover:bg-slate-800/60";
 
-      let rankBadge = `<span class="font-black text-slate-400 font-mono text-sm sm:text-base">#${r.rank}</span>`;
+      let rankBadge = `<span class="font-black text-slate-400 font-mono text-xs sm:text-base">#${r.rank}</span>`;
       if (r.rank === 1)
-        rankBadge = `<span class="inline-flex items-center gap-1 font-black text-amber-300 text-sm sm:text-base">🥇 #1</span>`;
+        rankBadge = `<span class="inline-flex items-center gap-1 font-black text-amber-300 text-xs sm:text-base">🥇 #1</span>`;
       else if (r.rank === 2)
-        rankBadge = `<span class="inline-flex items-center gap-1 font-black text-slate-200 text-sm sm:text-base">🥈 #2</span>`;
+        rankBadge = `<span class="inline-flex items-center gap-1 font-black text-slate-200 text-xs sm:text-base">🥈 #2</span>`;
       else if (r.rank === 3)
-        rankBadge = `<span class="inline-flex items-center gap-1 font-black text-amber-500 text-sm sm:text-base">🥉 #3</span>`;
+        rankBadge = `<span class="inline-flex items-center gap-1 font-black text-amber-500 text-xs sm:text-base">🥉 #3</span>`;
 
       // Matchup Result Pill (#1) or Season Record Pill (#5)
       let matchupPill = "";
       if (isSeason) {
         matchupPill = `
           <div class="text-center">
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono font-black ${r.winPct >= 60 ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : r.winPct >= 40 ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-rose-500/15 text-rose-300 border border-rose-500/30"}">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-mono font-black ${r.winPct >= 60 ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : r.winPct >= 40 ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-rose-500/15 text-rose-300 border border-rose-500/30"}">
               ${r.wins}W - ${r.losses}L${r.ties > 0 ? ` - ${r.ties}T` : ""}
             </span>
-            <div class="text-xs text-slate-400 font-mono mt-0.5">${r.winPct}% Win</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 font-mono mt-0.5">${r.winPct}% Win</div>
           </div>
         `;
       } else {
         if (r.outcome === "win") {
           matchupPill = `
             <div class="text-center">
-              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 🟢 W (+${Math.abs(r.margin).toFixed(1)})
               </span>
-              <div class="text-xs text-slate-400 truncate max-w-[130px] mt-0.5 font-medium" title="vs ${escapeHtml(r.opponentName || "Opponent")}">
+              <div class="text-[10px] sm:text-xs text-slate-400 truncate max-w-[110px] sm:max-w-[130px] mt-0.5 font-medium" title="vs ${escapeHtml(r.opponentName || "Opponent")}">
                 vs ${escapeHtml(r.opponentName || "Opp")}
               </div>
             </div>
@@ -2114,10 +2773,10 @@
         } else if (r.outcome === "loss") {
           matchupPill = `
             <div class="text-center">
-              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">
                 🔴 L (-${Math.abs(r.margin).toFixed(1)})
               </span>
-              <div class="text-xs text-slate-400 truncate max-w-[130px] mt-0.5 font-medium" title="vs ${escapeHtml(r.opponentName || "Opponent")}">
+              <div class="text-[10px] sm:text-xs text-slate-400 truncate max-w-[110px] sm:max-w-[130px] mt-0.5 font-medium" title="vs ${escapeHtml(r.opponentName || "Opponent")}">
                 vs ${escapeHtml(r.opponentName || "Opp")}
               </div>
             </div>
@@ -2125,7 +2784,7 @@
         } else if (r.outcome === "tie") {
           matchupPill = `
             <div class="text-center">
-              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-slate-800 text-slate-300 border border-slate-700">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-slate-800 text-slate-300 border border-slate-700">
                 ⚪ TIE
               </span>
             </div>
@@ -2133,14 +2792,14 @@
         } else if (r.outcome === "unplayed") {
           matchupPill = `
             <div class="text-center">
-              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-800/80 text-slate-400 border border-slate-700/60 truncate max-w-[130px]" title="vs ${escapeHtml(r.opponentName || "Opponent")}">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-slate-800/80 text-slate-400 border border-slate-700/60 truncate max-w-[110px] sm:max-w-[130px]" title="vs ${escapeHtml(r.opponentName || "Opponent")}">
                 vs ${escapeHtml(r.opponentName || "Opp")}
               </span>
-              <div class="text-xs text-slate-500 font-mono mt-0.5">Upcoming</div>
+              <div class="text-[10px] sm:text-xs text-slate-500 font-mono mt-0.5">Upcoming</div>
             </div>
           `;
         } else {
-          matchupPill = `<span class="text-slate-600 text-xs">-</span>`;
+          matchupPill = `<span class="text-slate-600 text-[10px] sm:text-xs">-</span>`;
         }
       }
 
@@ -2150,64 +2809,64 @@
         typeof r.benchPoints === "number" && !isNaN(r.benchPoints) ? r.benchPoints : 0;
       let efficiencyBadge = `
         <div class="text-center">
-          <span class="text-sm font-mono font-black ${effVal >= 90 ? "text-emerald-400" : effVal >= 75 ? "text-slate-300" : "text-amber-400"}">
+          <span class="text-xs sm:text-sm font-mono font-black ${effVal >= 90 ? "text-emerald-400" : effVal >= 75 ? "text-slate-300" : "text-amber-400"}">
             ${effVal}%
           </span>
-          <div class="text-xs text-slate-400 font-medium">${benchPtsVal.toFixed(1)} benched</div>
+          <div class="text-[10px] sm:text-xs text-slate-400 font-medium">${benchPtsVal.toFixed(1)} benched</div>
         </div>
       `;
 
       const avatarHtml = avatarUrl
-        ? `<img src="${avatarUrl}" class="w-9 h-9 rounded-full object-cover border border-slate-700 flex-shrink-0" alt="" onerror="this.remove()">`
+        ? `<img src="${avatarUrl}" class="w-7 h-7 sm:w-9 sm:h-9 rounded-full object-cover border border-slate-700 flex-shrink-0" alt="" onerror="this.remove()">`
         : "";
 
       tr.innerHTML = `
-        <td class="py-4 px-4 whitespace-nowrap">${rankBadge}</td>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">${rankBadge}</td>
 
-        <td class="py-4 px-4 whitespace-nowrap">
-          <div class="space-y-1">
-            <div class="font-mono text-base sm:text-lg font-black ${r.rank <= 3 ? "text-emerald-400" : "text-white"}">
-              ${r.points.toFixed(2)} <span class="text-xs font-semibold text-slate-400">${isSeason ? "ppg" : "pts"}</span>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">
+          <div class="space-y-0.5 sm:space-y-1">
+            <div class="font-mono text-sm sm:text-lg font-black ${r.rank <= 3 ? "text-emerald-400" : "text-white"}">
+              ${r.points.toFixed(2)} <span class="text-[10px] sm:text-xs font-semibold text-slate-400">${isSeason ? "ppg" : "pts"}</span>
             </div>
-            <div class="w-28 sm:w-36 bg-slate-800/90 rounded-full h-1.5 overflow-hidden">
+            <div class="w-24 sm:w-36 bg-slate-800/90 rounded-full h-1 sm:h-1.5 overflow-hidden">
               <div class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full" style="width: ${r.percentOfMax}%"></div>
             </div>
           </div>
         </td>
 
-        <td class="py-4 px-4 whitespace-nowrap">
-          <div class="flex items-center gap-3">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">
+          <div class="flex items-center gap-2 sm:gap-3">
             ${avatarHtml}
             <div class="min-w-0">
-              <span class="font-black text-sm sm:text-base text-slate-100 truncate block">
+              <span class="font-black text-xs sm:text-base text-slate-100 truncate block">
                 ${escapeHtml(r.manager)}
               </span>
             </div>
           </div>
         </td>
 
-        <td class="py-4 px-4 whitespace-nowrap text-xs sm:text-sm text-slate-300 font-medium truncate max-w-[180px]">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-[11px] sm:text-sm text-slate-300 font-medium truncate max-w-[140px] sm:max-w-[180px]">
           ${escapeHtml(r.teamName)}
         </td>
 
-        <td class="py-4 px-4 text-slate-300 font-medium">
-          <div class="text-xs sm:text-sm font-bold text-slate-200 break-words leading-snug max-w-[260px]">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 text-slate-300 font-medium">
+          <div class="text-[11px] sm:text-sm font-bold text-slate-200 break-words leading-snug max-w-[200px] sm:max-w-[260px]">
             ${escapeHtml(r.league)}
           </div>
         </td>
 
-        <td class="py-4 px-4 text-center whitespace-nowrap">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 text-center whitespace-nowrap">
           ${matchupPill}
         </td>
 
-        <td class="py-4 px-4 text-center whitespace-nowrap">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 text-center whitespace-nowrap">
           ${efficiencyBadge}
         </td>
 
-        <td class="py-4 px-3 text-center whitespace-nowrap">
+        <td class="py-2.5 sm:py-4 px-1.5 sm:px-3 text-center whitespace-nowrap">
           <button
             onclick="toggleRowExpand('${r.id}')"
-            class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition text-xs font-mono font-bold border border-slate-800 cursor-pointer"
+            class="p-1.5 sm:p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition text-[10px] sm:text-xs font-mono font-bold border border-slate-800 cursor-pointer"
             title="Toggle Details"
           >
             ${isExpanded ? "▲" : "▼"}
@@ -2738,6 +3397,9 @@
     if (!positionalMvpDeck || !playerTableBody) return;
 
     const isSeason = currentMode === "SEASON_ROLLUP";
+    if (playerSeasonBadge && seasonInput) {
+      playerSeasonBadge.textContent = seasonInput.value;
+    }
     if (playerWeekBadge) {
       playerWeekBadge.textContent = isSeason
         ? `Weeks 1 - ${weekInput.value} Rollup`
@@ -2825,11 +3487,15 @@
           ? `<img src="${topPlayer.headshotUrl}" class="w-10 h-10 rounded-full object-cover border border-slate-700 bg-slate-800 flex-shrink-0" alt="" onerror="this.remove()">`
           : "";
 
+        const titleComponent = createCardTitleWithInfo(
+          `${slot.icon} ${slot.label}`,
+          `Highest scoring ${slot.pos} across all participating leagues for this matchup period.`,
+          `text-xs font-black uppercase tracking-wider ${slot.color} hover:underline`
+        );
+
         card.innerHTML = `
           <div class="flex items-center justify-between border-b border-white/10 pb-2">
-            <span class="text-xs font-black uppercase tracking-wider ${slot.color} flex items-center gap-1">
-              <span>${slot.icon}</span> ${slot.label}
-            </span>
+            ${titleComponent}
             <span class="text-xs font-mono font-bold text-slate-400">${escapeHtml(topPlayer.team || "FA")}</span>
           </div>
 
@@ -2860,11 +3526,15 @@
           </div>
         `;
       } else {
+        const titleComponent = createCardTitleWithInfo(
+          `${slot.icon} ${slot.label}`,
+          `Highest scoring ${slot.pos} across all participating leagues for this matchup period.`,
+          `text-xs font-black uppercase tracking-wider ${slot.color} hover:underline`
+        );
+
         card.innerHTML = `
           <div class="flex items-center justify-between border-b border-white/10 pb-2">
-            <span class="text-xs font-black uppercase tracking-wider ${slot.color} flex items-center gap-1">
-              <span>${slot.icon}</span> ${slot.label}
-            </span>
+            ${titleComponent}
           </div>
           <div class="py-6 text-center text-xs text-slate-500 italic">No ${slot.pos} data recorded yet.</div>
         `;
@@ -3044,64 +3714,64 @@
           : `<span class="text-xs text-slate-500 italic">Free Agent / Unrostered</span>`;
 
       tr.innerHTML = `
-        <td class="py-4 px-4 text-center whitespace-nowrap font-mono font-black text-sm ${rank <= 3 ? "text-amber-400" : "text-slate-400"}">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 text-center whitespace-nowrap font-mono font-black text-xs sm:text-sm ${rank <= 3 ? "text-amber-400" : "text-slate-400"}">
           #${rank}
         </td>
 
-        <td class="py-4 px-4 whitespace-nowrap">
-          <div class="flex items-center gap-3">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">
+          <div class="flex items-center gap-2 sm:gap-3">
             ${avatarHtml}
             <div class="min-w-0">
-              <span class="font-black text-sm sm:text-base text-slate-100 truncate block">
+              <span class="font-black text-xs sm:text-base text-slate-100 truncate block">
                 ${escapeHtml(p.name)}
               </span>
-              <span class="text-xs text-slate-400 font-semibold block">
+              <span class="text-[10px] sm:text-xs text-slate-400 font-semibold block">
                 ${escapeHtml(p.team || "FA")} • ${escapeHtml(p.pos)}
               </span>
             </div>
           </div>
         </td>
 
-        <td class="py-4 px-3 text-center whitespace-nowrap">
+        <td class="py-2.5 sm:py-4 px-1.5 sm:px-3 text-center whitespace-nowrap">
           ${getPlayerPositionBadge(p.pos)}
         </td>
 
-        <td class="py-4 px-3 text-center whitespace-nowrap text-xs font-bold text-slate-300 font-mono">
+        <td class="py-2.5 sm:py-4 px-1.5 sm:px-3 text-center whitespace-nowrap text-[11px] sm:text-xs font-bold text-slate-300 font-mono">
           ${escapeHtml(p.team || "FA")}
         </td>
 
-        <td class="py-4 px-4 whitespace-nowrap">
-          <div class="font-mono text-base sm:text-lg font-black text-emerald-400">
-            ${p.points.toFixed(2)} <span class="text-xs font-semibold text-slate-400">${isSeason ? "ppg" : "pts"}</span>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">
+          <div class="font-mono text-sm sm:text-lg font-black text-emerald-400">
+            ${p.points.toFixed(2)} <span class="text-[10px] sm:text-xs font-semibold text-slate-400">${isSeason ? "ppg" : "pts"}</span>
           </div>
           ${
             isSeason && p.totalPoints !== undefined
               ? `
-            <div class="text-xs text-slate-400 font-mono">${p.totalPoints.toFixed(1)} total • ${p.gamesCount} wks</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 font-mono">${p.totalPoints.toFixed(1)} total • ${p.gamesCount} wks</div>
           `
               : ""
           }
         </td>
 
-        <td class="py-4 px-4 whitespace-nowrap text-center">
-          <div class="space-y-1 inline-block text-left">
-            <div class="text-xs font-mono font-bold text-slate-200">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-center">
+          <div class="space-y-0.5 sm:space-y-1 inline-block text-left">
+            <div class="text-[10px] sm:text-xs font-mono font-bold text-slate-200">
               ${p.startRate}% <span class="text-slate-500 font-normal">(${p.startedCount}/${p.startedCount + p.benchedCount})</span>
             </div>
-            <div class="w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div class="w-16 sm:w-20 bg-slate-800 rounded-full h-1 sm:h-1.5 overflow-hidden">
               <div class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full" style="width: ${p.startRate}%"></div>
             </div>
           </div>
         </td>
 
-        <td class="py-4 px-4">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4">
           ${ownersHtml}
         </td>
 
-        <td class="py-4 px-3 text-center whitespace-nowrap">
+        <td class="py-2.5 sm:py-4 px-1.5 sm:px-3 text-center whitespace-nowrap">
           <button
             onclick="togglePlayerRowExpand('${p.id}')"
-            class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition text-xs font-mono font-bold border border-slate-800 cursor-pointer"
+            class="p-1.5 sm:p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition text-[10px] sm:text-xs font-mono font-bold border border-slate-800 cursor-pointer"
             title="Toggle Roster Exposure Breakdown"
           >
             ${isExpanded ? "▲" : "▼"}
@@ -3588,10 +4258,10 @@
         const actTies = r.ties || 0;
         actualRecordHtml = `
           <div class="text-center" title="Actual Head-to-Head Record: ${actWins}W - ${actLosses}L${actTies > 0 ? ` - ${actTies}T` : ""} (${r.winPct}% win rate)">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-black ${r.winPct >= 60 ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : r.winPct >= 40 ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-rose-500/15 text-rose-300 border border-rose-500/30"}">
+            <span class="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-black ${r.winPct >= 60 ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : r.winPct >= 40 ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-rose-500/15 text-rose-300 border border-rose-500/30"}">
               ${actWins}W - ${actLosses}L${actTies > 0 ? ` - ${actTies}T` : ""}
             </span>
-            <div class="text-xs text-slate-400 font-mono mt-0.5 font-medium">${r.winPct}%</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 font-mono mt-0.5 font-medium">${r.winPct}%</div>
           </div>
         `;
       } else {
@@ -3605,10 +4275,10 @@
                 : `Upcoming Matchup vs ${r.opponentName || "Opponent"}`;
         actualRecordHtml = `
           <div class="text-center" title="${escapeHtml(outcomeDesc)}">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black ${r.outcome === "win" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : r.outcome === "loss" ? "bg-rose-500/20 text-rose-300 border border-rose-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}">
+            <span class="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-[10px] sm:text-xs font-black ${r.outcome === "win" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : r.outcome === "loss" ? "bg-rose-500/20 text-rose-300 border border-rose-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}">
               ${r.outcome === "win" ? "🟢 1-0" : r.outcome === "loss" ? "🔴 0-1" : r.outcome === "tie" ? "⚪ 0-0-1" : "Upcoming"}
             </span>
-            <div class="text-xs text-slate-400 mt-0.5 font-medium truncate max-w-[120px]" title="vs ${escapeHtml(r.opponentName || "Opp")}">vs ${escapeHtml(r.opponentName || "Opp")}</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5 font-medium truncate max-w-[100px] sm:max-w-[120px]" title="vs ${escapeHtml(r.opponentName || "Opp")}">vs ${escapeHtml(r.opponentName || "Opp")}</div>
           </div>
         `;
       }
@@ -3616,10 +4286,10 @@
       // All-Play Pill with detailed tooltip
       const allPlayHtml = `
         <div class="text-center" title="All-Play Record: ${r.allPlayWins || 0}W - ${r.allPlayLosses || 0}L${(r.allPlayTies || 0) > 0 ? ` - ${r.allPlayTies}T` : ""} (${r.allPlayWinPct || 0}% win rate against all league rivals)">
-          <span class="font-mono text-xs sm:text-sm font-bold text-slate-200">
+          <span class="font-mono text-[10px] sm:text-sm font-bold text-slate-200">
             ${r.allPlayWins || 0}W - ${r.allPlayLosses || 0}L${(r.allPlayTies || 0) > 0 ? ` - ${r.allPlayTies}T` : ""}
           </span>
-          <div class="text-xs font-mono text-cyan-400 font-semibold">${r.allPlayWinPct || 0}% Win</div>
+          <div class="text-[10px] sm:text-xs font-mono text-cyan-400 font-semibold">${r.allPlayWinPct || 0}% Win</div>
         </div>
       `;
 
@@ -3636,52 +4306,52 @@
             : "0.0";
       if (luckVal >= 0.5) {
         luckBadge = `
-          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs sm:text-sm font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm cursor-help" title="🍀 Lucky Schedule Draw: Gained +${luckVal.toFixed(2)} bonus wins above expected (${actWinsStr} actual vs ${expWinsStr} expected based on scoring)">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm cursor-help" title="🍀 Lucky Schedule Draw: Gained +${luckVal.toFixed(2)} bonus wins above expected (${actWinsStr} actual vs ${expWinsStr} expected based on scoring)">
             <span>🍀</span> +${luckVal.toFixed(2)}
           </span>
         `;
       } else if (luckVal <= -0.5) {
         luckBadge = `
-          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs sm:text-sm font-mono font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm cursor-help" title="💔 Unlucky Schedule Draw: Lost ${Math.abs(luckVal).toFixed(2)} wins below expected (${actWinsStr} actual vs ${expWinsStr} expected due to tough opponent scores)">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm cursor-help" title="💔 Unlucky Schedule Draw: Lost ${Math.abs(luckVal).toFixed(2)} wins below expected (${actWinsStr} actual vs ${expWinsStr} expected due to tough opponent scores)">
             <span>💔</span> ${luckVal.toFixed(2)}
           </span>
         `;
       } else {
         luckBadge = `
-          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs sm:text-sm font-mono font-black bg-slate-800 text-slate-300 border border-slate-700 cursor-help" title="⚖️ Fair Schedule: Actual outcome closely matches scoring performance (${luckVal >= 0 ? "+" : ""}${luckVal.toFixed(2)} vs ${expWinsStr} expected)">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-slate-800 text-slate-300 border border-slate-700 cursor-help" title="⚖️ Fair Schedule: Actual outcome closely matches scoring performance (${luckVal >= 0 ? "+" : ""}${luckVal.toFixed(2)} vs ${expWinsStr} expected)">
             <span>⚖️</span> ${luckVal >= 0 ? "+" : ""}${luckVal.toFixed(2)}
           </span>
         `;
       }
 
       tr.innerHTML = `
-        <td class="py-4 px-4 whitespace-nowrap font-mono font-black text-sm text-slate-400">#${rankNum}</td>
-        <td class="py-4 px-4 whitespace-nowrap">
-          <div class="flex items-center gap-3">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap font-mono font-black text-xs sm:text-sm text-slate-400">#${rankNum}</td>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">
+          <div class="flex items-center gap-2 sm:gap-3">
             ${avatarHtml}
             <div class="min-w-0">
-              <span class="font-bold text-sm text-white truncate block" title="${escapeHtml(r.manager)}">${escapeHtml(r.manager)}</span>
-              <span class="text-xs text-slate-400 truncate block" title="${escapeHtml(r.teamName)}">${escapeHtml(r.teamName)}</span>
+              <span class="font-bold text-xs sm:text-sm text-white truncate block" title="${escapeHtml(r.manager)}">${escapeHtml(r.manager)}</span>
+              <span class="text-[10px] sm:text-xs text-slate-400 truncate block" title="${escapeHtml(r.teamName)}">${escapeHtml(r.teamName)}</span>
             </div>
           </div>
         </td>
-        <td class="py-4 px-4 text-xs sm:text-sm text-slate-300 font-medium max-w-[200px] truncate" title="League: ${escapeHtml(r.league)}">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 text-[11px] sm:text-sm text-slate-300 font-medium max-w-[150px] sm:max-w-[200px] truncate" title="League: ${escapeHtml(r.league)}">
           <div class="flex items-center gap-1.5 truncate">
             <span class="text-slate-500">🏆</span>
             <span class="truncate">${escapeHtml(r.league)}</span>
           </div>
         </td>
-        <td class="py-4 px-4 whitespace-nowrap text-center">${actualRecordHtml}</td>
-        <td class="py-4 px-4 whitespace-nowrap text-center">${allPlayHtml}</td>
-        <td class="py-4 px-4 whitespace-nowrap text-center font-mono font-black text-sm text-slate-200" title="Expected Wins: ${(r.expectedWins || 0).toFixed(2)} based on ${r.allPlayWinPct || 0}% All-Play win rate">
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-center">${actualRecordHtml}</td>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-center">${allPlayHtml}</td>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-center font-mono font-black text-xs sm:text-sm text-slate-200" title="Expected Wins: ${(r.expectedWins || 0).toFixed(2)} based on ${r.allPlayWinPct || 0}% All-Play win rate">
           ${(r.expectedWins || 0).toFixed(2)}
         </td>
-        <td class="py-4 px-4 whitespace-nowrap text-center">${luckBadge}</td>
-        <td class="py-4 px-4 whitespace-nowrap text-right font-mono font-bold text-sm text-emerald-400" title="${isSeason ? `Total PF: ${(r.totalPoints || 0).toFixed(1)} pts across ${r.weeksCount || 1} weeks (${r.points.toFixed(2)} PPG)` : `Points Scored: ${r.points.toFixed(2)} pts`}">
-          ${r.points.toFixed(2)} <span class="text-xs font-normal text-slate-400">${isSeason ? "ppg" : "pts"}</span>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-center">${luckBadge}</td>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-right font-mono font-bold text-xs sm:text-sm text-emerald-400" title="${isSeason ? `Total PF: ${(r.totalPoints || 0).toFixed(1)} pts across ${r.weeksCount || 1} weeks (${r.points.toFixed(2)} PPG)` : `Points Scored: ${r.points.toFixed(2)} pts`}">
+          ${r.points.toFixed(2)} <span class="text-[10px] sm:text-xs font-normal text-slate-400">${isSeason ? "ppg" : "pts"}</span>
         </td>
-        <td class="py-4 px-4 whitespace-nowrap text-right font-mono font-bold text-sm text-slate-300" title="${isSeason ? `Total Opponent PA: ${(r.totalPointsAgainst || 0).toFixed(1)} pts allowed (${(r.pointsAgainst || 0).toFixed(2)} PPG)` : `Opponent Score Allowed: ${(r.pointsAgainst || 0).toFixed(2)} pts`}">
-          ${(r.pointsAgainst || 0).toFixed(2)} <span class="text-xs font-normal text-slate-400">${isSeason ? "ppg" : "pts"}</span>
+        <td class="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-right font-mono font-bold text-xs sm:text-sm text-slate-300" title="${isSeason ? `Total Opponent PA: ${(r.totalPointsAgainst || 0).toFixed(1)} pts allowed (${(r.pointsAgainst || 0).toFixed(2)} PPG)` : `Opponent Score Allowed: ${(r.pointsAgainst || 0).toFixed(2)} pts`}">
+          ${(r.pointsAgainst || 0).toFixed(2)} <span class="text-[10px] sm:text-xs font-normal text-slate-400">${isSeason ? "ppg" : "pts"}</span>
         </td>
       `;
 
@@ -3696,31 +4366,97 @@
   window.loadCachedData = loadCachedData;
   window.initPlayersDb = initPlayersDb;
 
-  window.switchTab = function (tabName) {
+  const TAB_ORDER = ["awards", "leaderboard", "visuals", "leagueGrid", "luck", "players"];
+  const TAB_HASH_MAP = {
+    awards: "awards",
+    leaderboard: "board",
+    visuals: "analytics",
+    leagueGrid: "leagues",
+    luck: "luck",
+    players: "players"
+  };
+  const HASH_TAB_MAP = {
+    awards: "awards",
+    board: "leaderboard",
+    leaderboard: "leaderboard",
+    analytics: "visuals",
+    visuals: "visuals",
+    scores: "visuals",
+    leagues: "leagueGrid",
+    leaguegrid: "leagueGrid",
+    luck: "luck",
+    luckindex: "luck",
+    players: "players",
+    player: "players"
+  };
+
+  function getCurrentlyActiveTab() {
+    const viewAwards = document.getElementById("viewAwards");
     const viewLeaderboard = document.getElementById("viewLeaderboard");
+    const viewVisuals = document.getElementById("viewVisuals");
+    const viewLeagueGrid = document.getElementById("viewLeagueGrid");
+    const viewLuck = document.getElementById("viewLuck");
+    const viewPlayers = document.getElementById("viewPlayers");
+
+    if (viewAwards && !viewAwards.classList.contains("hidden")) return "awards";
+    if (viewLeaderboard && !viewLeaderboard.classList.contains("hidden")) return "leaderboard";
+    if (viewVisuals && !viewVisuals.classList.contains("hidden")) return "visuals";
+    if (viewLeagueGrid && !viewLeagueGrid.classList.contains("hidden")) return "leagueGrid";
+    if (viewLuck && !viewLuck.classList.contains("hidden")) return "luck";
+    if (viewPlayers && !viewPlayers.classList.contains("hidden")) return "players";
+    return "awards";
+  }
+
+  function syncTabFromHash() {
+    if (typeof window === "undefined" || !window.location) return;
+    const rawHash = (window.location.hash || "").replace(/^#/, "").toLowerCase();
+    const targetTab = HASH_TAB_MAP[rawHash];
+    if (targetTab) {
+      window.switchTab(targetTab, false);
+    }
+  }
+
+  window.switchTab = function (tabName, updateHash = true) {
+    if (!TAB_ORDER.includes(tabName)) {
+      tabName = "awards";
+    }
+
+    const viewLeaderboard = document.getElementById("viewLeaderboard");
+    const viewAwards = document.getElementById("viewAwards");
     const viewVisuals = document.getElementById("viewVisuals");
     const viewLeagueGrid = document.getElementById("viewLeagueGrid");
     const viewPlayers = document.getElementById("viewPlayers");
     const viewLuck = document.getElementById("viewLuck");
 
-    const tabLeaderboard = document.getElementById("tabLeaderboard");
-    const tabVisuals = document.getElementById("tabVisuals");
-    const tabLeagueGrid = document.getElementById("tabLeagueGrid");
-    const tabPlayers = document.getElementById("tabPlayers");
-    const tabLuck = document.getElementById("tabLuck");
+    const desktopInactive =
+      "px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer active:scale-95";
+    const desktopActive =
+      "px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 font-bold cursor-pointer active:scale-95 shadow-sm";
 
-    const inactiveClass =
-      "px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer";
-    const activeClass =
-      "px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-2 font-bold cursor-pointer";
+    const mobileInactive =
+      "flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-bold gap-1 min-w-[50px] text-slate-400 hover:text-slate-200 border border-transparent active:scale-95 touch-manipulation cursor-pointer";
+    const mobileActive =
+      "flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-extrabold gap-1 min-w-[50px] text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 shadow-sm active:scale-95 touch-manipulation cursor-pointer";
 
-    if (tabLeaderboard) tabLeaderboard.className = inactiveClass;
-    if (tabVisuals) tabVisuals.className = inactiveClass;
-    if (tabLeagueGrid) tabLeagueGrid.className = inactiveClass;
-    if (tabPlayers) tabPlayers.className = inactiveClass;
-    if (tabLuck) tabLuck.className = inactiveClass;
+    // Toggle Desktop Tabs
+    const tabMap = {
+      awards: { desktop: "tabAwards", mobile: "mobileTabAwards" },
+      leaderboard: { desktop: "tabLeaderboard", mobile: "mobileTabLeaderboard" },
+      visuals: { desktop: "tabVisuals", mobile: "mobileTabVisuals" },
+      leagueGrid: { desktop: "tabLeagueGrid", mobile: "mobileTabLeagueGrid" },
+      luck: { desktop: "tabLuck", mobile: "mobileTabLuck" },
+      players: { desktop: "tabPlayers", mobile: "mobileTabPlayers" }
+    };
+
+    TAB_ORDER.forEach(t => {
+      const dEl = document.getElementById(tabMap[t].desktop);
+      const mEl = document.getElementById(tabMap[t].mobile);
+      if (dEl) dEl.className = t === tabName ? desktopActive : desktopInactive;
+      if (mEl) mEl.className = t === tabName ? mobileActive : mobileInactive;
+    });
 
     if (viewLeaderboard) viewLeaderboard.classList.add("hidden");
+    if (viewAwards) viewAwards.classList.add("hidden");
     if (viewVisuals) viewVisuals.classList.add("hidden");
     if (viewLeagueGrid) viewLeagueGrid.classList.add("hidden");
     if (viewPlayers) viewPlayers.classList.add("hidden");
@@ -3728,25 +4464,34 @@
 
     if (tabName === "leaderboard") {
       if (viewLeaderboard) viewLeaderboard.classList.remove("hidden");
-      if (tabLeaderboard) tabLeaderboard.className = activeClass;
+    } else if (tabName === "awards") {
+      if (viewAwards) viewAwards.classList.remove("hidden");
+      triggerConfetti();
     } else if (tabName === "visuals") {
       if (viewVisuals) viewVisuals.classList.remove("hidden");
-      if (tabVisuals) tabVisuals.className = activeClass;
       renderCharts(getActiveRecords(), getActiveLeaguesMap());
     } else if (tabName === "leagueGrid") {
       if (viewLeagueGrid) viewLeagueGrid.classList.remove("hidden");
-      if (tabLeagueGrid) tabLeagueGrid.className = activeClass;
       renderLeagueGrid(getActiveRecords(), getActiveLeaguesMap());
     } else if (tabName === "players") {
       if (viewPlayers) viewPlayers.classList.remove("hidden");
-      if (tabPlayers) tabPlayers.className = activeClass;
       renderPlayerAnalytics(getActiveRecords(), getActiveLeaguesMap());
     } else if (tabName === "luck") {
       if (viewLuck) viewLuck.classList.remove("hidden");
-      if (tabLuck) tabLuck.className = activeClass;
       renderLuckAnalytics(getActiveRecords(), getActiveLeaguesMap());
     }
+
+    if (updateHash && typeof window !== "undefined" && window.location) {
+      const hash = TAB_HASH_MAP[tabName] || tabName;
+      if (window.location.hash !== `#${hash}`) {
+        history.replaceState(null, "", `#${hash}`);
+      }
+    }
   };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("hashchange", syncTabFromHash);
+  }
 
   function triggerConfetti() {
     if (typeof confetti === "function") {
@@ -3853,12 +4598,13 @@
       return ptsB - ptsA;
     });
     const allPlayLeader = sortedByAllPlay[0];
+    const shareUrl = buildShareableUrl();
 
     let text = "";
     if (isSeason) {
-      text = `🏈 *Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})*\n\n`;
+      text = `<${shareUrl}|*Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})*>\n\n`;
 
-      text += `*🏆 The Podium (Avg PPG)*\n`;
+      text += `*The Podium (Avg PPG)*\n`;
       if (first)
         text += `• 🥇 *#1* ${first.manager} (${first.teamName}) — *${first.points.toFixed(2)} PPG* (${(first.totalPoints || 0).toFixed(1)} PF, ${first.wins || 0}W-${first.losses || 0}L) • _${first.league}_\n`;
       if (second)
@@ -3866,7 +4612,7 @@
       if (third)
         text += `• 🥉 *#3* ${third.manager} (${third.teamName}) — *${third.points.toFixed(2)} PPG* (${(third.totalPoints || 0).toFixed(1)} PF, ${third.wins || 0}W-${third.losses || 0}L) • _${third.league}_\n\n`;
 
-      text += `*🌟 Superlatives Showcase*\n`;
+      text += `*Superlatives Showcase*\n`;
       if (badBeat)
         text += `• 💔 *Season Heartbreak:* ${badBeat.manager} (${badBeat.teamName}) — *${(badBeat.points || 0).toFixed(1)} PPG* with a ${badBeat.wins || 0}W-${badBeat.losses || 0}L record • _${badBeat.league}_\n`;
       if (luckyEscape)
@@ -3874,7 +4620,7 @@
       if (benchKing && benchKing.benchPoints > 0)
         text += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) — *${benchKing.benchPoints.toFixed(1)} pts* left on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
 
-      text += `*🍀 Schedule Luck & All-Play*\n`;
+      text += `*Schedule Luck & All-Play*\n`;
       if (luckiest) {
         const luckStr = `${(luckiest.luckIndex || 0) >= 0 ? "+" : ""}${(luckiest.luckIndex || 0).toFixed(2)}`;
         text += `• 🍀 *Luckiest Squad:* ${luckiest.manager} — *${luckStr} Luck Index* (${luckiest.wins || 0}W actual vs ${(luckiest.expectedWins || 0).toFixed(2)} xW) • _${luckiest.league}_\n`;
@@ -3887,16 +4633,16 @@
         text += `• ⚡ *All-Play Dominance:* ${allPlayLeader.manager} — *${allPlayLeader.allPlayWinPct || 0}% All-Play Win Rate* (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • _${allPlayLeader.league}_\n\n`;
       }
 
-      text += `*📊 Overview*\n`;
+      text += `*Overview*\n`;
       text += `• 👑 *Power League:* ${topLeagueName} (Avg: *${topLeagueAvg.toFixed(2)} PPG*)\n`;
       if (first && lowest)
         text += `• 🔥 *Peak PPG:* ${first.points.toFixed(2)} (${first.manager}) | ❄️ *Lowest PPG:* ${lowest.points.toFixed(2)} (${lowest.manager})\n`;
       text += `• 📈 *Benchmark:* Avg: *${avgScore.toFixed(2)} PPG* | Median: *${medianScore.toFixed(2)} PPG*\n`;
       text += `• 🏟️ *Scope:* ${totalLeagues} Leagues | ${totalSquads} Squads`;
     } else {
-      text = `🏈 *Week ${week} Fantasy Recap (${season})*\n\n`;
+      text = `<${shareUrl}|*Week ${week} Fantasy Recap (${season})*>\n\n`;
 
-      text += `*🏆 The Podium (Top Scores)*\n`;
+      text += `*The Podium (Top Scores)*\n`;
       if (first)
         text += `• 🥇 *#1* ${first.manager} (${first.teamName}) — *${first.points.toFixed(2)} pts* • _${first.league}_\n`;
       if (second)
@@ -3904,7 +4650,7 @@
       if (third)
         text += `• 🥉 *#3* ${third.manager} (${third.teamName}) — *${third.points.toFixed(2)} pts* • _${third.league}_\n\n`;
 
-      text += `*🌟 Superlatives Showcase*\n`;
+      text += `*Superlatives Showcase*\n`;
       if (badBeat)
         text += `• 💔 *The Bad Beat:* ${badBeat.manager} (${badBeat.teamName}) scored *${badBeat.points.toFixed(2)} pts* and lost by ${Math.abs(badBeat.margin || 0).toFixed(2)} to ${badBeat.opponentName || "rival"} • _${badBeat.league}_\n`;
       if (luckyEscape)
@@ -3912,7 +4658,7 @@
       if (benchKing && benchKing.benchPoints > 0)
         text += `• 🪑 *Bench Heavyweight:* ${benchKing.manager} (${benchKing.teamName}) left *${benchKing.benchPoints.toFixed(2)} pts* on bench (${benchKing.efficiency ?? 100}% Lineup Efficiency) • _${benchKing.league}_\n\n`;
 
-      text += `*🍀 Schedule Luck & All-Play*\n`;
+      text += `*Schedule Luck & All-Play*\n`;
       if (luckiest) {
         const luckStr = `${(luckiest.luckIndex || 0) >= 0 ? "+" : ""}${(luckiest.luckIndex || 0).toFixed(2)}`;
         text += `• 🍀 *Luckiest Draw:* ${luckiest.manager} — *${luckStr} Luck Index* (${(luckiest.expectedWins || 0).toFixed(2)} xW) • _${luckiest.league}_\n`;
@@ -3925,7 +4671,7 @@
         text += `• ⚡ *All-Play Leader:* ${allPlayLeader.manager} — *${allPlayLeader.allPlayWinPct || 0}% Win Rate* (${allPlayLeader.allPlayWins || 0}W-${allPlayLeader.allPlayLosses || 0}L) • _${allPlayLeader.league}_\n\n`;
       }
 
-      text += `*📊 Overview*\n`;
+      text += `*Overview*\n`;
       text += `• 👑 *Power League:* ${topLeagueName} (Avg: *${topLeagueAvg.toFixed(2)} pts*)\n`;
       if (first && lowest)
         text += `• 🔥 *Peak Score:* ${first.points.toFixed(2)} pts (${first.manager}) | ❄️ *Lowest Score:* ${lowest.points.toFixed(2)} pts (${lowest.manager})\n`;
@@ -3938,6 +4684,13 @@
         .writeText(text)
         .then(() => {
           showToast("Recap copied to clipboard!", "📋");
+          if (copyRecapBtnText) {
+            const orig = copyRecapBtnText.textContent;
+            copyRecapBtnText.textContent = "Recap Copied! 📋";
+            setTimeout(() => {
+              copyRecapBtnText.textContent = orig;
+            }, 2500);
+          }
         })
         .catch(err => {
           console.warn("Clipboard API failed, fallback to textarea:", err);
@@ -3960,6 +4713,13 @@
     try {
       document.execCommand("copy");
       showToast("Recap copied to clipboard!", "📋");
+      if (copyRecapBtnText) {
+        const orig = copyRecapBtnText.textContent;
+        copyRecapBtnText.textContent = "Recap Copied! 📋";
+        setTimeout(() => {
+          copyRecapBtnText.textContent = orig;
+        }, 2500);
+      }
     } catch (err) {
       console.error("Fallback copy failed:", err);
       showError("Could not copy to clipboard. Please copy manually from the table.");
@@ -3968,8 +4728,79 @@
   }
 
   /**
+   * Builds a shareable CrossLeague URL containing season, week, mode, league IDs, and active tab
+   * (Omits user identification so reports can be shared cleanly & anonymously).
+   */
+  function buildShareableUrl() {
+    const season = seasonInput ? seasonInput.value : "2024";
+    const week = weekInput ? weekInput.value : "1";
+    const mode = currentMode || (modeSelect ? modeSelect.value : "WEEKLY");
+    const currentTab = getCurrentlyActiveTab();
+
+    const url = new URL(window.location.href);
+    url.search = "";
+    if (season) url.searchParams.set("season", season);
+    if (week) url.searchParams.set("week", week);
+    if (mode) url.searchParams.set("mode", mode);
+
+    let leagueIds = [];
+    if (selectedLeagueIds && selectedLeagueIds.size > 0) {
+      leagueIds = Array.from(selectedLeagueIds);
+    } else if (allLeaguesData && allLeaguesData.length > 0) {
+      leagueIds = allLeaguesData.map(l => l.league_id);
+    } else if (customLeagueIds && customLeagueIds.size > 0) {
+      leagueIds = Array.from(customLeagueIds);
+    }
+    if (leagueIds.length > 0) {
+      url.searchParams.set("leagues", leagueIds.join(","));
+    }
+
+    url.hash = `#${currentTab}`;
+    return url.toString();
+  }
+
+  /**
+   * Share Action: Copies current state URL with week/mode/leagues to clipboard
+   */
+  async function shareUrl() {
+    const shareableUrl = buildShareableUrl();
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareableUrl);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = shareableUrl;
+        ta.style.position = "fixed";
+        ta.style.left = "-999999px";
+        ta.style.top = "-999999px";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      showToast("Shareable link copied to clipboard!", "🔗");
+      if (shareUrlBtnText) {
+        const orig = shareUrlBtnText.textContent;
+        shareUrlBtnText.textContent = "Link Copied! 🔗";
+        setTimeout(() => {
+          shareUrlBtnText.textContent = orig;
+        }, 2500);
+      }
+    } catch (err) {
+      console.error("Failed to copy URL:", err);
+      showError("Could not copy link to clipboard.");
+    }
+  }
+
+  /**
    * Standalone Offline Report Exporter with Full Inlining
    */
+  async function downloadReport() {
+    return shareReport();
+  }
+
   async function shareReport() {
     if (!rawRecords || rawRecords.length === 0) {
       showError("No data available to generate report. Please sync a Sleeper account first.");
@@ -4094,7 +4925,14 @@
       showError("Failed to generate download file. Please try again.");
     }
 
-    if (shareReportBtnText) {
+    if (downloadReportBtnText) {
+      const originalText = downloadReportBtnText.textContent;
+      downloadReportBtnText.textContent = "Report Downloaded! 📁";
+      setTimeout(() => {
+        downloadReportBtnText.textContent = originalText;
+      }, 2500);
+    }
+    if (shareReportBtnText && shareReportBtnText !== downloadReportBtnText) {
       const originalText = shareReportBtnText.textContent;
       shareReportBtnText.textContent = "Report Downloaded! 📁";
       setTimeout(() => {
@@ -4144,7 +4982,6 @@
     leaguesMap = data.leaguesMap || {};
     allLeaguesData = data.allLeaguesData || [];
     selectedLeagueIds = new Set(data.selectedLeagueIds || allLeaguesData.map(l => l.league_id));
-    applyQueryLeagueFilter();
 
     setLoading(false);
     initialState.classList.add("hidden");
@@ -4152,6 +4989,9 @@
 
     if (syncControlCenter) syncControlCenter.classList.add("hidden");
     if (liveSyncIndicator) liveSyncIndicator.classList.add("hidden");
+    if (headerSeasonBadge) headerSeasonBadge.classList.add("hidden");
+    if (headerWeekBadge) headerWeekBadge.classList.add("hidden");
+    if (btnOpenSettingsModal) btnOpenSettingsModal.classList.add("hidden");
 
     // Embed snapshot info into the header subtitle
     const dateFormatted = data.generatedAt
@@ -4177,8 +5017,11 @@
 
     reportContent.classList.remove("hidden");
     // Hide action buttons that don't work in offline exported reports
+    if (shareUrlBtn) shareUrlBtn.classList.add("hidden");
+    if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
     if (shareReportBtn) shareReportBtn.classList.add("hidden");
     if (copyRecapBtn) copyRecapBtn.classList.add("hidden");
+    if (exportCsvBtn) exportCsvBtn.classList.add("hidden");
 
     initPlayersDb();
     renderLeagueDropdown();
@@ -4302,10 +5145,55 @@
   }
 
   // Event Listeners
-  filterForm.addEventListener("submit", e => {
-    e.preventDefault();
-    fetchLeaderboard();
-  });
+  if (syncTypeUserBtn) {
+    syncTypeUserBtn.addEventListener("click", () => setSyncType("user"));
+  }
+  if (syncTypeLeaguesBtn) {
+    syncTypeLeaguesBtn.addEventListener("click", () => setSyncType("leagues"));
+  }
+  if (btnAddCustomLeagueId && customLeagueIdInput) {
+    btnAddCustomLeagueId.addEventListener("click", () => {
+      addCustomLeagueIds(customLeagueIdInput.value);
+      customLeagueIdInput.value = "";
+    });
+    customLeagueIdInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addCustomLeagueIds(customLeagueIdInput.value);
+        customLeagueIdInput.value = "";
+      }
+    });
+    customLeagueIdInput.addEventListener("paste", () => {
+      setTimeout(() => {
+        addCustomLeagueIds(customLeagueIdInput.value);
+        customLeagueIdInput.value = "";
+      }, 50);
+    });
+  }
+  if (btnClearCustomLeagueIds) {
+    btnClearCustomLeagueIds.addEventListener("click", clearCustomLeagueIds);
+  }
+
+  if (filterForm) {
+    filterForm.addEventListener("submit", e => {
+      e.preventDefault();
+      if (
+        currentSyncType === "leagues" &&
+        customLeagueIdInput &&
+        customLeagueIdInput.value.trim()
+      ) {
+        addCustomLeagueIds(customLeagueIdInput.value);
+        customLeagueIdInput.value = "";
+      }
+      closeSettingsModal();
+      savePreferences();
+      updateSettingsButtonBadge();
+      updateWeekNavigatorUI();
+      if (!tryLoadFromCache()) {
+        fetchLeaderboard();
+      }
+    });
+  }
 
   tableSearch.addEventListener("input", e => {
     searchQuery = e.target.value;
@@ -4353,6 +5241,23 @@
     });
   }
 
+  if (customLeaguesDropdownBtn) {
+    customLeaguesDropdownBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      const isHidden = customLeaguesDropdownMenu.classList.contains("hidden");
+      if (isHidden) {
+        customLeaguesDropdownMenu.classList.remove("hidden");
+        if (customLeaguesDropdownChevron) customLeaguesDropdownChevron.classList.add("rotate-180");
+        customLeaguesDropdownBtn.setAttribute("aria-expanded", "true");
+      } else {
+        customLeaguesDropdownMenu.classList.add("hidden");
+        if (customLeaguesDropdownChevron)
+          customLeaguesDropdownChevron.classList.remove("rotate-180");
+        customLeaguesDropdownBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
   if (leagueDropdownBtn) {
     leagueDropdownBtn.addEventListener("click", e => {
       e.stopPropagation();
@@ -4370,11 +5275,63 @@
   }
 
   document.addEventListener("click", e => {
+    const trigger = e.target.closest(".card-info-trigger");
+    if (trigger) {
+      const wrapper = trigger.closest(".card-info-wrapper");
+      const popover = wrapper ? wrapper.querySelector(".card-info-popover") : null;
+      const wasOpen = popover && popover.classList.contains("is-open");
+
+      // Close any other open popovers
+      document.querySelectorAll(".card-info-popover.is-open").forEach(p => {
+        if (p !== popover) {
+          p.classList.remove("is-open");
+          const parentWrap = p.closest(".card-info-wrapper");
+          const parentBtn = parentWrap ? parentWrap.querySelector(".card-info-trigger") : null;
+          if (parentBtn) parentBtn.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      if (popover) {
+        if (wasOpen) {
+          popover.classList.remove("is-open");
+          trigger.setAttribute("aria-expanded", "false");
+        } else {
+          popover.classList.add("is-open");
+          trigger.setAttribute("aria-expanded", "true");
+        }
+      }
+      return;
+    }
+
+    // If clicking outside any card-info-wrapper, close all open popovers
+    if (!e.target.closest(".card-info-wrapper")) {
+      document.querySelectorAll(".card-info-popover.is-open").forEach(p => {
+        p.classList.remove("is-open");
+        const parentWrap = p.closest(".card-info-wrapper");
+        const parentBtn = parentWrap ? parentWrap.querySelector(".card-info-trigger") : null;
+        if (parentBtn) parentBtn.setAttribute("aria-expanded", "false");
+      });
+    }
+
+    if (customLeaguesDropdownMenu && !customLeaguesDropdownMenu.classList.contains("hidden")) {
+      if (customLeaguesDropdownContainer && !customLeaguesDropdownContainer.contains(e.target)) {
+        customLeaguesDropdownMenu.classList.add("hidden");
+        if (customLeaguesDropdownChevron)
+          customLeaguesDropdownChevron.classList.remove("rotate-180");
+        if (customLeaguesDropdownBtn)
+          customLeaguesDropdownBtn.setAttribute("aria-expanded", "false");
+      }
+    }
     if (leagueDropdownMenu && !leagueDropdownMenu.classList.contains("hidden")) {
       if (leagueDropdownContainer && !leagueDropdownContainer.contains(e.target)) {
         leagueDropdownMenu.classList.add("hidden");
         if (leagueDropdownChevron) leagueDropdownChevron.classList.remove("rotate-180");
         if (leagueDropdownBtn) leagueDropdownBtn.setAttribute("aria-expanded", "false");
+      }
+    }
+    if (settingsModal && !settingsModal.classList.contains("hidden")) {
+      if (settingsDropdownContainer && !settingsDropdownContainer.contains(e.target)) {
+        closeSettingsModal();
       }
     }
   });
@@ -4417,14 +5374,96 @@
 
   document.addEventListener("keydown", e => {
     if (e.key === "Escape") {
+      document.querySelectorAll(".card-info-popover.is-open").forEach(p => {
+        p.classList.remove("is-open");
+        const parentWrap = p.closest(".card-info-wrapper");
+        const parentBtn = parentWrap ? parentWrap.querySelector(".card-info-trigger") : null;
+        if (parentBtn) parentBtn.setAttribute("aria-expanded", "false");
+      });
       const modal = document.getElementById("luckMethodologyModal");
       if (modal && !modal.classList.contains("hidden")) {
         closeLuckModal();
+      }
+      if (customLeaguesDropdownMenu && !customLeaguesDropdownMenu.classList.contains("hidden")) {
+        customLeaguesDropdownMenu.classList.add("hidden");
+        if (customLeaguesDropdownChevron)
+          customLeaguesDropdownChevron.classList.remove("rotate-180");
+        if (customLeaguesDropdownBtn)
+          customLeaguesDropdownBtn.setAttribute("aria-expanded", "false");
+      }
+      if (settingsModal && !settingsModal.classList.contains("hidden")) {
+        closeSettingsModal();
       }
       if (leagueDropdownMenu && !leagueDropdownMenu.classList.contains("hidden")) {
         leagueDropdownMenu.classList.add("hidden");
         if (leagueDropdownChevron) leagueDropdownChevron.classList.remove("rotate-180");
         if (leagueDropdownBtn) leagueDropdownBtn.setAttribute("aria-expanded", "false");
+      }
+      return;
+    }
+
+    // Guard: ignore shortcuts if typing in input/textarea/select or if a modal is open
+    const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
+    if (activeTag === "input" || activeTag === "textarea" || activeTag === "select") {
+      return;
+    }
+    if (settingsModal && !settingsModal.classList.contains("hidden")) {
+      return;
+    }
+    const luckModal = document.getElementById("luckMethodologyModal");
+    if (luckModal && !luckModal.classList.contains("hidden")) {
+      return;
+    }
+
+    // Tab Switching Keyboard Shortcuts (1-6, [, ])
+    if (e.key === "1") {
+      e.preventDefault();
+      window.switchTab("awards");
+      return;
+    } else if (e.key === "2") {
+      e.preventDefault();
+      window.switchTab("leaderboard");
+      return;
+    } else if (e.key === "3") {
+      e.preventDefault();
+      window.switchTab("visuals");
+      return;
+    } else if (e.key === "4") {
+      e.preventDefault();
+      window.switchTab("leagueGrid");
+      return;
+    } else if (e.key === "5") {
+      e.preventDefault();
+      window.switchTab("luck");
+      return;
+    } else if (e.key === "6") {
+      e.preventDefault();
+      window.switchTab("players");
+      return;
+    } else if (e.key === "[") {
+      e.preventDefault();
+      const currentTab = getCurrentlyActiveTab();
+      const idx = TAB_ORDER.indexOf(currentTab);
+      const prevIdx = (idx - 1 + TAB_ORDER.length) % TAB_ORDER.length;
+      window.switchTab(TAB_ORDER[prevIdx]);
+      return;
+    } else if (e.key === "]") {
+      e.preventDefault();
+      const currentTab = getCurrentlyActiveTab();
+      const idx = TAB_ORDER.indexOf(currentTab);
+      const nextIdx = (idx + 1) % TAB_ORDER.length;
+      window.switchTab(TAB_ORDER[nextIdx]);
+      return;
+    }
+
+    // Keyboard Arrow Navigation for Matchup Weeks
+    if (e.key === "ArrowLeft") {
+      if (prevWeekBtn && !prevWeekBtn.disabled) {
+        prevWeekBtn.click();
+      }
+    } else if (e.key === "ArrowRight") {
+      if (nextWeekBtn && !nextWeekBtn.disabled) {
+        nextWeekBtn.click();
       }
     }
   });
@@ -4444,28 +5483,44 @@
   });
 
   if (exportCsvBtn) exportCsvBtn.addEventListener("click", exportCsv);
-  if (shareReportBtn) shareReportBtn.addEventListener("click", shareReport);
+  if (shareUrlBtn) shareUrlBtn.addEventListener("click", shareUrl);
+  if (downloadReportBtn) downloadReportBtn.addEventListener("click", downloadReport);
+  if (shareReportBtn && shareReportBtn !== downloadReportBtn)
+    shareReportBtn.addEventListener("click", downloadReport);
   if (copyRecapBtn) copyRecapBtn.addEventListener("click", copyChatRecap);
 
-  window.shareReport = shareReport;
+  window.shareUrl = shareUrl;
+  window.downloadReport = downloadReport;
+  window.shareReport = downloadReport;
   window.copyChatRecap = copyChatRecap;
   window.exportCsv = exportCsv;
   window.openLuckModal = openLuckModal;
   window.closeLuckModal = closeLuckModal;
+  window.openSettingsModal = openSettingsModal;
+  window.closeSettingsModal = closeSettingsModal;
+  window.buildShareableUrl = buildShareableUrl;
+  window.getUrlParams = getUrlParams;
 
   // App Initialization
   async function startApp() {
     initPlayersDb();
     if (window.__EMBEDDED_REPORT__) {
       loadEmbeddedReport(window.__EMBEDDED_REPORT__);
+      syncTabFromHash();
       return;
     }
     await initDefaults();
     updateModeUI();
     const hasLoadedCache = tryLoadFromCache();
-    if (!hasLoadedCache && userIdInput && userIdInput.value) {
+    if (
+      !hasLoadedCache &&
+      ((currentSyncType === "user" && userIdInput && userIdInput.value) ||
+        (currentSyncType === "leagues" && customLeagueIds.size > 0) ||
+        (pendingLeagueIdsFilter && pendingLeagueIdsFilter.size > 0))
+    ) {
       fetchLeaderboard();
     }
+    syncTabFromHash();
   }
 
   if (document.readyState === "loading") {
