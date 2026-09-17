@@ -30,6 +30,15 @@ describe("Bundle & Syntax Integrity", () => {
     );
   });
 
+  it("should initialize after the document has loaded", () => {
+    const code = fs.readFileSync(appJsPath, "utf8");
+    assert.match(
+      code,
+      /document\.addEventListener\("DOMContentLoaded", startApp\)/,
+      "Saved preferences must be restored when the document finishes loading"
+    );
+  });
+
   it("should have valid JavaScript syntax in scripts/bundle.js", () => {
     const bundleScriptPath = path.join(rootDir, "scripts", "bundle.js");
     assert.doesNotThrow(() => {

@@ -4438,7 +4438,7 @@
   }
 
   if (document.readyState === "loading") {
-    window.addEventListener("DOMContentLoaded", startApp);
+    document.addEventListener("DOMContentLoaded", startApp);
   } else {
     startApp();
   }
