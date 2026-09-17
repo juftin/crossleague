@@ -2234,6 +2234,15 @@
   const playerSearchInput = document.getElementById("playerSearchInput");
   const playerStatusFilter = document.getElementById("playerStatusFilter");
 
+  const queryParams = new URLSearchParams(window.location.search);
+  const queryUserId = queryParams.get("userId")?.trim();
+  const queryWeek = parseInt(queryParams.get("week"), 10);
+  const queryLeagueIds = new Set(
+    [...queryParams.getAll("leagueId"), ...(queryParams.get("leagueIds") || "").split(",")]
+      .map(leagueId => leagueId.trim())
+      .filter(Boolean)
+  );
+
   // Populate Week Select Options (1 to 18) if not already present
   if (weekInput && weekInput.options.length === 0) {
     for (let w = 1; w <= 18; w++) {
@@ -2354,6 +2363,7 @@
         ? data.selectedLeagueIds
         : allLeaguesData.map(l => l.league_id)
     );
+    applyQueryLeagueFilter();
 
     setLoading(false);
     initialState.classList.add("hidden");
@@ -2420,11 +2430,17 @@
   function loadSavedPreferences() {
     const savedUser =
       localStorage.getItem("sleeper_username") || localStorage.getItem("sleeper_user_id");
-    if (savedUser && userIdInput) userIdInput.value = savedUser;
+    if (userIdInput && (queryUserId || savedUser)) userIdInput.value = queryUserId || savedUser;
     const savedSeason = localStorage.getItem("sleeper_season");
     if (savedSeason && seasonInput) seasonInput.value = savedSeason;
     const savedWeek = localStorage.getItem("sleeper_week");
-    if (savedWeek && weekInput) weekInput.value = savedWeek;
+    if (weekInput) {
+      if (queryWeek >= 1 && queryWeek <= 18) {
+        weekInput.value = String(queryWeek);
+      } else if (savedWeek) {
+        weekInput.value = savedWeek;
+      }
+    }
     const savedMode = localStorage.getItem("sleeper_mode");
     if (savedMode && modeSelect) {
       modeSelect.value = savedMode;
@@ -2443,6 +2459,19 @@
     if (seasonInput) localStorage.setItem("sleeper_season", seasonInput.value);
     if (weekInput) localStorage.setItem("sleeper_week", weekInput.value);
     if (modeSelect) localStorage.setItem("sleeper_mode", modeSelect.value);
+  }
+
+  function applyQueryLeagueFilter() {
+    if (queryLeagueIds.size === 0) return;
+
+    const availableLeagueIds = new Set(allLeaguesData.map(league => league.league_id));
+    const matchingLeagueIds = [...queryLeagueIds].filter(leagueId =>
+      availableLeagueIds.has(leagueId)
+    );
+
+    if (matchingLeagueIds.length > 0) {
+      selectedLeagueIds = new Set(matchingLeagueIds);
+    }
   }
 
   function updateModeUI() {
@@ -3315,6 +3344,7 @@
       shareReportBtn.classList.remove("hidden");
       if (copyRecapBtn) copyRecapBtn.classList.remove("hidden");
 
+      applyQueryLeagueFilter();
       renderLeagueDropdown();
       refreshDashboard();
       saveDataToCache(
@@ -6239,6 +6269,7 @@
     leaguesMap = data.leaguesMap || {};
     allLeaguesData = data.allLeaguesData || [];
     selectedLeagueIds = new Set(data.selectedLeagueIds || allLeaguesData.map(l => l.league_id));
+    applyQueryLeagueFilter();
 
     setLoading(false);
     initialState.classList.add("hidden");

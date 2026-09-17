@@ -39,6 +39,14 @@ describe("Bundle & Syntax Integrity", () => {
     );
   });
 
+  it("should support report filters from URL query parameters", () => {
+    const code = fs.readFileSync(appJsPath, "utf8");
+    assert.match(code, /new URLSearchParams\(window\.location\.search\)/);
+    assert.match(code, /queryParams\.get\("userId"\)/);
+    assert.match(code, /queryParams\.get\("week"\)/);
+    assert.match(code, /queryParams\.get\("leagueIds"\)/);
+  });
+
   it("should have valid JavaScript syntax in scripts/bundle.js", () => {
     const bundleScriptPath = path.join(rootDir, "scripts", "bundle.js");
     assert.doesNotThrow(() => {

@@ -48,6 +48,14 @@
    ```
 3. Enter your Sleeper username or numeric User ID, select a season and matchup week, and click **Sync Leagues**.
 
+### Query Parameters
+
+Prefill and filter a report with URL parameters. `userId` and `week` override saved preferences; league IDs may be passed as a comma-separated `leagueIds` value or as repeated `leagueId` values.
+
+```
+?userId=123456789&week=4&leagueIds=league-a,league-b
+```
+
 ---
 
 ## 🏗️ Project Architecture
