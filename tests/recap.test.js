@@ -11,7 +11,7 @@ describe("Chat Recap Formatter", () => {
     benchKing,
     shareUrl = "https://crossleague.app/?season=2024&week=1#awards"
   }) => {
-    let text = `<${shareUrl}|*Week ${week} Fantasy Recap (${season})*>\n\n`;
+    let text = `*<${shareUrl}|Week ${week} Fantasy Recap (${season})>*\n\n`;
     text += `*The Podium (Top Scores)*\n`;
     if (top3[0])
       text += `• 🥇 *#1* ${top3[0].manager} (${top3[0].teamName}) — *${top3[0].points.toFixed(2)} pts* • _${top3[0].league}_\n`;
@@ -68,7 +68,7 @@ describe("Chat Recap Formatter", () => {
 
     assert.ok(
       output.includes(
-        "<https://crossleague.app/?season=2024&week=1#awards|*Week 1 Fantasy Recap (2024)*>"
+        "*<https://crossleague.app/?season=2024&week=1#awards|Week 1 Fantasy Recap (2024)>*"
       )
     );
     assert.ok(output.includes("*The Podium (Top Scores)*"));

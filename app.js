@@ -4602,7 +4602,7 @@
 
     let text = "";
     if (isSeason) {
-      text = `<${shareUrl}|*Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})*>\n\n`;
+      text = `*<${shareUrl}|Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})>*\n\n`;
 
       text += `*The Podium (Avg PPG)*\n`;
       if (first)
@@ -4640,7 +4640,7 @@
       text += `• 📈 *Benchmark:* Avg: *${avgScore.toFixed(2)} PPG* | Median: *${medianScore.toFixed(2)} PPG*\n`;
       text += `• 🏟️ *Scope:* ${totalLeagues} Leagues | ${totalSquads} Squads`;
     } else {
-      text = `<${shareUrl}|*Week ${week} Fantasy Recap (${season})*>\n\n`;
+      text = `*<${shareUrl}|Week ${week} Fantasy Recap (${season})>*\n\n`;
 
       text += `*The Podium (Top Scores)*\n`;
       if (first)
