@@ -38,6 +38,11 @@ tasks:
     cmds:
       - npm test {{.CLI_ARGS}}
 
+  snapshots:
+    desc: Generate visual PNG snapshots for dashboard tabs and modals
+    cmds:
+      - node scripts/generate-snapshots.js
+
   check:
     desc: Complete verification pipeline (lint, test, build sync check)
     cmds:
