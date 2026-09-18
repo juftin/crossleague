@@ -1,0 +1,2493 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🏈 CrossLeague • Sleeper Multi-League Power Rankings</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>"
+    />
+    <script data-cfasync="false" src="https://cdn.tailwindcss.com"></script>
+    <script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script data-cfasync="false">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', "Inter", "sans-serif"]
+            },
+            colors: {
+              brand: {
+                50: "#ecfdf5",
+                100: "#d1fae5",
+                400: "#34d399",
+                500: "#10b981",
+                600: "#059669",
+                700: "#047857"
+              },
+              sleeper: {
+                cyan: "#00ceb8",
+                blue: "#0284c7",
+                navy: "#0f172a",
+                card: "rgba(15, 23, 42, 0.75)"
+              }
+            },
+            animation: {
+              shimmer: "shimmer 2s infinite linear",
+              "pulse-glow": "pulseGlow 2.5s infinite ease-in-out"
+            },
+            keyframes: {
+              shimmer: {
+                "0%": { backgroundPosition: "-1000px 0" },
+                "100%": { backgroundPosition: "1000px 0" }
+              },
+              pulseGlow: {
+                "0%, 100%": { opacity: "0.6", transform: "scale(1)" },
+                "50%": { opacity: "1", transform: "scale(1.02)" }
+              }
+            }
+          }
+        }
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body
+
+    class="text-slate-100 min-h-screen antialiased flex flex-col selection:bg-emerald-500 selection:text-slate-950"
+  >
+    <!-- Header (Full-Width Fluid) -->
+    <header
+      class="border-b border-slate-800/80 bg-slate-950/90 sticky top-0 z-40 backdrop-blur-xl w-full"
+    >
+      <div
+        class="w-full px-3 sm:px-8 lg:px-12 py-3 sm:py-4 flex items-center justify-between gap-3 sm:gap-4"
+      >
+        <!-- Brand & Title (Full original layout) -->
+        <div class="flex items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
+          <div class="relative group flex-shrink-0">
+            <div
+              class="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-60 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none transform-gpu"
+            ></div>
+            <div
+              class="relative w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-slate-900 flex items-center justify-center text-lg sm:text-2xl shadow-xl border border-white/10"
+            >
+              ⚡
+            </div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 sm:gap-2.5">
+              <h1
+                class="text-base sm:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-emerald-400 truncate"
+              >
+                CrossLeague
+              </h1>
+            </div>
+            <p class="text-[11px] sm:text-sm text-slate-400 font-semibold mt-0.5 truncate">
+              Every league. Every squad. One board.
+            </p>
+            <p id="snapshotSubtitle" class="hidden text-[10px] sm:text-xs text-cyan-400 font-semibold mt-0.5 truncate"></p>
+          </div>
+        </div>
+
+        <!-- Right Side: Year/Week Badges, Snapshot Indicator & Hamburger Menu Button -->
+        <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          <!-- Year / Week Bubbles Column aligned to the right -->
+          <div
+            id="headerBottomRow"
+            class="flex flex-col items-end justify-center gap-1 flex-shrink-0"
+          >
+            <!-- Year / Season Bubble Badge -->
+            <span
+              id="headerSeasonBadge"
+              title="Active Season"
+              class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-800 text-[10px] sm:text-xs font-semibold text-cyan-300 shadow-sm font-mono leading-tight"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"></span>
+              <span id="headerSeasonValue">2024</span>
+            </span>
+
+            <!-- Week Bubble Badge -->
+            <span
+              id="headerWeekBadge"
+              title="Active Matchup Week"
+              class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-800 text-[10px] sm:text-xs font-semibold text-emerald-300 shadow-sm font-mono leading-tight"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+              <span id="headerWeekValue">Week 1</span>
+            </span>
+          </div>
+
+          <!-- Snapshot Indicator -->
+          <span
+            id="snapshotIndicator"
+            class="hidden inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-cyan-950/80 border border-cyan-500/30 text-[10px] sm:text-sm font-semibold text-cyan-300 flex-shrink-0"
+          >
+            <span
+              class="w-1.5 sm:w-2.5 h-1.5 sm:h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"
+            ></span>
+            Snapshot
+          </span>
+
+          <!-- MENU DROPDOWN CONTAINER -->
+          <div class="relative inline-block text-left z-50" id="settingsDropdownContainer">
+            <!-- Unlabeled Hamburger Trigger Button -->
+            <button
+              type="button"
+              id="btnOpenSettingsModal"
+              class="p-2 sm:p-2.5 rounded-xl glass-card border border-slate-700/80 hover:border-emerald-500/50 text-slate-300 hover:text-white transition flex items-center justify-center shadow-sm active:scale-95 cursor-pointer group"
+              aria-expanded="false"
+              aria-haspopup="true"
+              aria-label="Menu"
+              title="Menu &amp; Settings"
+            >
+              <svg
+                id="settingsDropdownChevron"
+                class="w-5 h-5 text-emerald-400 group-hover:text-emerald-300 transition-colors"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
+            </button>
+
+            <!-- Mobile Backdrop Overlay -->
+            <div
+              id="settingsBackdrop"
+              class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-40 sm:hidden"
+              aria-hidden="true"
+            ></div>
+
+            <!-- Dropdown Panel (Contains Week Stepper, Settings, League Filter, Quick Actions) -->
+            <div
+              id="settingsModal"
+              class="hidden fixed inset-x-3 top-16 max-h-[calc(100dvh-6.5rem-env(safe-area-inset-bottom,0px))] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[420px] sm:max-w-md sm:max-h-[85vh] overflow-y-auto overscroll-contain rounded-2xl glass-card border border-slate-700/80 shadow-2xl p-4 pb-16 sm:p-5 sm:pb-5 z-50 space-y-4 backdrop-blur-xl bg-slate-950/95 ring-1 ring-white/10 text-left touch-scroll"
+            >
+              <!-- Menu Header -->
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">⚡</span>
+                  <span class="text-xs font-black uppercase tracking-wider text-slate-200"
+                    >Menu &amp; Controls</span
+                  >
+                </div>
+                <button
+                  type="button"
+                  id="btnCloseSettingsModal"
+                  class="p-1 rounded-lg text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition cursor-pointer text-xs"
+                  aria-label="Close menu"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <!-- 1. Matchup Week Stepper inside Menu -->
+              <div class="space-y-1.5">
+                <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400 px-1"
+                  >Matchup Week</span
+                >
+                <div
+                  id="weekSelectorComponent"
+                  class="flex items-center justify-between p-1 bg-slate-900 rounded-xl border border-slate-800"
+                >
+                  <button
+                    type="button"
+                    id="prevWeekBtn"
+                    title="Previous Week (← Left Arrow)"
+                    class="w-8 h-8 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center font-bold cursor-pointer text-xs shadow-sm"
+                    aria-label="Previous Week"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                  </button>
+
+                  <div
+                    id="weekDisplayContainer"
+                    class="flex items-center gap-2 px-3 select-none justify-center"
+                  >
+                    <span
+                      id="weekDisplayValue"
+                      class="text-sm font-extrabold text-white whitespace-nowrap font-mono tracking-tight"
+                    >
+                      Week 1
+                    </span>
+                    <span
+                      id="weekStatusBadge"
+                      class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400"
+                    >
+                      Played
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    id="nextWeekBtn"
+                    title="Next Week (→ Right Arrow)"
+                    class="w-8 h-8 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center font-bold cursor-pointer text-xs shadow-sm"
+                    aria-label="Next Week"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Account & Scope Settings Form -->
+              <form id="filterForm" class="space-y-3.5">
+                <!-- Platform Selector -->
+                <div class="space-y-1.5">
+                  <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400 px-1"
+                    >Fantasy Platform</span
+                  >
+                  <div class="flex items-center p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs font-bold">
+                    <button
+                      type="button"
+                      id="platformSleeperBtn"
+                      class="flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-200 bg-slate-800 shadow-sm flex items-center justify-center gap-1.5 text-xs font-bold"
+                    >
+                      <span>⚡</span>
+                      <span>Sleeper</span>
+                    </button>
+                    <button
+                      type="button"
+                      id="platformEspnBtn"
+                      class="flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 text-xs"
+                    >
+                      <span>🏈</span>
+                      <span>ESPN</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Sync Source Selector & Inputs -->
+                <div class="space-y-2">
+                  <div id="syncTypeButtonsContainer" class="flex items-center p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs font-bold">
+                    <button
+                      type="button"
+                      id="syncTypeUserBtn"
+                      class="flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-200 bg-slate-800 shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      <span>👤</span>
+                      <span>Username</span>
+                    </button>
+                    <button
+                      type="button"
+                      id="syncTypeLeaguesBtn"
+                      class="flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5"
+                    >
+                      <span>🏆</span>
+                      <span>League IDs</span>
+                    </button>
+                  </div>
+
+                  <!-- 1. Username Input Panel (Sleeper) -->
+                  <div id="userSyncPanel">
+                    <label
+                      for="userIdInput"
+                      class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between"
+                    >
+                      <span id="userIdInputLabel">Sleeper Username or ID</span>
+                      <span class="text-[10px] text-emerald-400 font-bold lowercase">remembered</span>
+                    </label>
+                    <div class="relative">
+                      <input
+                        type="text"
+                        id="userIdInput"
+                        placeholder="e.g. username or numeric ID"
+                        class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all placeholder-slate-500 pl-9 font-medium"
+                      />
+                      <svg
+                        class="w-4 h-4 text-slate-500 absolute left-3 top-2.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <!-- 2. League IDs Multi-Input Drop-Down Panel -->
+                  <div id="leaguesSyncPanel" class="hidden space-y-2.5">
+                    <label
+                      class="block text-xs font-black uppercase tracking-wider text-slate-400 flex items-center justify-between"
+                    >
+                      <span id="customLeaguesLabel">League IDs</span>
+                      <span class="text-[10px] text-slate-500 font-medium">multi-league</span>
+                    </label>
+
+                    <!-- Multi-input Entry Field -->
+                    <div class="flex items-center gap-1.5">
+                      <div class="relative flex-1">
+                        <input
+                          type="text"
+                          id="customLeagueIdInput"
+                          placeholder="e.g. 12345678 or espn:12345678"
+                          class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all placeholder-slate-500 pl-8 font-mono"
+                        />
+                        <span class="absolute left-2.5 top-2 text-xs text-slate-500 font-mono">#</span>
+                      </div>
+                      <button
+                        type="button"
+                        id="btnAddCustomLeagueId"
+                        class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition cursor-pointer shrink-0 shadow-sm"
+                      >
+                        + Add
+                      </button>
+                    </div>
+
+                    <!-- Collapsible Dropdown for Added League IDs -->
+                    <div id="customLeaguesDropdownContainer" class="relative">
+                      <button
+                        type="button"
+                        id="customLeaguesDropdownBtn"
+                        class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-emerald-500/50 text-slate-200 hover:text-white transition flex items-center justify-between text-xs font-semibold cursor-pointer shadow-sm active:scale-98 group"
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                        title="View and manage added League IDs"
+                      >
+                        <div class="flex items-center gap-2 truncate min-w-0 pr-2">
+                          <span class="text-xs flex-shrink-0">📋</span>
+                          <span id="customLeaguesDropdownLabel" class="truncate text-slate-300">View Added IDs</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                          <span
+                            id="leagueIdsCountBadge"
+                            class="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded-full border border-emerald-500/30 font-mono"
+                          >
+                            0 IDs
+                          </span>
+                          <svg
+                            id="customLeaguesDropdownChevron"
+                            class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19 9l-7 7-7-7"
+                            ></path>
+                          </svg>
+                        </div>
+                      </button>
+
+                      <!-- Collapsible Dropdown Menu -->
+                      <div
+                        id="customLeaguesDropdownMenu"
+                        class="hidden mt-1.5 w-full rounded-xl bg-slate-900 border border-slate-700/80 shadow-xl p-2.5 space-y-2 z-10"
+                      >
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 px-1">
+                          <span class="text-[10px] font-black uppercase tracking-wider text-slate-400"
+                            >Active League IDs</span
+                          >
+                          <button
+                            type="button"
+                            id="btnClearCustomLeagueIds"
+                            class="text-rose-400/80 hover:text-rose-300 text-[10px] font-bold transition cursor-pointer hover:underline"
+                          >
+                            Clear all
+                          </button>
+                        </div>
+
+                        <!-- Active League IDs Chips Container -->
+                        <div
+                          id="customLeagueIdsChips"
+                          class="flex flex-wrap gap-1.5 p-2 bg-slate-950/60 rounded-xl border border-slate-800/80 min-h-[44px] max-h-36 overflow-y-auto overscroll-contain touch-scroll"
+                        >
+                          <div id="noLeagueIdsPlaceholder" class="text-[11px] text-slate-500 italic p-1">
+                            No League IDs added yet. Paste or enter IDs above.
+                          </div>
+                        </div>
+
+                        <div class="text-[10px] text-slate-500 px-1">
+                          Separate multiple IDs by comma, space, or newline. Prepend <code class="text-rose-300 font-mono">espn:</code> or <code class="text-emerald-300 font-mono">sleeper:</code> for mixed platforms.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                  <!-- Scope Mode -->
+                  <div>
+                    <label
+                      for="modeSelect"
+                      class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5"
+                    >
+                      Scope Mode
+                    </label>
+                    <select
+                      id="modeSelect"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-semibold cursor-pointer"
+                    >
+                      <option value="WEEKLY">Weekly Matchup</option>
+                      <option value="SEASON_ROLLUP">Season-to-Date</option>
+                    </select>
+                  </div>
+
+                  <!-- Season Input -->
+                  <div>
+                    <label
+                      for="seasonInput"
+                      class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5"
+                    >
+                      Season
+                    </label>
+                    <select
+                      id="seasonInput"
+                      class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-semibold cursor-pointer"
+                    >
+                      <option value="2026">2026</option>
+                      <option value="2025">2025</option>
+                      <option value="2024">2024</option>
+                      <option value="2023">2023</option>
+                      <option value="2022">2022</option>
+                      <option value="2021">2021</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Hidden Input maintaining current week state -->
+                <input type="hidden" id="weekInput" name="week" value="1" />
+
+                <!-- Save & Apply Button -->
+                <div class="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    id="btnCancelSettingsModal"
+                    class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 transition cursor-pointer border border-slate-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    id="btnSaveSettingsModal"
+                    class="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Apply &amp; Sync</span>
+                  </button>
+                </div>
+              </form>
+
+              <!-- 3. Active Leagues Multi-Select Dropdown inside Menu -->
+              <div id="leagueDropdownContainer" class="border-t border-slate-800/80 pt-3 space-y-1.5">
+                <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400 px-1"
+                  >Active Leagues</span
+                >
+                <div class="relative">
+                  <button
+                    type="button"
+                    id="leagueDropdownBtn"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-emerald-500/50 text-slate-200 hover:text-white transition flex items-center justify-between text-xs font-semibold cursor-pointer shadow-sm active:scale-98 group"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    title="Filter Active Leagues"
+                  >
+                    <div class="flex items-center gap-2 truncate min-w-0 pr-2">
+                      <span class="text-xs flex-shrink-0">🏟️</span>
+                      <span id="leagueDropdownLabel" class="truncate text-slate-200">All Leagues Selected</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                      <span
+                        id="leagueDropdownBadge"
+                        class="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded-full border border-emerald-500/30 font-mono"
+                      >
+                        0 / 0
+                      </span>
+                      <svg
+                        id="leagueDropdownChevron"
+                        class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </div>
+                  </button>
+
+                  <!-- Collapsible Dropdown Panel -->
+                  <div
+                    id="leagueDropdownMenu"
+                    class="hidden mt-1.5 w-full rounded-xl bg-slate-900 border border-slate-700/80 shadow-xl p-2.5 space-y-2 z-10"
+                  >
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 px-1">
+                      <span class="text-[10px] font-black uppercase tracking-wider text-slate-400"
+                        >Select Leagues</span
+                      >
+                      <div class="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          id="selectAllLeaguesBtn"
+                          class="px-2 py-0.5 rounded-md bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-emerald-300 text-[10px] font-bold transition border border-slate-800 cursor-pointer"
+                        >
+                          All
+                        </button>
+                        <button
+                          type="button"
+                          id="clearAllLeaguesBtn"
+                          class="px-2 py-0.5 rounded-md bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-rose-300 text-[10px] font-bold transition border border-slate-800 cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      id="leagueDropdownList"
+                      class="max-h-48 overflow-y-auto overscroll-contain touch-scroll space-y-1 pr-1"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Actions Section -->
+              <div class="border-t border-slate-800/80 pt-3 space-y-1.5">
+                <span class="block text-[10px] font-black uppercase tracking-wider text-slate-500 px-1"
+                  >Quick Actions</span
+                >
+                <!-- Copy Recap -->
+                <button
+                  type="button"
+                  id="copyRecapBtn"
+                  class="hidden w-full px-3 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-200 hover:text-white transition flex items-center gap-2.5 text-xs font-bold border border-slate-800 cursor-pointer"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 text-cyan-400 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                    ></path>
+                  </svg>
+                  <span id="copyRecapBtnText">Copy Recap</span>
+                </button>
+
+                <!-- Share Link -->
+                <button
+                  type="button"
+                  id="shareUrlBtn"
+                  class="hidden w-full px-3 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-200 hover:text-white transition flex items-center gap-2.5 text-xs font-bold border border-slate-800 cursor-pointer"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 text-blue-400 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    ></path>
+                  </svg>
+                  <span id="shareUrlBtnText">Share</span>
+                </button>
+
+                <!-- Download Report -->
+                <button
+                  type="button"
+                  id="downloadReportBtn"
+                  class="hidden w-full px-3 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-200 hover:text-white transition flex items-center gap-2.5 text-xs font-bold border border-slate-800 cursor-pointer"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    ></path>
+                  </svg>
+                  <span id="downloadReportBtnText">Download Report</span>
+                </button>
+
+                <!-- Clear Data -->
+                <button
+                  type="button"
+                  id="clearDataBtn"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900/60 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 transition flex items-center gap-2.5 text-xs font-bold border border-slate-800 hover:border-rose-900/40 cursor-pointer"
+                  title="Clear all stored leagues, cached data, credentials, and settings"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 text-rose-400 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    ></path>
+                  </svg>
+                  <span id="clearDataBtnText">Clear Data</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Row 2: Desktop Navigation Tabs (Full-width row) -->
+      <div class="hidden sm:block border-t border-slate-800/80 bg-slate-950/60 px-3 sm:px-8 lg:px-12 py-2">
+        <nav
+          id="tabNavigationContainer"
+          aria-label="Dashboard views"
+          class="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1.5 p-1.5 bg-slate-900/90 rounded-2xl border border-slate-800 text-xs sm:text-sm font-bold shadow-inner"
+        >
+          <!-- 1. Awards Tab -->
+          <button
+            type="button"
+            id="tabAwards"
+            onclick="switchTab('awards')"
+            title="Awards & Podium"
+            class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap font-bold cursor-pointer active:scale-95 shadow-sm text-center"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15a6 6 0 006-6V4H6v5a6 6 0 006 6zm0 0v4m-4 0h8M4 6H2a2 2 0 00-2 2v1a4 4 0 004 4h2m12-7h2a2 2 0 012 2v1a4 4 0 01-4 4h-2"
+              ></path>
+            </svg>
+            <span>Awards</span>
+          </button>
+
+          <!-- 2. Board Tab -->
+          <button
+            type="button"
+            id="tabLeaderboard"
+            onclick="switchTab('leaderboard')"
+            title="Full Leaderboard"
+            class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 10h16M4 14h16M4 18h16"
+              ></path>
+            </svg>
+            <span>Board</span>
+          </button>
+
+          <!-- 3. Score Analytics Tab -->
+          <button
+            type="button"
+            id="tabVisuals"
+            onclick="switchTab('visuals')"
+            title="Score Analytics & Charts"
+            class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              ></path>
+            </svg>
+            <span>Analytics</span>
+          </button>
+
+          <!-- 4. League Matrix Tab -->
+          <button
+            type="button"
+            id="tabLeagueGrid"
+            onclick="switchTab('leagueGrid')"
+            title="League vs League Comparison"
+            class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
+              ></path>
+            </svg>
+            <span>Leagues</span>
+          </button>
+
+          <!-- 5. Luck Matrix Tab -->
+          <button
+            type="button"
+            id="tabLuck"
+            onclick="switchTab('luck')"
+            title="Luck Index & Schedule Matrix"
+            class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              ></path>
+            </svg>
+            <span>Luck Matrix</span>
+          </button>
+
+          <!-- 6. Players Tab -->
+          <button
+            type="button"
+            id="tabPlayers"
+            onclick="switchTab('players')"
+            title="Player Analytics & Heatmap"
+            class="flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              ></path>
+            </svg>
+            <span>Player Analytics</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content Container (Full-Width Fluid) -->
+    <main class="flex-1 w-full px-3 sm:px-8 lg:px-12 py-3 sm:py-6 space-y-4 sm:space-y-6 pb-24 sm:pb-8">
+      <!-- Live Loading Bar -->
+      <div id="statusContainer" class="hidden space-y-2 pb-2">
+        <div class="flex justify-between text-xs sm:text-sm font-bold text-slate-300">
+          <span id="statusText" class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            Loading rosters &amp; matchups...
+          </span>
+          <span id="progressText" class="font-mono text-emerald-400 font-bold">0%</span>
+        </div>
+        <div
+          class="w-full bg-slate-900/90 rounded-full h-2.5 p-0.5 border border-slate-800 overflow-hidden"
+        >
+          <div
+            id="progressBar"
+            class="bg-gradient-to-r from-emerald-500 via-cyan-400 to-teal-300 h-full rounded-full transition-all duration-300 w-0 shadow-lg shadow-emerald-500/40"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Error banner -->
+      <div
+        id="errorBanner"
+        class="hidden bg-rose-950/40 border border-rose-500/30 text-rose-200 rounded-xl p-4 text-sm sm:text-base flex items-start gap-3 backdrop-blur"
+      >
+          <svg
+            class="w-6 h-6 flex-shrink-0 text-rose-400 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <div id="errorMessage" class="font-semibold">
+            Could not reach Sleeper API. Double check username or network.
+          </div>
+        </div>
+      </div>
+
+      <!-- Skeleton Loading Placeholder -->
+      <div id="skeletonLoader" class="hidden space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="h-48 rounded-2xl skeleton-loader"></div>
+          <div class="h-52 rounded-2xl skeleton-loader"></div>
+          <div class="h-48 rounded-2xl skeleton-loader"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="h-28 rounded-xl skeleton-loader"></div>
+          <div class="h-28 rounded-xl skeleton-loader"></div>
+          <div class="h-28 rounded-xl skeleton-loader"></div>
+          <div class="h-28 rounded-xl skeleton-loader"></div>
+          <div class="h-28 rounded-xl skeleton-loader col-span-1"></div>
+        </div>
+        <div class="h-96 rounded-2xl skeleton-loader"></div>
+      </div>
+
+      <!-- Content Area (Full-Width) -->
+      <div id="reportContent" class="hidden space-y-6">
+        <!-- TAB 1: AWARDS VIEW -->
+        <div id="viewAwards" class="space-y-7 w-full">
+          <!-- THE PODIUM -->
+          <div id="podiumSection" class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <span class="text-2xl">🏆</span>
+                <h2 class="text-base sm:text-lg font-black uppercase tracking-wider text-slate-200">
+                  The Podium • Heavy Hitters
+                </h2>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end" id="podiumCards"></div>
+          </div>
+
+          <!-- SUPERLATIVES SHOWCASE DECK (#1 Bad Beat & Lucky Escape, #2 Bench MVP) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="superlativesGrid">
+            <div
+              id="badBeatCard"
+              class="glass-card rounded-2xl p-5 border border-rose-500/25 bg-rose-950/20 glass-card-hover flex flex-col justify-between"
+            >
+              <span class="text-sm text-slate-500">Loading Bad Beat...</span>
+            </div>
+            <div
+              id="luckyEscapeCard"
+              class="glass-card rounded-2xl p-5 border border-emerald-500/25 bg-emerald-950/20 glass-card-hover flex flex-col justify-between"
+            >
+              <span class="text-sm text-slate-500">Loading Lucky Escape...</span>
+            </div>
+            <div
+              id="benchMvpCard"
+              class="glass-card rounded-2xl p-5 border border-amber-500/25 bg-amber-950/20 glass-card-hover flex flex-col justify-between"
+            >
+              <span class="text-sm text-slate-500">Loading Bench Analytics...</span>
+            </div>
+          </div>
+
+          <!-- SUMMARY KPI METRIC CARDS -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div
+              class="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs text-slate-400 hover:text-slate-200 font-black uppercase tracking-wider flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>Leagues &amp; Squads</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Total active fantasy leagues and participating squads included in the current filter.
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-sm">🏟️</span>
+                </div>
+                <div class="flex items-baseline gap-2 mt-2">
+                  <div class="flex items-baseline gap-1">
+                    <span
+                      id="statTotalLeagues"
+                      class="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-mono"
+                      >0</span
+                    >
+                    <span class="text-xs font-bold text-slate-400 uppercase">Leagues</span>
+                  </div>
+                  <span class="text-slate-600 font-black">•</span>
+                  <div class="flex items-baseline gap-1">
+                    <span
+                      id="statTotalTeams"
+                      class="text-2xl sm:text-3xl lg:text-4xl font-black text-cyan-300 font-mono"
+                      >0</span
+                    >
+                    <span class="text-xs font-bold text-cyan-400/80 uppercase">Teams</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-slate-800/60">
+                <div class="text-xs text-slate-500 font-semibold">Active in filter</div>
+              </div>
+            </div>
+
+            <div
+              class="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs text-slate-400 hover:text-slate-200 font-black uppercase tracking-wider flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>Peak Score</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Highest single-squad score recorded across all active leagues for this matchup period.
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-sm">🔥</span>
+                </div>
+                <div
+                  id="statHighScore"
+                  class="text-3xl sm:text-4xl font-black text-emerald-400 mt-2 font-mono"
+                >
+                  0.00
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-slate-800/60">
+                <div id="statHighTeam" class="text-xs sm:text-sm text-slate-200 font-bold truncate">
+                  -
+                </div>
+                <div
+                  id="statHighLeague"
+                  class="text-xs text-emerald-400/90 font-semibold truncate flex items-center gap-1 mt-0.5"
+                  title="League Name"
+                >
+                  <span>🏆</span> <span class="truncate">-</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs text-slate-400 hover:text-slate-200 font-black uppercase tracking-wider flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>Lowest Score</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Lowest score recorded across all active squads for this matchup period.
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-sm">❄️</span>
+                </div>
+                <div
+                  id="statLowScore"
+                  class="text-3xl sm:text-4xl font-black text-rose-400 mt-2 font-mono"
+                >
+                  0.00
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-slate-800/60">
+                <div id="statLowTeam" class="text-xs sm:text-sm text-slate-200 font-bold truncate">
+                  -
+                </div>
+                <div
+                  id="statLowLeague"
+                  class="text-xs text-rose-400/90 font-semibold truncate flex items-center gap-1 mt-0.5"
+                  title="League Name"
+                >
+                  <span>🏆</span> <span class="truncate">-</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs text-slate-400 hover:text-slate-200 font-black uppercase tracking-wider flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>Benchmark</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Cross-league scoring averages and median output across all active squads.
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-sm">📊</span>
+                </div>
+                <div
+                  id="statAvgScore"
+                  class="text-3xl sm:text-4xl font-black text-indigo-300 mt-2 font-mono"
+                >
+                  0.00
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-slate-800/60">
+                <div id="statMedianScore" class="text-xs sm:text-sm text-slate-400 font-semibold">
+                  Median: 0.00
+                </div>
+                <div class="text-xs text-slate-500 font-medium">Cross-League Average</div>
+              </div>
+            </div>
+
+            <div
+              class="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative col-span-1 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs text-amber-400 hover:text-amber-300 font-black uppercase tracking-wider flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>Power League</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover popover-right" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Highest average scoring fantasy league across all participating teams.
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-sm">👑</span>
+                </div>
+                <div
+                  id="statTopLeagueAvg"
+                  class="text-3xl sm:text-4xl font-black text-amber-300 mt-2 font-mono"
+                >
+                  0.00
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-amber-500/20">
+                <div
+                  id="statTopLeagueName"
+                  class="text-xs sm:text-sm text-amber-200 font-bold truncate flex items-center gap-1"
+                >
+                  <span>🏆</span> <span class="truncate">-</span>
+                </div>
+                <div
+                  id="statTopLeagueSub"
+                  class="text-xs text-amber-300/70 font-medium truncate mt-0.5"
+                >
+                  Top Scoring League (Avg)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: BOARD VIEW (Full-Width Table) -->
+        <div id="viewLeaderboard" class="hidden space-y-4 w-full">
+          <!-- Advanced Filter & Search Deck -->
+          <div
+            class="glass-card rounded-2xl p-3.5 sm:p-5 border border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 w-full"
+          >
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto flex-1">
+              <!-- Search -->
+              <div class="relative flex-1 sm:w-80">
+                <input
+                  type="text"
+                  id="tableSearch"
+                  placeholder="Search manager, squad, league..."
+                  class="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
+                />
+                <svg
+                  class="w-4 h-4 text-slate-500 absolute left-3.5 top-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+              </div>
+
+              <!-- Score Tier Filter -->
+              <select
+                id="scoreTierSelect"
+                class="bg-slate-950/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold cursor-pointer"
+              >
+                <option value="ALL">All Scores</option>
+                <option value="BOOM">🔥 Nuclear (140+ pts)</option>
+                <option value="SOLID">⚡ Solid (100 - 140)</option>
+                <option value="COLD">🧊 Ice Cold (&lt; 100)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Master Power Board Table -->
+          <div class="glass-card rounded-2xl p-4 sm:p-6 border border-slate-800 space-y-4 w-full">
+            <div class="flex items-center justify-between text-xs sm:text-sm text-slate-400 px-1">
+              <span id="rowCount">Showing 0 of 0 squads</span>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+              <table class="w-full text-left border-collapse" id="mainTable">
+                <thead
+                  class="bg-slate-900/90 text-slate-400 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider border-b border-slate-800 select-none"
+                >
+                  <tr>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortTable('Rank')"
+                      title="Sort by Rank"
+                    >
+                      <div class="flex items-center gap-1 sm:gap-1.5">
+                        <span>#</span>
+                        <span id="sortIconRank" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortTable('Points')"
+                      title="Sort by Points"
+                    >
+                      <div class="flex items-center gap-1 sm:gap-1.5">
+                        <span id="thPoints">POINTS</span>
+                        <span id="sortIconPoints" class="text-xs text-emerald-400">▼</span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortTable('Manager')"
+                      title="Sort by Manager"
+                    >
+                      <div class="flex items-center gap-1 sm:gap-1.5">
+                        <span>MANAGER</span>
+                        <span id="sortIconManager" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortTable('Team')"
+                      title="Sort by Squad"
+                    >
+                      <div class="flex items-center gap-1 sm:gap-1.5">
+                        <span>SQUAD</span>
+                        <span id="sortIconTeam" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortTable('League')"
+                      title="Sort by League"
+                    >
+                      <div class="flex items-center gap-1 sm:gap-1.5">
+                        <span>LEAGUE</span>
+                        <span id="sortIconLeague" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortTable('Record')"
+                      title="Sort by Matchup / Win %"
+                    >
+                      <div class="flex items-center justify-center gap-1 sm:gap-1.5">
+                        <span>MATCHUP</span>
+                        <span id="sortIconRecord" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortTable('Efficiency')"
+                      title="Sort by Lineup Efficiency"
+                    >
+                      <div class="flex items-center justify-center gap-1 sm:gap-1.5">
+                        <span>EFFICIENCY</span>
+                        <span id="sortIconEfficiency" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th class="py-2.5 sm:py-3.5 px-1.5 sm:px-3 w-10 sm:w-12 text-center"></th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y divide-slate-800/60 font-sans text-xs sm:text-sm">
+                  <!-- Dynamically populated rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Empty search state -->
+            <div id="noResultsFound" class="hidden py-12 text-center text-slate-400 space-y-2">
+              <div class="text-3xl">🔍</div>
+              <div class="font-bold text-slate-200">No squads match your filters.</div>
+              <div class="text-xs text-slate-500">
+                Try adjusting your search query or league selection.
+              </div>
+            </div>
+
+            <!-- Pagination Footer for Main Board -->
+            <div
+              id="mainPaginationFooter"
+              class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 text-xs sm:text-sm text-slate-400"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700/80"
+                >
+                  <span class="text-slate-400 font-bold text-xs">Show:</span>
+                  <select
+                    id="mainPageSizeSelect"
+                    onchange="setMainPageSize(this.value)"
+                    class="bg-transparent text-white font-black text-xs focus:outline-none cursor-pointer"
+                  >
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                  </select>
+                </div>
+                <span id="mainPageInfoText" class="text-slate-400 font-medium">Showing 0 of 0</span>
+              </div>
+
+              <div id="mainPaginationControls" class="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end">
+                <button
+                  id="btnPrevMainPage"
+                  onclick="changeMainPage(-1)"
+                  class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 19l-7-7 7-7"
+                    ></path>
+                  </svg>
+                  <span>Prev</span>
+                </button>
+                <div id="mainPageNumberButtons" class="flex items-center gap-1"></div>
+                <button
+                  id="btnNextMainPage"
+                  onclick="changeMainPage(1)"
+                  class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+                >
+                  <span>Next</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: VISUAL ANALYTICS VIEW -->
+        <div id="viewVisuals" class="hidden space-y-6 w-full">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+            <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+              <div>
+                <div class="relative inline-block card-info-wrapper">
+                  <button
+                    type="button"
+                    class="card-info-trigger text-base font-black text-white hover:text-emerald-300 uppercase tracking-wider flex items-center gap-2 focus:outline-none transition group cursor-pointer"
+                    aria-expanded="false"
+                  >
+                    <span>📊</span> <span>Score Distribution</span>
+                    <span class="text-xs opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                  </button>
+                  <div class="card-info-popover" role="tooltip">
+                    <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                      Frequency histogram of squad scores grouped into 20-point scoring tiers across all active leagues.
+                    </div>
+                  </div>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                  Spread of scoring outputs across all active squads
+                </p>
+              </div>
+              <div class="h-80 sm:h-96 relative">
+                <canvas id="scoreDistChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+              <div>
+                <div class="relative inline-block card-info-wrapper">
+                  <button
+                    type="button"
+                    class="card-info-trigger text-base font-black text-white hover:text-emerald-300 uppercase tracking-wider flex items-center gap-2 focus:outline-none transition group cursor-pointer"
+                    aria-expanded="false"
+                  >
+                    <span>🏟️</span> <span>League Scoring Power</span>
+                    <span class="text-xs opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                  </button>
+                  <div class="card-info-popover" role="tooltip">
+                    <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                      Comparing league scoring averages and peak team outputs side-by-side.
+                    </div>
+                  </div>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                  Comparing league scoring averages and peak team outputs
+                </p>
+              </div>
+              <div class="h-80 sm:h-96 relative">
+                <canvas id="leagueAvgChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: LEAGUE BREAKDOWN GRID VIEW -->
+        <div id="viewLeagueGrid" class="hidden space-y-6 w-full">
+          <div
+            id="leagueCardsGrid"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full"
+          ></div>
+        </div>
+
+        <!-- TAB 4: LUCK INDEX & SCHEDULE VARIANCE VIEW -->
+        <div id="viewLuck" class="hidden space-y-6 w-full">
+          <!-- Educational / Explanation Hero Card -->
+          <div
+            class="glass-card rounded-2xl p-5 sm:p-6 border border-emerald-500/20 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-slate-900/90 relative overflow-hidden space-y-4"
+          >
+            <!-- Card Header Row -->
+            <div
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3.5"
+            >
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <span class="text-xl">🍀</span>
+                <h3 class="text-lg sm:text-xl font-black text-white tracking-wide">
+                  Schedule Luck & All-Play Index
+                </h3>
+                <span
+                  class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono"
+                  >All-Play Formula</span
+                >
+              </div>
+              <button
+                id="btnOpenLuckModal"
+                type="button"
+                onclick="openLuckModal()"
+                class="self-start sm:self-auto px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 text-xs sm:text-sm font-bold transition inline-flex items-center gap-2 shadow-sm cursor-pointer"
+                title="View full Luck Index, Expected Wins (xW), and All-Play simulation methodology."
+              >
+                <svg
+                  class="w-4 h-4 text-emerald-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span>Read Full Methodology</span>
+              </button>
+            </div>
+
+            <!-- Card Description Body -->
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl sm:max-w-3xl">
+              The <strong>Luck Index</strong> measures how much a squad's win-loss record was helped
+              or hindered by their weekly head-to-head schedule draw. Using the
+              <strong>All-Play simulation</strong>, each team's weekly score is evaluated against
+              every other manager in their league to compute true scoring expectation.
+            </p>
+
+            <!-- 3 Legend Tier Cards (Grid) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
+              <div
+                class="p-2.5 rounded-xl bg-slate-950/60 border border-emerald-500/20 flex items-start gap-2"
+                title="Positive Luck Index (&ge; +0.50): Won games against opponents who had down scoring weeks."
+              >
+                <span class="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0"></span>
+                <div class="text-xs">
+                  <strong class="text-emerald-300 font-bold block sm:inline"
+                    >🍀 &gt; +0.50 (Lucky):</strong
+                  >
+                  <span class="text-slate-400"
+                    >Gained extra wins from favorable schedule matchups</span
+                  >
+                </div>
+              </div>
+              <div
+                class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-700/50 flex items-start gap-2"
+                title="Neutral Luck Index (-0.50 to +0.50): Record aligns directly with scoring output."
+              >
+                <span class="w-2 h-2 rounded-full bg-slate-400 mt-1.5 flex-shrink-0"></span>
+                <div class="text-xs">
+                  <strong class="text-slate-300 font-bold block sm:inline"
+                    >⚖️ -0.50 to +0.50 (Fair):</strong
+                  >
+                  <span class="text-slate-400"
+                    >Win-loss record mirrors true scoring performance</span
+                  >
+                </div>
+              </div>
+              <div
+                class="p-2.5 rounded-xl bg-slate-950/60 border border-rose-500/20 flex items-start gap-2"
+                title="Negative Luck Index (&le; -0.50): Lost games despite putting up strong weekly scores because opponents scored higher."
+              >
+                <span class="w-2 h-2 rounded-full bg-rose-400 mt-1.5 flex-shrink-0"></span>
+                <div class="text-xs">
+                  <strong class="text-rose-300 font-bold block sm:inline"
+                    >💔 &lt; -0.50 (Unlucky):</strong
+                  >
+                  <span class="text-slate-400"
+                    >Dropped matchups to high scorers despite strong output</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 KPI Superlative Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div
+              id="luckLuckiestCard"
+              class="glass-card rounded-2xl p-5 border border-emerald-500/30 bg-emerald-950/20 glass-card-hover flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs font-black uppercase tracking-wider text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>🍀 Luckiest Squad</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Highest positive luck index — gained the most bonus wins above scoring expectation due to favorable opponent matchups.
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold border border-emerald-500/30"
+                    >Lucky Draw</span
+                  >
+                </div>
+                <div
+                  id="statLuckiestVal"
+                  class="text-3xl font-black text-emerald-300 font-mono mt-2"
+                >
+                  +0.00
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-emerald-500/20">
+                <div id="statLuckiestTeam" class="text-sm font-bold text-slate-100 truncate">-</div>
+                <div
+                  id="statLuckiestLeague"
+                  class="text-xs font-semibold text-emerald-300/90 truncate flex items-center gap-1 mt-0.5"
+                  title="League Name"
+                >
+                  <span>🏆</span> <span class="truncate">-</span>
+                </div>
+                <div id="statLuckiestSub" class="text-xs text-slate-400 mt-1 font-medium">-</div>
+              </div>
+            </div>
+
+            <div
+              id="luckUnluckiestCard"
+              class="glass-card rounded-2xl p-5 border border-rose-500/30 bg-rose-950/20 glass-card-hover flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs font-black uppercase tracking-wider text-rose-400 hover:text-rose-300 flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>💔 Unluckiest Squad</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Lowest negative luck index — lost the most games below scoring expectation due to high-scoring opponent matchups.
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    class="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono font-bold border border-rose-500/30"
+                    >Tough Schedule</span
+                  >
+                </div>
+                <div
+                  id="statUnluckiestVal"
+                  class="text-3xl font-black text-rose-400 font-mono mt-2"
+                >
+                  -0.00
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-rose-500/20">
+                <div id="statUnluckiestTeam" class="text-sm font-bold text-slate-100 truncate">
+                  -
+                </div>
+                <div
+                  id="statUnluckiestLeague"
+                  class="text-xs font-semibold text-rose-300/90 truncate flex items-center gap-1 mt-0.5"
+                  title="League Name"
+                >
+                  <span>🏆</span> <span class="truncate">-</span>
+                </div>
+                <div id="statUnluckiestSub" class="text-xs text-slate-400 mt-1 font-medium">-</div>
+              </div>
+            </div>
+
+            <div
+              id="luckAllPlayLeaderCard"
+              class="glass-card rounded-2xl p-5 border border-amber-500/30 bg-amber-950/20 glass-card-hover flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs font-black uppercase tracking-wider text-amber-400 hover:text-amber-300 flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>👑 All-Play Powerhouse</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Squad with the highest win percentage when simulated against every other league team every week.
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold border border-amber-500/30"
+                    >True Dominance</span
+                  >
+                </div>
+                <div
+                  id="statAllPlayLeaderVal"
+                  class="text-3xl font-black text-amber-300 font-mono mt-2"
+                >
+                  0%
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-amber-500/20">
+                <div id="statAllPlayLeaderTeam" class="text-sm font-bold text-slate-100 truncate">
+                  -
+                </div>
+                <div
+                  id="statAllPlayLeaderLeague"
+                  class="text-xs font-semibold text-amber-300/90 truncate flex items-center gap-1 mt-0.5"
+                  title="League Name"
+                >
+                  <span>🏆</span> <span class="truncate">-</span>
+                </div>
+                <div id="statAllPlayLeaderSub" class="text-xs text-slate-400 mt-1 font-medium">
+                  -
+                </div>
+              </div>
+            </div>
+
+            <div
+              id="luckToughestCard"
+              class="glass-card rounded-2xl p-5 border border-indigo-500/30 bg-indigo-950/20 glass-card-hover flex flex-col justify-between"
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="relative inline-block card-info-wrapper">
+                    <button
+                      type="button"
+                      class="card-info-trigger text-xs font-black uppercase tracking-wider text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 focus:outline-none transition group cursor-pointer"
+                      aria-expanded="false"
+                    >
+                      <span>🛡️ Toughest Opponents</span>
+                      <span class="text-[10px] opacity-70 group-hover:opacity-100 transition-opacity">ⓘ</span>
+                    </button>
+                    <div class="card-info-popover popover-right" role="tooltip">
+                      <div class="text-[11px] text-slate-200 leading-relaxed font-normal">
+                        Faced the highest average opponent scoring output (Points Against) across all matchups.
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono font-bold border border-indigo-500/30"
+                    >Highest PA</span
+                  >
+                </div>
+                <div
+                  id="statToughestVal"
+                  class="text-3xl font-black text-indigo-300 font-mono mt-2"
+                >
+                  0.00
+                </div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-indigo-500/20">
+                <div id="statToughestTeam" class="text-sm font-bold text-slate-100 truncate">-</div>
+                <div
+                  id="statToughestLeague"
+                  class="text-xs font-semibold text-indigo-300/90 truncate flex items-center gap-1 mt-0.5"
+                  title="League Name"
+                >
+                  <span>🏆</span> <span class="truncate">-</span>
+                </div>
+                <div id="statToughestSub" class="text-xs text-slate-400 mt-1 font-medium">
+                  Avg Points Against
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Master Luck Table -->
+          <div class="glass-card rounded-2xl p-4 sm:p-6 border border-slate-800 space-y-4 w-full">
+            <!-- Toolbar -->
+            <div
+              class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4"
+            >
+              <div class="relative flex-1 sm:w-80">
+                <input
+                  type="text"
+                  id="luckSearch"
+                  placeholder="Search manager, squad, league..."
+                  class="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                />
+                <svg
+                  class="w-4 h-4 text-slate-500 absolute left-3.5 top-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+              </div>
+              <div class="flex items-center gap-2">
+                <select
+                  id="luckCategoryFilter"
+                  class="bg-slate-950/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none font-semibold cursor-pointer"
+                  title="Filter table by Schedule Luck Tier"
+                >
+                  <option value="ALL">All Luck Tiers</option>
+                  <option value="LUCKY">🍀 Lucky Draws (&gt; +0.50)</option>
+                  <option value="FAIR">⚖️ Fair / Neutral (-0.50 to +0.50)</option>
+                  <option value="UNLUCKY">💔 Unlucky Draws (&lt; -0.50)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs sm:text-sm text-slate-400 px-1">
+              <span id="luckRowCount">Showing 0 squads</span>
+              <span class="text-xs text-slate-500 italic"
+                >Click column headers to sort by metric</span
+              >
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+              <table class="w-full text-left border-collapse" id="luckTable">
+                <thead
+                  class="bg-slate-900/90 text-slate-400 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider border-b border-slate-800 select-none"
+                >
+                  <tr>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('Rank')"
+                      title="Sort by Rank: Overall Luck placement based on current sorting metric."
+                    >
+                      <div class="flex items-center gap-1">
+                        <span>#</span>
+                        <span id="sortIconLuckRank" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('Manager')"
+                      title="Sort by Manager: Manager username and squad moniker."
+                    >
+                      <div class="flex items-center gap-1">
+                        <span>MANAGER / SQUAD</span>
+                        <span id="sortIconLuckManager" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('League')"
+                      title="Sort by League: Fantasy league context."
+                    >
+                      <div class="flex items-center gap-1">
+                        <span>LEAGUE</span>
+                        <span id="sortIconLuckLeague" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('Actual')"
+                      title="Sort by Actual Record: Real head-to-head win-loss-tie record and win percentage."
+                    >
+                      <div class="flex items-center justify-center gap-1">
+                        <span>ACTUAL RECORD</span>
+                        <span id="sortIconLuckActual" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('AllPlay')"
+                      title="Sort by All-Play Record: Simulated record if playing against every other manager in the league each week."
+                    >
+                      <div class="flex items-center justify-center gap-1">
+                        <span>ALL-PLAY RECORD</span>
+                        <span id="sortIconLuckAllPlay" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('Expected')"
+                      title="Sort by Expected Wins: Sum of weekly All-Play win probabilities. Represents games 'expected' to be won based on score alone."
+                    >
+                      <div class="flex items-center justify-center gap-1">
+                        <span>EXP. WINS</span>
+                        <span id="sortIconLuckExpected" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('Luck')"
+                      title="Sort by Luck Index: Actual Wins minus Expected Wins. Measures how much the schedule boosted (+) or hurt (-) your record."
+                    >
+                      <div class="flex items-center justify-center gap-1">
+                        <span>LUCK INDEX</span>
+                        <span id="sortIconLuckLuck" class="text-xs text-emerald-400">▼</span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-right cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('PF')"
+                      title="Sort by Points For (PF): Offensive scoring total / average."
+                    >
+                      <div class="flex items-center justify-end gap-1">
+                        <span>PF (PTS)</span>
+                        <span id="sortIconLuckPF" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-right cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortLuckTable('PA')"
+                      title="Sort by Points Against (PA): Defensive schedule difficulty / points allowed by opponents faced."
+                    >
+                      <div class="flex items-center justify-end gap-1">
+                        <span>PA (AGAINST)</span>
+                        <span id="sortIconLuckPA" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="luckTableBody" class="divide-y divide-slate-800/60 font-sans text-xs sm:text-sm">
+                  <!-- Dynamically populated luck rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="noLuckFound" class="hidden py-12 text-center text-slate-400 space-y-2">
+              <div class="text-3xl">🍀</div>
+              <div class="font-bold text-slate-200">No squads match the current luck filters.</div>
+              <div class="text-xs text-slate-500">
+                Try changing the tier filter or search terms.
+              </div>
+            </div>
+
+            <!-- Pagination Footer for Luck Table -->
+            <div
+              id="luckPaginationFooter"
+              class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 text-xs sm:text-sm text-slate-400"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700/80"
+                >
+                  <span class="text-slate-400 font-bold text-xs">Show:</span>
+                  <select
+                    id="luckPageSizeSelect"
+                    onchange="setLuckPageSize(this.value)"
+                    class="bg-transparent text-white font-black text-xs focus:outline-none cursor-pointer"
+                  >
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                  </select>
+                </div>
+                <span id="luckPageInfoText" class="text-slate-400 font-medium">Showing 0 of 0</span>
+              </div>
+
+              <div id="luckPaginationControls" class="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end">
+                <button
+                  id="btnPrevLuckPage"
+                  onclick="changeLuckPage(-1)"
+                  class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 19l-7-7 7-7"
+                    ></path>
+                  </svg>
+                  <span>Prev</span>
+                </button>
+                <div id="luckPageNumberButtons" class="flex items-center gap-1"></div>
+                <button
+                  id="btnNextLuckPage"
+                  onclick="changeLuckPage(1)"
+                  class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+                >
+                  <span>Next</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: PLAYER ANALYTICS VIEW -->
+        <div id="viewPlayers" class="hidden space-y-6 w-full">
+          <!-- Positional MVP Spotlight Cards -->
+          <div>
+            <div class="flex items-center justify-between mb-3.5">
+              <h3
+                class="text-base sm:text-lg font-black text-white uppercase tracking-wider flex items-center gap-2"
+              >
+                <span>🌟</span> Top Positional Performers
+              </h3>
+            </div>
+            <div
+              id="positionalMvpDeck"
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 w-full"
+            >
+              <!-- Dynamically populated MVP cards for QB, RB, WR, TE, K, DEF -->
+            </div>
+          </div>
+
+          <!-- Player Leaderboard Section -->
+          <div class="glass-card rounded-2xl p-4 sm:p-6 border border-slate-800 space-y-5 w-full">
+            <!-- Filter & Search Toolbar -->
+            <div
+              class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4"
+            >
+              <!-- Position Filter Pills -->
+              <div
+                class="flex items-center gap-1 sm:gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar touch-scroll max-w-full"
+              >
+                <button
+                  onclick="setPlayerPositionFilter('ALL')"
+                  id="posFilterALL"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  ALL
+                </button>
+                <button
+                  onclick="setPlayerPositionFilter('QB')"
+                  id="posFilterQB"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  QB
+                </button>
+                <button
+                  onclick="setPlayerPositionFilter('RB')"
+                  id="posFilterRB"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  RB
+                </button>
+                <button
+                  onclick="setPlayerPositionFilter('WR')"
+                  id="posFilterWR"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  WR
+                </button>
+                <button
+                  onclick="setPlayerPositionFilter('TE')"
+                  id="posFilterTE"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  TE
+                </button>
+                <button
+                  onclick="setPlayerPositionFilter('FLEX')"
+                  id="posFilterFLEX"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  FLEX
+                </button>
+                <button
+                  onclick="setPlayerPositionFilter('K')"
+                  id="posFilterK"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  K
+                </button>
+                <button
+                  onclick="setPlayerPositionFilter('DEF')"
+                  id="posFilterDEF"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black text-slate-400 hover:text-white transition cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  DEF
+                </button>
+              </div>
+
+              <!-- Search and Roster Filter -->
+              <div class="flex flex-wrap items-center gap-3 flex-1 lg:justify-end">
+                <div class="relative min-w-[200px] flex-1 sm:flex-initial sm:w-64">
+                  <input
+                    type="text"
+                    id="playerSearchInput"
+                    placeholder="Search player, team..."
+                    class="w-full pl-9 pr-3 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                  />
+                  <svg
+                    class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    ></path>
+                  </svg>
+                </div>
+
+                <select
+                  id="playerStatusFilter"
+                  class="px-3 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-xs sm:text-sm font-semibold text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="ALL">All Players</option>
+                  <option value="STARTERS">Starters Only</option>
+                  <option value="BENCH">Benched Only</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Player Table Count & Meta -->
+            <div class="flex items-center justify-between text-xs sm:text-sm text-slate-400 px-1">
+              <span id="playerRowCount">Showing 0 players</span>
+              <span class="text-xs text-slate-500 italic"
+                >Click a player row to see owner breakdown across leagues</span
+              >
+            </div>
+
+            <!-- Player Leaderboard Table -->
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+              <table class="w-full text-left border-collapse" id="playerTable">
+                <thead
+                  class="bg-slate-900/90 text-slate-400 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider border-b border-slate-800 select-none"
+                >
+                  <tr>
+                    <th class="py-2.5 sm:py-3.5 px-2 sm:px-4 w-10 sm:w-12 text-center">#</th>
+                    <th class="py-2.5 sm:py-3.5 px-2 sm:px-4">Player</th>
+                    <th class="py-2.5 sm:py-3.5 px-1.5 sm:px-3 text-center">Pos</th>
+                    <th class="py-2.5 sm:py-3.5 px-1.5 sm:px-3 text-center">Team</th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                      id="thPlayerPoints"
+                      onclick="sortPlayers('points')"
+                    >
+                      <div class="flex items-center gap-1 sm:gap-1.5">
+                        <span id="labelPlayerPoints">Points</span>
+                        <span id="sortIconPlayerPoints" class="text-xs text-emerald-400">▼</span>
+                      </div>
+                    </th>
+                    <th
+                      class="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                      onclick="sortPlayers('startRate')"
+                    >
+                      <div class="flex items-center justify-center gap-1 sm:gap-1.5">
+                        <span>Start Rate</span>
+                        <span id="sortIconPlayerStartRate" class="text-xs text-slate-500"></span>
+                      </div>
+                    </th>
+                    <th class="py-2.5 sm:py-3.5 px-2 sm:px-4">Managers & Exposure</th>
+                    <th class="py-2.5 sm:py-3.5 px-1.5 sm:px-3 w-10 sm:w-12 text-center"></th>
+                  </tr>
+                </thead>
+                <tbody id="playerTableBody" class="divide-y divide-slate-800/60 font-sans text-xs sm:text-sm">
+                  <!-- Dynamically populated player rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Empty search state -->
+            <div id="noPlayersFound" class="hidden py-12 text-center text-slate-400 space-y-2">
+              <div class="text-3xl">🏈</div>
+              <div class="font-bold text-slate-200">No players match the current filters.</div>
+              <div class="text-xs text-slate-500">
+                Try changing the position filter or search terms.
+              </div>
+            </div>
+
+            <!-- Pagination Footer for Player Table -->
+            <div
+              id="playerPaginationFooter"
+              class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 text-xs sm:text-sm text-slate-400"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700/80"
+                >
+                  <span class="text-slate-400 font-bold text-xs">Show:</span>
+                  <select
+                    id="playerPageSizeSelect"
+                    onchange="setPlayerPageSize(this.value)"
+                    class="bg-transparent text-white font-black text-xs focus:outline-none cursor-pointer"
+                  >
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                  </select>
+                </div>
+                <span id="playerPageInfoText" class="text-slate-400 font-medium"
+                  >Showing 0 of 0</span
+                >
+              </div>
+
+              <div id="playerPaginationControls" class="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end">
+                <button
+                  id="btnPrevPlayerPage"
+                  onclick="changePlayerPage(-1)"
+                  class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 19l-7-7 7-7"
+                    ></path>
+                  </svg>
+                  <span>Prev</span>
+                </button>
+                <div id="playerPageNumberButtons" class="flex items-center gap-1"></div>
+                <button
+                  id="btnNextPlayerPage"
+                  onclick="changePlayerPage(1)"
+                  class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+                >
+                  <span>Next</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOBILE BOTTOM NAVIGATION DOCK (Visible on < sm) -->
+        <nav
+          id="mobileBottomNav"
+          aria-label="Mobile Navigation"
+          class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/90 px-1 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-2xl flex items-center justify-around"
+        >
+          <!-- 1. Awards -->
+          <button
+            type="button"
+            id="mobileTabAwards"
+            onclick="switchTab('awards')"
+            class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-extrabold gap-1 min-w-[50px] text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 shadow-sm active:scale-95 touch-manipulation cursor-pointer"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15a6 6 0 006-6V4H6v5a6 6 0 006 6zm0 0v4m-4 0h8M4 6H2a2 2 0 00-2 2v1a4 4 0 004 4h2m12-7h2a2 2 0 012 2v1a4 4 0 01-4 4h-2"
+              ></path>
+            </svg>
+            <span>Awards</span>
+          </button>
+
+          <!-- 2. Board -->
+          <button
+            type="button"
+            id="mobileTabLeaderboard"
+            onclick="switchTab('leaderboard')"
+            class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-bold gap-1 min-w-[50px] text-slate-400 hover:text-slate-200 border border-transparent active:scale-95 touch-manipulation cursor-pointer"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 10h16M4 14h16M4 18h16"
+              ></path>
+            </svg>
+            <span>Board</span>
+          </button>
+
+          <!-- 3. Scores / Analytics -->
+          <button
+            type="button"
+            id="mobileTabVisuals"
+            onclick="switchTab('visuals')"
+            class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-bold gap-1 min-w-[50px] text-slate-400 hover:text-slate-200 border border-transparent active:scale-95 touch-manipulation cursor-pointer"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              ></path>
+            </svg>
+            <span>Charts</span>
+          </button>
+
+          <!-- 4. Leagues -->
+          <button
+            type="button"
+            id="mobileTabLeagueGrid"
+            onclick="switchTab('leagueGrid')"
+            class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-bold gap-1 min-w-[50px] text-slate-400 hover:text-slate-200 border border-transparent active:scale-95 touch-manipulation cursor-pointer"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              ></path>
+            </svg>
+            <span>Leagues</span>
+          </button>
+
+          <!-- 5. Luck -->
+          <button
+            type="button"
+            id="mobileTabLuck"
+            onclick="switchTab('luck')"
+            class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-bold gap-1 min-w-[50px] text-slate-400 hover:text-slate-200 border border-transparent active:scale-95 touch-manipulation cursor-pointer"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span>Luck</span>
+          </button>
+
+          <!-- 6. Players -->
+          <button
+            type="button"
+            id="mobileTabPlayers"
+            onclick="switchTab('players')"
+            class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all text-[10px] font-bold gap-1 min-w-[50px] text-slate-400 hover:text-slate-200 border border-transparent active:scale-95 touch-manipulation cursor-pointer"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              ></path>
+            </svg>
+            <span>Players</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Initial Placeholder State -->
+      <div
+        id="initialState"
+        class="glass-card rounded-2xl p-16 text-center text-slate-400 space-y-5 border border-slate-800 max-w-3xl mx-auto my-12"
+      >
+        <div
+          class="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-4xl flex items-center justify-center mx-auto text-emerald-400 shadow-xl"
+        >
+          ⚡
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-black text-white">Who Actually Ran the League?</h3>
+        <p class="text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
+          Drop your Sleeper handle above to stack all your squads and league rivals on one universal
+          power board.
+        </p>
+      </div>
+    </main>
+
+    <!-- Footer (Full-Width Fluid) -->
+    <footer
+      class="border-t border-slate-900 bg-slate-950/80 py-7 text-center text-sm text-slate-500 mt-auto w-full"
+    >
+      <div
+        class="w-full px-4 sm:px-8 lg:px-12 flex flex-col sm:flex-row items-center justify-center gap-3 text-center"
+      >
+        <div class="text-slate-400 font-semibold">
+          ⚡ CrossLeague • Fantasy Football Power Rankings
+        </div>
+      </div>
+    </footer>
+
+    <!-- Luck Index Methodology Modal -->
+    <div
+      id="luckMethodologyModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-opacity"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalMethodologyTitle"
+    >
+      <div
+        class="glass-card bg-slate-900/95 border border-slate-700/80 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-2xl w-full overflow-y-auto max-h-[90vh] text-left relative space-y-6"
+        onclick="event.stopPropagation()"
+      >
+        <!-- Modal Header -->
+        <div class="flex items-start justify-between pb-4 border-b border-slate-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl">📐</span>
+              <h3 id="modalMethodologyTitle" class="text-xl sm:text-2xl font-black text-white">
+                Luck Index Methodology
+              </h3>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              How All-Play simulation isolates true roster dominance from schedule luck.
+            </p>
+          </div>
+          <button
+            id="btnCloseLuckModal"
+            type="button"
+            onclick="closeLuckModal()"
+            class="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition cursor-pointer"
+            aria-label="Close methodology modal"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Body Sections -->
+        <div class="space-y-6 text-sm text-slate-300 leading-relaxed">
+          <!-- Section 1: The Schedule Bias Problem -->
+          <div class="space-y-2">
+            <h4 class="font-bold text-white text-base flex items-center gap-2">
+              <span class="text-emerald-400">1.</span> The Head-to-Head Schedule Dilemma
+            </h4>
+            <p class="text-slate-300">
+              In standard fantasy football leagues, a team’s win-loss record is heavily influenced
+              by weekly matchup luck rather than pure scoring strength:
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div class="p-3 rounded-xl bg-slate-950/60 border border-rose-500/20 text-xs">
+                <span class="font-bold text-rose-400 block mb-1">💔 Unlucky Matchup</span>
+                Scoring the <strong>2nd highest points</strong> in the entire league, but taking an
+                <strong>0-1 loss</strong> because you faced the #1 scorer that week.
+              </div>
+              <div class="p-3 rounded-xl bg-slate-950/60 border border-emerald-500/20 text-xs">
+                <span class="font-bold text-emerald-400 block mb-1">🍀 Lucky Matchup</span>
+                Scoring the <strong>2nd lowest points</strong> across the league, but walking away
+                with a <strong>1-0 win</strong> against the #12 scorer.
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: All-Play Simulation -->
+          <div class="space-y-2">
+            <h4 class="font-bold text-white text-base flex items-center gap-2">
+              <span class="text-emerald-400">2.</span> All-Play Simulation
+            </h4>
+            <p class="text-slate-300">
+              To eliminate schedule bias, CrossLeague runs a complete
+              <strong>All-Play simulation</strong> for every completed matchup week. Each team’s
+              weekly score is evaluated against all other
+              <code class="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono text-xs"
+                >N - 1</code
+              >
+              rivals in their league:
+            </p>
+            <ul class="list-disc list-inside space-y-1 text-xs text-slate-300 pl-1">
+              <li><strong>Win (1.0)</strong>: Scored more points than rival</li>
+              <li><strong>Loss (0.0)</strong>: Scored fewer points than rival</li>
+              <li><strong>Tie (0.5)</strong>: Scored exactly identical points</li>
+            </ul>
+          </div>
+
+          <!-- Section 3: Expected Wins (xW) -->
+          <div class="space-y-2">
+            <h4 class="font-bold text-white text-base flex items-center gap-2">
+              <span class="text-emerald-400">3.</span> Expected Wins (<span
+                class="font-mono text-cyan-300"
+                >xW</span
+              >)
+            </h4>
+            <p class="text-slate-300">
+              For each week, a team earns a <strong>Weekly Expected Win percentage</strong>:
+            </p>
+            <div
+              class="p-3 rounded-xl bg-slate-950/80 border border-cyan-500/30 text-center font-mono text-xs text-cyan-300"
+            >
+              Weekly Expected Win % = (Weekly All-Play Wins) / (Total League Teams - 1)
+            </div>
+            <p class="text-xs text-slate-400">
+              Cumulative
+              <strong>Expected Wins (<span class="text-slate-300 font-mono">xW</span>)</strong> is
+              the sum of these weekly percentages across all completed weeks. This represents how
+              many wins a team deserved based solely on their scoring rank each week.
+            </p>
+          </div>
+
+          <!-- Section 4: The Luck Index Formula -->
+          <div class="space-y-2">
+            <h4 class="font-bold text-white text-base flex items-center gap-2">
+              <span class="text-emerald-400">4.</span> Luck Index Formula
+            </h4>
+            <div class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/40 text-center">
+              <div class="font-mono font-black text-base sm:text-lg text-emerald-300">
+                Luck Index = Actual Wins - Expected Wins (xW)
+              </div>
+              <div class="text-xs text-slate-400 mt-1 font-medium">
+                Normalized differential between actual head-to-head record and true All-Play scoring
+                expectation.
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5: Classification Tiers -->
+          <div class="space-y-2">
+            <h4 class="font-bold text-white text-base flex items-center gap-2">
+              <span class="text-emerald-400">5.</span> How to Interpret Ratings
+            </h4>
+            <div class="space-y-2 pt-1 text-xs">
+              <div
+                class="p-3 rounded-xl bg-slate-950/50 border border-emerald-500/30 flex items-start gap-2.5"
+              >
+                <span class="text-base leading-none mt-0.5">🍀</span>
+                <div>
+                  <span class="font-bold text-emerald-300 block"
+                    >Positive (&ge; +0.50) • Lucky Draw</span
+                  >
+                  <span class="text-slate-300"
+                    >Overperforming expectation. The manager won bonus matchups against opponents on
+                    their off-weeks.</span
+                  >
+                </div>
+              </div>
+              <div
+                class="p-3 rounded-xl bg-slate-950/50 border border-slate-700/50 flex items-start gap-2.5"
+              >
+                <span class="text-base leading-none mt-0.5">⚖️</span>
+                <div>
+                  <span class="font-bold text-slate-300 block"
+                    >Neutral (-0.50 to +0.50) • Fair / True to Form</span
+                  >
+                  <span class="text-slate-300"
+                    >Record accurately mirrors roster scoring output. Schedule variance is
+                    minimal.</span
+                  >
+                </div>
+              </div>
+              <div
+                class="p-3 rounded-xl bg-slate-950/50 border border-rose-500/30 flex items-start gap-2.5"
+              >
+                <span class="text-base leading-none mt-0.5">💔</span>
+                <div>
+                  <span class="font-bold text-rose-300 block"
+                    >Negative (&le; -0.50) • Tough Schedule</span
+                  >
+                  <span class="text-slate-300"
+                    >Underperforming expectation. The manager lost games despite strong point totals
+                    due to high opponent scores (Points Against).</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="pt-4 border-t border-slate-800 flex justify-end">
+          <button
+            type="button"
+            onclick="closeLuckModal()"
+            class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm transition cursor-pointer shadow-lg shadow-emerald-500/20"
+          >
+            Got It, Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div
+      id="toastContainer"
+      class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"
+    ></div>
+
+    <!-- Application Logic -->
+    <script type="module" src="./js/index.js"></script>
+  </body>
+</html>
