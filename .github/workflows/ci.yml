@@ -38,5 +38,17 @@ jobs:
       - name: Run Test Suite
         run: task test
 
+      - name: Verify Visual Snapshots
+        run: task snapshots:check
+
+      - name: Upload Visual Snapshots on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-snapshots
+          path: |
+            snapshots/*.png
+            tests/.snapshot-tmp/**
+
       - name: Verify Single-Bundle Synchronization
         run: task build -- --check

@@ -3167,7 +3167,7 @@
         glow: "gold-glow",
         color: "text-amber-400",
         orderClass: "order-1 md:order-2",
-        cardClass: "md:min-h-[260px] p-6",
+        cardClass: "md:min-h-[260px] p-4 sm:p-6",
         scoreSize: "text-3xl sm:text-4xl"
       },
       {
@@ -3177,7 +3177,7 @@
         glow: "silver-glow",
         color: "text-slate-300",
         orderClass: "order-2 md:order-1",
-        cardClass: "md:min-h-[230px] p-5",
+        cardClass: "md:min-h-[230px] p-4 sm:p-5",
         scoreSize: "text-2xl sm:text-3xl"
       },
       {
@@ -3187,7 +3187,7 @@
         glow: "bronze-glow",
         color: "text-amber-600",
         orderClass: "order-3 md:order-3",
-        cardClass: "md:min-h-[205px] p-5",
+        cardClass: "md:min-h-[205px] p-4 sm:p-5",
         scoreSize: "text-2xl sm:text-3xl"
       }
     ];
@@ -3206,7 +3206,7 @@
         : `Lineup Efficiency: ${effVal}%`;
 
       const avatarUrl = getAvatarUrl(t.avatar);
-      const avatarSize = slot.rank === 1 ? "w-11 h-11" : "w-10 h-10";
+      const avatarSize = slot.rank === 1 ? "w-10 sm:w-11 h-10 sm:h-11" : "w-9 sm:w-10 h-9 sm:h-10";
       const avatarHtml = avatarUrl
         ? `<img src="${avatarUrl}" class="${avatarSize} rounded-full object-cover border border-slate-700 flex-shrink-0" alt="" onerror="this.remove()">`
         : "";
@@ -3232,7 +3232,7 @@
           <div class="mt-3 flex items-center gap-3">
             ${avatarHtml}
             <div class="min-w-0 flex-1">
-              <div class="text-lg sm:text-xl font-black text-white truncate" title="${escapeHtml(t.manager)}">
+              <div class="text-base sm:text-xl font-black text-white truncate" title="${escapeHtml(t.manager)}">
                 ${escapeHtml(t.manager)}
               </div>
               <div class="text-xs sm:text-sm text-slate-400 font-medium truncate mt-0.5" title="${escapeHtml(t.teamName)}">
@@ -3245,14 +3245,14 @@
           </div>
         </div>
 
-        <div class="mt-5 pt-3 border-t border-slate-800/80 flex flex-wrap sm:flex-nowrap items-baseline justify-between gap-2">
-          <div>
-            <div class="text-xs uppercase font-bold text-slate-400">${metricLabel}</div>
-            <div class="${slot.scoreSize} font-black ${slot.color} font-mono leading-none mt-1.5">
+        <div class="mt-4 sm:mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-[10px] sm:text-xs uppercase font-bold text-slate-400 truncate">${metricLabel}</div>
+            <div class="${slot.scoreSize} font-black ${slot.color} font-mono leading-none mt-1">
               ${t.points.toFixed(2)}
             </div>
           </div>
-          <div class="text-xs font-semibold text-slate-400 sm:text-right min-w-0">
+          <div class="text-[11px] sm:text-xs font-semibold text-slate-400 text-right min-w-0">
             ${subMetric}
           </div>
         </div>
@@ -3823,8 +3823,8 @@
                     <span>📈 Season Consistency & Breakdown</span>
                   </div>
                   <div class="text-xs sm:text-sm text-slate-400 font-semibold">
-                    Season High: <span class="font-black text-emerald-400 font-mono">${r.highScore.toFixed(2)} pts</span> • 
-                    Season Low: <span class="font-black text-rose-400 font-mono">${r.lowScore.toFixed(2)} pts</span> • 
+                    Season High: <span class="font-black text-emerald-400 font-mono">${r.highScore.toFixed(2)} pts</span> •
+                    Season Low: <span class="font-black text-rose-400 font-mono">${r.lowScore.toFixed(2)} pts</span> •
                     Consistency (Std Dev): <span class="font-black text-cyan-300 font-mono">±${r.stdDev}</span>
                   </div>
                 </div>
@@ -3856,8 +3856,8 @@
                     <span class="text-slate-400 font-normal">| Matchup #${r.matchupId || "N/A"}</span>
                   </div>
                   <div class="text-xs sm:text-sm text-slate-400 font-semibold">
-                    Starters: <span class="font-black text-emerald-400 font-mono">${r.startersTotal.toFixed(2)} pts</span> • 
-                    Bench: <span class="font-black text-slate-300 font-mono">${r.benchPoints.toFixed(2)} pts</span> • 
+                    Starters: <span class="font-black text-emerald-400 font-mono">${r.startersTotal.toFixed(2)} pts</span> •
+                    Bench: <span class="font-black text-slate-300 font-mono">${r.benchPoints.toFixed(2)} pts</span> •
                     Optimal Potential: <span class="font-black text-amber-300 font-mono">${r.optimalPoints.toFixed(2)} pts</span> (${r.efficiency}% efficiency)
                   </div>
                 </div>
@@ -4728,8 +4728,8 @@
                   <span class="text-slate-400 font-normal">| Cross-League Roster Exposure</span>
                 </div>
                 <div class="text-xs sm:text-sm text-slate-400 font-semibold font-mono">
-                  Started: <span class="text-emerald-400 font-black">${p.startedCount}</span> • 
-                  Benched: <span class="text-amber-400 font-black">${p.benchedCount}</span> • 
+                  Started: <span class="text-emerald-400 font-black">${p.startedCount}</span> •
+                  Benched: <span class="text-amber-400 font-black">${p.benchedCount}</span> •
                   Start Rate: <span class="text-cyan-300 font-black">${p.startRate}%</span>
                 </div>
               </div>

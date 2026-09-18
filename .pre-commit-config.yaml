@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+
+  - repo: local
+    hooks:
+      - id: task-lint
+        name: Code Quality & Linting (Taskfile)
+        entry: task lint
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: task-check
+        name: Full Verification Pipeline & Visual Snapshots (Taskfile)
+        entry: task check
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
