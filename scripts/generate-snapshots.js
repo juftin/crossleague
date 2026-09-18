@@ -208,6 +208,13 @@ function capturePageScreenshot(chromePath, page, targetDir) {
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-web-security",
+      "--disable-background-networking",
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-breakpad",
+      "--disable-component-update",
+      "--disable-domain-reliability",
+      "--disable-sync",
       "--no-first-run",
       "--no-default-browser-check",
       "--allow-file-access-from-files",
@@ -256,7 +263,7 @@ function capturePageScreenshot(chromePath, page, targetDir) {
           `Timeout capturing snapshot for ${page.id}${stderrData ? `\nChrome stderr:\n${stderrData}` : ""}`
         )
       );
-    }, 15000);
+    }, 30000);
 
     function cleanup(err) {
       if (completed) return;
@@ -312,7 +319,7 @@ export async function generateSnapshots({ isCheck = false } = {}) {
 
   const startTime = Date.now();
 
-  const CHUNK_SIZE = 3;
+  const CHUNK_SIZE = process.env.CI ? 2 : 3;
   for (let i = 0; i < pages.length; i += CHUNK_SIZE) {
     const chunk = pages.slice(i, i + CHUNK_SIZE);
     await Promise.all(chunk.map(page => capturePageScreenshot(chromePath, page, outputDir)));
