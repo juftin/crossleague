@@ -211,6 +211,12 @@ function capturePageScreenshot(chromePath, page, targetDir) {
       "--headless=new",
       "--disable-gpu",
       "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-web-security",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--allow-file-access-from-files",
       "--hide-scrollbars",
       "--force-device-scale-factor=1",
       "--run-all-compositor-stages-before-draw",
@@ -229,8 +235,15 @@ function capturePageScreenshot(chromePath, page, targetDir) {
     chromeArgs.push(fileUrl);
 
     const proc = spawn(chromePath, chromeArgs, {
-      stdio: "ignore"
+      stdio: ["ignore", "pipe", "pipe"]
     });
+
+    let stderrData = "";
+    if (proc.stderr) {
+      proc.stderr.on("data", chunk => {
+        stderrData += chunk.toString();
+      });
+    }
 
     let completed = false;
 
@@ -244,8 +257,12 @@ function capturePageScreenshot(chromePath, page, targetDir) {
     }, 150);
 
     const timeout = setTimeout(() => {
-      cleanup(new Error(`Timeout capturing snapshot for ${page.id}`));
-    }, 8000);
+      cleanup(
+        new Error(
+          `Timeout capturing snapshot for ${page.id}${stderrData ? `\nChrome stderr:\n${stderrData}` : ""}`
+        )
+      );
+    }, 15000);
 
     function cleanup(err) {
       if (completed) return;
@@ -270,7 +287,11 @@ function capturePageScreenshot(chromePath, page, targetDir) {
       if (fs.existsSync(outputPath) && fs.statSync(outputPath).size > 1000) {
         cleanup(null);
       } else {
-        cleanup(new Error(`Process closed without generating valid snapshot for ${page.id}`));
+        cleanup(
+          new Error(
+            `Process closed without generating valid snapshot for ${page.id}${stderrData ? `\nChrome stderr:\n${stderrData}` : ""}`
+          )
+        );
       }
     });
 
