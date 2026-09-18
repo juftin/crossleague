@@ -2,11 +2,14 @@
    CrossLeague • Design System & Glassmorphic Styles
    ========================================================================== */
 
+html,
 body {
   font-family: "Plus Jakarta Sans", sans-serif;
   background-color: #030712;
   position: relative;
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .hidden {

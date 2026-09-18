@@ -151,10 +151,23 @@ function buildSnapshotHtmlPages() {
       </script>
     `;
 
+    const mobileStyle = s.isMobile
+      ? `<style>
+          html, body {
+            width: 390px !important;
+            max-width: 390px !important;
+            overflow-x: hidden !important;
+          }
+        </style>`
+      : "";
+
     if (html.includes("</head>")) {
-      html = html.replace("</head>", () => `${deterministicOverride}\n${dataScript}\n</head>`);
+      html = html.replace(
+        "</head>",
+        () => `${deterministicOverride}\n${mobileStyle}\n${dataScript}\n</head>`
+      );
     } else {
-      html = `${deterministicOverride}\n${dataScript}\n${html}`;
+      html = `${deterministicOverride}\n${mobileStyle}\n${dataScript}\n${html}`;
     }
 
     if (html.includes("</body>")) {
@@ -199,12 +212,21 @@ function capturePageScreenshot(chromePath, page, targetDir) {
       "--disable-gpu",
       "--no-sandbox",
       "--hide-scrollbars",
+      "--force-device-scale-factor=1",
       "--run-all-compositor-stages-before-draw",
       `--user-data-dir=${userProfileDir}`,
       `--window-size=${windowSize}`,
-      `--screenshot=${outputPath}`,
-      fileUrl
+      `--screenshot=${outputPath}`
     ];
+
+    if (page.isMobile) {
+      chromeArgs.push(
+        "--enable-viewport",
+        "--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+      );
+    }
+
+    chromeArgs.push(fileUrl);
 
     const proc = spawn(chromePath, chromeArgs, {
       stdio: "ignore"
