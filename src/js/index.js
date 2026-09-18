@@ -53,7 +53,11 @@ import {
   setSyncType
 } from "./components/dom.js";
 import { showToast } from "./components/toast.js";
-import { openSettingsModal, closeSettingsModal } from "./components/modal.js";
+import {
+  openSettingsModal,
+  closeSettingsModal,
+  toggleSettingsDropdown
+} from "./components/modal.js";
 import { updateSettingsButtonBadge } from "./state/preferences.js";
 import { renderCustomLeagueIdChips, renderLeagueDropdown } from "./components/dropdowns.js";
 
@@ -704,6 +708,7 @@ if (typeof window !== "undefined") {
   window.closeLuckModal = closeLuckModal;
   window.openSettingsModal = openSettingsModal;
   window.closeSettingsModal = closeSettingsModal;
+  window.toggleSettingsDropdown = toggleSettingsDropdown;
   window.buildShareableUrl = buildShareableUrl;
   window.getUrlParams = getUrlParams;
 }
@@ -731,8 +736,11 @@ export function setupEventListeners() {
   const leagueDropdownChevron = document.getElementById("leagueDropdownChevron");
   const leagueDropdownContainer = document.getElementById("leagueDropdownContainer");
 
-  const settingsModal = document.getElementById("settingsDropdownModal");
+  const settingsModal = document.getElementById("settingsModal");
   const settingsDropdownContainer = document.getElementById("settingsDropdownContainer");
+  const btnOpenSettingsModal = document.getElementById("btnOpenSettingsModal");
+  const btnCloseSettingsModal = document.getElementById("btnCloseSettingsModal");
+  const settingsBackdrop = document.getElementById("settingsBackdrop");
 
   const selectAllLeaguesBtn = document.getElementById("selectAllLeaguesBtn");
   const clearAllLeaguesBtn = document.getElementById("clearAllLeaguesBtn");
@@ -1018,6 +1026,15 @@ export function setupEventListeners() {
   }
   if (copyRecapBtn) copyRecapBtn.addEventListener("click", copyChatRecap);
   if (clearDataBtn) clearDataBtn.addEventListener("click", clearAllData);
+  if (btnOpenSettingsModal) {
+    btnOpenSettingsModal.addEventListener("click", toggleSettingsDropdown);
+  }
+  if (btnCloseSettingsModal) {
+    btnCloseSettingsModal.addEventListener("click", closeSettingsModal);
+  }
+  if (settingsBackdrop) {
+    settingsBackdrop.addEventListener("click", closeSettingsModal);
+  }
 }
 
 /**

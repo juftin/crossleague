@@ -5854,6 +5854,7 @@ ${closeTag}
     window.closeLuckModal = closeLuckModal2;
     window.openSettingsModal = openSettingsModal;
     window.closeSettingsModal = closeSettingsModal;
+    window.toggleSettingsDropdown = toggleSettingsDropdown;
     window.buildShareableUrl = buildShareableUrl;
     window.getUrlParams = getUrlParams;
   }
@@ -5873,8 +5874,11 @@ ${closeTag}
     const leagueDropdownMenu = document.getElementById("leagueDropdownMenu");
     const leagueDropdownChevron = document.getElementById("leagueDropdownChevron");
     const leagueDropdownContainer = document.getElementById("leagueDropdownContainer");
-    const settingsModal = document.getElementById("settingsDropdownModal");
+    const settingsModal = document.getElementById("settingsModal");
     const settingsDropdownContainer = document.getElementById("settingsDropdownContainer");
+    const btnOpenSettingsModal = document.getElementById("btnOpenSettingsModal");
+    const btnCloseSettingsModal = document.getElementById("btnCloseSettingsModal");
+    const settingsBackdrop = document.getElementById("settingsBackdrop");
     const selectAllLeaguesBtn = document.getElementById("selectAllLeaguesBtn");
     const clearAllLeaguesBtn = document.getElementById("clearAllLeaguesBtn");
     const exportCsvBtn = document.getElementById("exportCsvBtn");
@@ -6135,6 +6139,15 @@ ${closeTag}
     }
     if (copyRecapBtn) copyRecapBtn.addEventListener("click", copyChatRecap);
     if (clearDataBtn) clearDataBtn.addEventListener("click", clearAllData);
+    if (btnOpenSettingsModal) {
+      btnOpenSettingsModal.addEventListener("click", toggleSettingsDropdown);
+    }
+    if (btnCloseSettingsModal) {
+      btnCloseSettingsModal.addEventListener("click", closeSettingsModal);
+    }
+    if (settingsBackdrop) {
+      settingsBackdrop.addEventListener("click", closeSettingsModal);
+    }
   }
   async function startApp() {
     if (typeof window === "undefined" || typeof document === "undefined") return;

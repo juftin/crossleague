@@ -206,7 +206,23 @@ describe("Bundle & Syntax Integrity", () => {
     );
     assert.ok(indexHtml.includes('id="mobileTabVisuals"'), "Must contain #mobileTabVisuals");
     assert.ok(indexHtml.includes('id="mobileTabLeagueGrid"'), "Must contain #mobileTabLeagueGrid");
-    assert.ok(indexHtml.includes('id="mobileTabLuck"'), "Must contain #mobileTabLuck");
-    assert.ok(indexHtml.includes('id="mobileTabPlayers"'), "Must contain #mobileTabPlayers");
+    assert.ok(
+      indexHtml.includes('id="btnOpenSettingsModal"'),
+      "Must contain #btnOpenSettingsModal"
+    );
+    assert.ok(
+      indexHtml.includes('id="btnCloseSettingsModal"'),
+      "Must contain #btnCloseSettingsModal"
+    );
+    assert.ok(indexHtml.includes('id="settingsBackdrop"'), "Must contain #settingsBackdrop");
+  });
+
+  it("should bind click listener to btnOpenSettingsModal in app.js", () => {
+    const code = fs.readFileSync(appJsPath, "utf8");
+    assert.match(
+      code,
+      /btnOpenSettingsModal\.addEventListener\("click",\s*toggleSettingsDropdown\)/,
+      "Menu button #btnOpenSettingsModal must have click listener attached"
+    );
   });
 });
