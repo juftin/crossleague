@@ -31,7 +31,7 @@
     "test": "node --test tests/**/*.test.js",
     "snapshots": "node scripts/generate-snapshots.js",
     "snapshots:check": "node scripts/generate-snapshots.js --check",
-    "dev": "vite"
+    "dev": "vite --host 0.0.0.0"
   },
   "keywords": [
     "crossleague",
