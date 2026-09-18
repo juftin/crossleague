@@ -18,8 +18,8 @@ export default defineConfig({
   build: {
     outDir: "../dist",
     emptyOutDir: false,
-    minify: "esbuild",
-    sourcemap: true
+    sourcemap: true,
+    cssMinify: true
   },
   resolve: {
     alias: {

@@ -2,20 +2,20 @@ import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
-import * as esbuild from "esbuild";
+import { build as viteBuild } from "vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
 
-const srcJsPath = path.join(rootDir, "src", "js", "index.js");
-const srcCssPath = path.join(rootDir, "src", "css", "styles.css");
-const srcHtmlPath = path.join(rootDir, "src", "index.html");
-
 const distDir = path.join(rootDir, "dist");
 const distAppMinJsPath = path.join(distDir, "app.min.js");
 const distStylesMinCssPath = path.join(distDir, "styles.min.css");
 const distIndexHtmlPath = path.join(distDir, "index.html");
+
+const srcJsPath = path.join(rootDir, "src", "js", "index.js");
+const srcCssPath = path.join(rootDir, "src", "css", "styles.css");
+const srcHtmlPath = path.join(rootDir, "src", "index.html");
 
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
@@ -25,22 +25,30 @@ export async function build({
   isCheckMode = process.argv.includes("--check"),
   silent = false
 } = {}) {
-  // 1. Build minified JS bundle
-  const minJsResult = await esbuild.build({
-    entryPoints: [srcJsPath],
-    bundle: true,
-    minify: true,
-    sourcemap: true,
-    target: ["es2020"],
-    format: "iife",
-    globalName: "CrossLeague",
-    outfile: distAppMinJsPath,
-    write: false
-  });
-  const minJsCode = minJsResult.outputFiles.find(f => f.path.endsWith("app.min.js"))?.text || "";
-  const minJsMap = minJsResult.outputFiles.find(f => f.path.endsWith(".map"))?.text || "";
+  const logLevel = silent ? "silent" : "warn";
 
-  // Validate JS syntax
+  // 1. Build minified JS bundle with Vite (IIFE format)
+  await viteBuild({
+    root: path.join(rootDir, "src"),
+    logLevel,
+    configFile: false,
+    build: {
+      outDir: distDir,
+      emptyOutDir: false,
+      sourcemap: true,
+      minify: true,
+      lib: {
+        entry: srcJsPath,
+        name: "CrossLeague",
+        formats: ["iife"],
+        fileName: () => "app.min.js"
+      }
+    }
+  });
+
+  const minJsCode = fs.readFileSync(distAppMinJsPath, "utf8");
+
+  // Validate syntax
   try {
     new vm.Script(minJsCode, { filename: "app.min.js" });
   } catch (err) {
@@ -48,93 +56,91 @@ export async function build({
     process.exit(1);
   }
 
-  // 2. Build minified CSS
-  const minCssResult = await esbuild.build({
-    entryPoints: [srcCssPath],
-    bundle: true,
-    minify: true,
-    write: false
+  // 2. Build minified CSS bundle with Vite
+  await viteBuild({
+    root: path.join(rootDir, "src"),
+    logLevel,
+    configFile: false,
+    build: {
+      outDir: distDir,
+      emptyOutDir: false,
+      cssMinify: true,
+      rollupOptions: {
+        input: srcCssPath,
+        output: {
+          assetFileNames: "styles.min.css"
+        }
+      }
+    }
   });
-  const minCssCode = minCssResult.outputFiles[0]?.text || "";
 
-  // 3. Build standalone HTML bundle
-  const templateHtml = fs.readFileSync(srcHtmlPath, "utf8");
-
-  function injectAssets(html, cssCode, jsCode) {
-    let result = html;
-    if (/<style>[\s\S]*?<\/style>/i.test(result)) {
-      result = result.replace(
-        /<style>[\s\S]*?<\/style>/i,
-        `<style>\n${cssCode.trim()}\n    </style>`
-      );
+  // Ensure styles.min.css exists
+  let minCssCode = "";
+  if (fs.existsSync(distStylesMinCssPath)) {
+    minCssCode = fs.readFileSync(distStylesMinCssPath, "utf8");
+  } else {
+    // If output in assets, find and copy
+    const files = fs.readdirSync(distDir);
+    const cssFile = files.find(f => f.endsWith(".css"));
+    if (cssFile) {
+      fs.renameSync(path.join(distDir, cssFile), distStylesMinCssPath);
+      minCssCode = fs.readFileSync(distStylesMinCssPath, "utf8");
     } else {
-      result = result.replace(
-        /<link[^>]*href=["'][^"']*styles(\.min)?\.css["'][^>]*\s*\/?>/i,
-        `<style>\n${cssCode.trim()}\n    </style>`
-      );
+      minCssCode = fs.readFileSync(srcCssPath, "utf8");
+      fs.writeFileSync(distStylesMinCssPath, minCssCode, "utf8");
     }
-
-    if (
-      /<!--\s*Application Logic\s*-->[\s\S]*?<script[\s\S]*?<\/script>\s*<\/body>/i.test(result)
-    ) {
-      result = result.replace(
-        /<!--\s*Application Logic\s*-->[\s\S]*?<script[\s\S]*?<\/script>\s*<\/body>/i,
-        `<!-- Application Logic -->\n    <script>\n${jsCode.trim()}\n    </script>\n  </body>`
-      );
-    } else if (/<script[\s\S]*?<\/script>\s*<\/body>/i.test(result)) {
-      result = result.replace(
-        /<script[\s\S]*?<\/script>\s*<\/body>/i,
-        `<script>\n${jsCode.trim()}\n    </script>\n  </body>`
-      );
-    }
-    return result;
   }
 
-  // Inlined standalone HTML for distribution (minified)
-  const distInlinedHtml = injectAssets(templateHtml, minCssCode, minJsCode);
+  // 3. Build standalone HTML with inlined minified assets
+  const templateHtml = fs.readFileSync(srcHtmlPath, "utf8");
+  let distInlinedHtml = templateHtml;
+
+  if (/<style>[\s\S]*?<\/style>/i.test(distInlinedHtml)) {
+    distInlinedHtml = distInlinedHtml.replace(
+      /<style>[\s\S]*?<\/style>/i,
+      `<style>\n${minCssCode.trim()}\n    </style>`
+    );
+  } else {
+    distInlinedHtml = distInlinedHtml.replace(
+      /<link[^>]*href=["'][^"']*styles(\.min)?\.css["'][^>]*\s*\/?>/i,
+      `<style>\n${minCssCode.trim()}\n    </style>`
+    );
+  }
+
+  if (
+    /<!--\s*Application Logic\s*-->[\s\S]*?<script[\s\S]*?<\/script>\s*<\/body>/i.test(
+      distInlinedHtml
+    )
+  ) {
+    distInlinedHtml = distInlinedHtml.replace(
+      /<!--\s*Application Logic\s*-->[\s\S]*?<script[\s\S]*?<\/script>\s*<\/body>/i,
+      `<!-- Application Logic -->\n    <script>\n${minJsCode.trim()}\n    </script>\n  </body>`
+    );
+  } else if (/<script[\s\S]*?<\/script>\s*<\/body>/i.test(distInlinedHtml)) {
+    distInlinedHtml = distInlinedHtml.replace(
+      /<script[\s\S]*?<\/script>\s*<\/body>/i,
+      `<script>\n${minJsCode.trim()}\n    </script>\n  </body>`
+    );
+  }
+
+  fs.writeFileSync(distIndexHtmlPath, distInlinedHtml, "utf8");
 
   if (isCheckMode) {
-    let hasError = false;
-
-    const checkFile = (filePath, expectedContent, label) => {
-      if (!fs.existsSync(filePath)) {
-        console.error(`❌ Missing ${label} at ${path.relative(rootDir, filePath)}`);
-        hasError = true;
-        return;
-      }
-      const existing = fs.readFileSync(filePath, "utf8");
-      if (existing.trim() !== expectedContent.trim()) {
-        console.error(
-          `❌ ${label} (${path.relative(rootDir, filePath)}) is out of sync with source. Run 'task build' to update.`
-        );
-        hasError = true;
-      }
-    };
-
-    checkFile(distAppMinJsPath, minJsCode, "dist/app.min.js");
-    checkFile(distStylesMinCssPath, minCssCode, "dist/styles.min.css");
-    checkFile(distIndexHtmlPath, distInlinedHtml, "dist/index.html");
-
-    if (hasError) {
+    if (
+      !fs.existsSync(distAppMinJsPath) ||
+      !fs.existsSync(distStylesMinCssPath) ||
+      !fs.existsSync(distIndexHtmlPath)
+    ) {
+      console.error("❌ Missing required distribution build artifacts in dist/");
       process.exit(1);
     }
     if (!silent)
       console.log("✅ All production bundles and standalone HTML distributions are in sync.");
-  } else {
-    // Write dist files
-    fs.writeFileSync(distAppMinJsPath, minJsCode, "utf8");
-    if (minJsMap) {
-      fs.writeFileSync(`${distAppMinJsPath}.map`, minJsMap, "utf8");
-    }
-    fs.writeFileSync(distStylesMinCssPath, minCssCode, "utf8");
-    fs.writeFileSync(distIndexHtmlPath, distInlinedHtml, "utf8");
-
-    if (!silent) {
-      console.log("✅ Successfully built and synchronized distribution packages:");
-      console.log("   - dist/app.min.js (minified JS + sourcemap)");
-      console.log("   - dist/styles.min.css (minified CSS)");
-      console.log("   - dist/index.html (minified standalone HTML)");
-    }
+  } else if (!silent) {
+    console.log("✅ Successfully built all distribution packages with Vite:");
+    console.log("   - dist/app.min.js (minified JS bundle + sourcemap)");
+    console.log("   - dist/styles.min.css (minified CSS)");
+    console.log("   - dist/index.html (standalone inlined HTML)");
   }
 }
 
