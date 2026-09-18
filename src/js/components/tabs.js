@@ -98,7 +98,6 @@ export function switchTab(tabName, updateHash = true, renderCallbacks = {}) {
     if (renderCallbacks.onLeaderboard) renderCallbacks.onLeaderboard();
   } else if (target === "awards") {
     if (viewAwards) viewAwards.classList.remove("hidden");
-    triggerConfetti();
     if (renderCallbacks.onAwards) renderCallbacks.onAwards();
   } else if (target === "visuals") {
     if (viewVisuals) viewVisuals.classList.remove("hidden");

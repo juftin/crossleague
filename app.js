@@ -639,7 +639,6 @@ var CrossLeague = (() => {
       if (renderCallbacks.onLeaderboard) renderCallbacks.onLeaderboard();
     } else if (target === "awards") {
       if (viewAwards) viewAwards.classList.remove("hidden");
-      triggerConfetti();
       if (renderCallbacks.onAwards) renderCallbacks.onAwards();
     } else if (target === "visuals") {
       if (viewVisuals) viewVisuals.classList.remove("hidden");
@@ -6156,6 +6155,9 @@ ${closeTag}
     if (window.__EMBEDDED_REPORT__) {
       loadEmbeddedReport(window.__EMBEDDED_REPORT__, refreshDashboard);
       syncTabFromHash();
+      if (getCurrentlyActiveTab() === "awards") {
+        triggerConfetti();
+      }
       return;
     }
     await initDefaults();
@@ -6176,6 +6178,9 @@ ${closeTag}
       fetchLeaderboard();
     }
     syncTabFromHash();
+    if (state.rawRecords.length > 0 && getCurrentlyActiveTab() === "awards") {
+      triggerConfetti();
+    }
   }
   if (typeof window !== "undefined" && typeof document !== "undefined") {
     if (document.readyState === "loading") {

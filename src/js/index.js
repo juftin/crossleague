@@ -1049,6 +1049,9 @@ export async function startApp() {
   if (window.__EMBEDDED_REPORT__) {
     loadEmbeddedReport(window.__EMBEDDED_REPORT__, refreshDashboard);
     syncTabFromHash();
+    if (getCurrentlyActiveTab() === "awards") {
+      triggerConfetti();
+    }
     return;
   }
 
@@ -1083,6 +1086,9 @@ export async function startApp() {
     fetchLeaderboard();
   }
   syncTabFromHash();
+  if (state.rawRecords.length > 0 && getCurrentlyActiveTab() === "awards") {
+    triggerConfetti();
+  }
 }
 
 // Automatically bootstrap app in browser environments
