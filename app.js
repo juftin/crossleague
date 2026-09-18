@@ -3823,8 +3823,8 @@
                     <span>📈 Season Consistency & Breakdown</span>
                   </div>
                   <div class="text-xs sm:text-sm text-slate-400 font-semibold">
-                    Season High: <span class="font-black text-emerald-400 font-mono">${r.highScore.toFixed(2)} pts</span> • 
-                    Season Low: <span class="font-black text-rose-400 font-mono">${r.lowScore.toFixed(2)} pts</span> • 
+                    Season High: <span class="font-black text-emerald-400 font-mono">${r.highScore.toFixed(2)} pts</span> •
+                    Season Low: <span class="font-black text-rose-400 font-mono">${r.lowScore.toFixed(2)} pts</span> •
                     Consistency (Std Dev): <span class="font-black text-cyan-300 font-mono">±${r.stdDev}</span>
                   </div>
                 </div>
@@ -3856,8 +3856,8 @@
                     <span class="text-slate-400 font-normal">| Matchup #${r.matchupId || "N/A"}</span>
                   </div>
                   <div class="text-xs sm:text-sm text-slate-400 font-semibold">
-                    Starters: <span class="font-black text-emerald-400 font-mono">${r.startersTotal.toFixed(2)} pts</span> • 
-                    Bench: <span class="font-black text-slate-300 font-mono">${r.benchPoints.toFixed(2)} pts</span> • 
+                    Starters: <span class="font-black text-emerald-400 font-mono">${r.startersTotal.toFixed(2)} pts</span> •
+                    Bench: <span class="font-black text-slate-300 font-mono">${r.benchPoints.toFixed(2)} pts</span> •
                     Optimal Potential: <span class="font-black text-amber-300 font-mono">${r.optimalPoints.toFixed(2)} pts</span> (${r.efficiency}% efficiency)
                   </div>
                 </div>
@@ -4728,8 +4728,8 @@
                   <span class="text-slate-400 font-normal">| Cross-League Roster Exposure</span>
                 </div>
                 <div class="text-xs sm:text-sm text-slate-400 font-semibold font-mono">
-                  Started: <span class="text-emerald-400 font-black">${p.startedCount}</span> • 
-                  Benched: <span class="text-amber-400 font-black">${p.benchedCount}</span> • 
+                  Started: <span class="text-emerald-400 font-black">${p.startedCount}</span> •
+                  Benched: <span class="text-amber-400 font-black">${p.benchedCount}</span> •
                   Start Rate: <span class="text-cyan-300 font-black">${p.startRate}%</span>
                 </div>
               </div>

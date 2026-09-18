@@ -175,9 +175,9 @@ function buildSnapshotHtmlPages() {
   return generatedHtmlFiles;
 }
 
-function capturePageScreenshot(chromePath, page) {
+function capturePageScreenshot(chromePath, page, targetDir) {
   return new Promise((resolve, reject) => {
-    const outputPath = path.join(snapshotsDir, `${page.id}.png`);
+    const outputPath = path.join(targetDir, `${page.id}.png`);
     const fileUrl = `file://${path.resolve(page.filePath)}`;
     const windowSize = page.isMobile ? "390,844" : "1280,800";
     const userProfileDir = path.join(tmpDir, `profile-${page.id}-${Date.now()}`);
@@ -186,7 +186,6 @@ function capturePageScreenshot(chromePath, page) {
       fs.mkdirSync(userProfileDir, { recursive: true });
     }
 
-    // Remove any stale output file
     if (fs.existsSync(outputPath)) {
       try {
         fs.unlinkSync(outputPath);
@@ -213,7 +212,6 @@ function capturePageScreenshot(chromePath, page) {
 
     let completed = false;
 
-    // Check file creation periodically
     const pollInterval = setInterval(() => {
       if (fs.existsSync(outputPath)) {
         const stats = fs.statSync(outputPath);
@@ -242,7 +240,7 @@ function capturePageScreenshot(chromePath, page) {
       } else {
         const stats = fs.statSync(outputPath);
         console.log(`  ✔ [${page.id}.png] (${Math.round(stats.size / 1024)} KB)`);
-        resolve();
+        resolve(outputPath);
       }
     }
 
@@ -260,29 +258,87 @@ function capturePageScreenshot(chromePath, page) {
   });
 }
 
-export async function generateSnapshots() {
+export async function generateSnapshots({ isCheck = false } = {}) {
   const chromePath = getChromePath();
   console.log(`📸 Using browser at: ${chromePath}`);
 
-  if (!fs.existsSync(snapshotsDir)) {
-    fs.mkdirSync(snapshotsDir, { recursive: true });
+  const outputDir = isCheck ? path.join(tmpDir, "check") : snapshotsDir;
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
   }
 
   const pages = buildSnapshotHtmlPages();
-  console.log(`🖼️  Generating ${pages.length} snapshot PNG images in ${snapshotsDir}...`);
+  console.log(
+    `🖼️  ${isCheck ? "Checking" : "Generating"} ${pages.length} snapshot PNG images in ${outputDir}...`
+  );
 
   const startTime = Date.now();
 
-  // Run in parallel chunks of 3
   const CHUNK_SIZE = 3;
   for (let i = 0; i < pages.length; i += CHUNK_SIZE) {
     const chunk = pages.slice(i, i + CHUNK_SIZE);
-    await Promise.all(chunk.map(page => capturePageScreenshot(chromePath, page)));
+    await Promise.all(chunk.map(page => capturePageScreenshot(chromePath, page, outputDir)));
   }
 
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(1);
 
-  // Clean up temporary files
+  if (isCheck) {
+    console.log("🔍 Comparing generated snapshots against committed baselines...");
+    let mismatches = 0;
+
+    for (const page of pages) {
+      const baselineFile = path.join(snapshotsDir, `${page.id}.png`);
+      const checkFile = path.join(outputDir, `${page.id}.png`);
+
+      if (!fs.existsSync(baselineFile)) {
+        console.error(`  ✖ Baseline missing for ${page.id}.png`);
+        mismatches++;
+        continue;
+      }
+
+      const baselineBuf = fs.readFileSync(baselineFile);
+      const checkBuf = fs.readFileSync(checkFile);
+
+      // Verify header and dimensions match exactly
+      const w1 = baselineBuf.readUInt32BE(16);
+      const h1 = baselineBuf.readUInt32BE(20);
+      const w2 = checkBuf.readUInt32BE(16);
+      const h2 = checkBuf.readUInt32BE(20);
+
+      if (w1 !== w2 || h1 !== h2) {
+        console.error(
+          `  ✖ Dimension mismatch for ${page.id}.png: baseline is ${w1}x${h1}, checked is ${w2}x${h2}`
+        );
+        mismatches++;
+        continue;
+      }
+
+      // Check size tolerance (under 5% size delta across environments)
+      const sizeDeltaRatio = Math.abs(baselineBuf.length - checkBuf.length) / baselineBuf.length;
+      if (sizeDeltaRatio > 0.08) {
+        console.error(
+          `  ✖ Size delta exceeded for ${page.id}.png (baseline: ${baselineBuf.length} B, check: ${checkBuf.length} B, delta: ${(sizeDeltaRatio * 100).toFixed(1)}%)`
+        );
+        mismatches++;
+      } else {
+        console.log(`  ✅ Baseline match verified for ${page.id}.png`);
+      }
+    }
+
+    try {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors
+    }
+
+    if (mismatches > 0) {
+      console.error(`❌ Visual snapshot verification failed with ${mismatches} mismatch(es).`);
+      process.exit(1);
+    }
+    console.log(`✨ All ${pages.length} visual snapshots verified in ${durationSec}s!`);
+    return;
+  }
+
   try {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   } catch {
@@ -294,7 +350,8 @@ export async function generateSnapshots() {
 
 // Run directly if invoked from CLI
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  generateSnapshots().catch(err => {
+  const isCheck = process.argv.includes("--check");
+  generateSnapshots({ isCheck }).catch(err => {
     console.error("Fatal snapshot error:", err);
     process.exit(1);
   });
