@@ -591,6 +591,9 @@ var CrossLeague = (() => {
     return "awards";
   }
   function triggerConfetti() {
+    if (getCurrentlyActiveTab() !== "awards") {
+      return;
+    }
     if (typeof confetti === "function") {
       confetti({
         particleCount: 80,
@@ -5716,7 +5719,7 @@ ${closeTag}
         state.allLeaguesData
       );
       const sorted = [...state.rawRecords].sort((a, b) => b.points - a.points);
-      if (sorted[0]) {
+      if (sorted[0] && getCurrentlyActiveTab() === "awards") {
         triggerConfetti();
       }
     } catch (err) {
@@ -6162,6 +6165,7 @@ ${closeTag}
     }
     await initDefaults();
     updateModeUI();
+    syncTabFromHash();
     const urlParams = getUrlParams();
     const hasQueryParams = Boolean(
       urlParams.platform || urlParams.user || urlParams.season || urlParams.week || urlParams.mode || urlParams.leagues

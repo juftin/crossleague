@@ -537,7 +537,7 @@ export async function fetchLeaderboard() {
     );
 
     const sorted = [...state.rawRecords].sort((a, b) => b.points - a.points);
-    if (sorted[0]) {
+    if (sorted[0] && getCurrentlyActiveTab() === "awards") {
       triggerConfetti();
     }
   } catch (err) {
@@ -1057,6 +1057,7 @@ export async function startApp() {
 
   await initDefaults();
   updateModeUI();
+  syncTabFromHash();
 
   const urlParams = getUrlParams();
   const hasQueryParams = Boolean(

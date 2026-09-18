@@ -27,9 +27,12 @@ export function getCurrentlyActiveTab() {
 }
 
 /**
- * Triggers full confetti celebration particle burst.
+ * Triggers full confetti celebration particle burst only when awards tab is active.
  */
 export function triggerConfetti() {
+  if (getCurrentlyActiveTab() !== "awards") {
+    return;
+  }
   if (typeof confetti === "function") {
     confetti({
       particleCount: 80,
