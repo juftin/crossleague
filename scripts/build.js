@@ -14,13 +14,8 @@ const srcHtmlPath = path.join(rootDir, "src", "index.html");
 
 const distDir = path.join(rootDir, "dist");
 const distAppMinJsPath = path.join(distDir, "app.min.js");
-const distAppJsPath = path.join(distDir, "app.js");
 const distStylesMinCssPath = path.join(distDir, "styles.min.css");
 const distIndexHtmlPath = path.join(distDir, "index.html");
-
-const rootAppJsPath = path.join(rootDir, "app.js");
-const rootStylesCssPath = path.join(rootDir, "styles.css");
-const rootIndexHtmlPath = path.join(rootDir, "index.html");
 
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
@@ -45,30 +40,15 @@ export async function build({
   const minJsCode = minJsResult.outputFiles.find(f => f.path.endsWith("app.min.js"))?.text || "";
   const minJsMap = minJsResult.outputFiles.find(f => f.path.endsWith(".map"))?.text || "";
 
-  // 2. Build unminified bundled JS for app.js
-  const unminJsResult = await esbuild.build({
-    entryPoints: [srcJsPath],
-    bundle: true,
-    minify: false,
-    target: ["es2020"],
-    format: "iife",
-    globalName: "CrossLeague",
-    outfile: distAppJsPath,
-    write: false
-  });
-  const unminJsCode = unminJsResult.outputFiles.find(f => f.path.endsWith("app.js"))?.text || "";
-
-  // Validate syntax
+  // Validate JS syntax
   try {
     new vm.Script(minJsCode, { filename: "app.min.js" });
-    new vm.Script(unminJsCode, { filename: "app.js" });
   } catch (err) {
     console.error("❌ Syntax error in generated JS bundle:", err.message);
     process.exit(1);
   }
 
-  // 3. Build CSS
-  const srcCssContent = fs.readFileSync(srcCssPath, "utf8");
+  // 2. Build minified CSS
   const minCssResult = await esbuild.build({
     entryPoints: [srcCssPath],
     bundle: true,
@@ -77,10 +57,8 @@ export async function build({
   });
   const minCssCode = minCssResult.outputFiles[0]?.text || "";
 
-  // 4. Build HTML bundles
-  let templateHtml = fs.existsSync(srcHtmlPath)
-    ? fs.readFileSync(srcHtmlPath, "utf8")
-    : fs.readFileSync(rootIndexHtmlPath, "utf8");
+  // 3. Build standalone HTML bundle
+  const templateHtml = fs.readFileSync(srcHtmlPath, "utf8");
 
   function injectAssets(html, cssCode, jsCode) {
     let result = html;
@@ -112,11 +90,8 @@ export async function build({
     return result;
   }
 
-  // Prepare inlined HTML for dist (minified)
+  // Inlined standalone HTML for distribution (minified)
   const distInlinedHtml = injectAssets(templateHtml, minCssCode, minJsCode);
-
-  // Prepare inlined HTML for root index.html (unminified app.js + styles.css)
-  const rootInlinedHtml = injectAssets(templateHtml, srcCssContent, unminJsCode);
 
   if (isCheckMode) {
     let hasError = false;
@@ -138,9 +113,7 @@ export async function build({
 
     checkFile(distAppMinJsPath, minJsCode, "dist/app.min.js");
     checkFile(distStylesMinCssPath, minCssCode, "dist/styles.min.css");
-    checkFile(rootAppJsPath, unminJsCode, "app.js");
-    checkFile(rootStylesCssPath, srcCssContent, "styles.css");
-    checkFile(rootIndexHtmlPath, rootInlinedHtml, "index.html");
+    checkFile(distIndexHtmlPath, distInlinedHtml, "dist/index.html");
 
     if (hasError) {
       process.exit(1);
@@ -153,23 +126,14 @@ export async function build({
     if (minJsMap) {
       fs.writeFileSync(`${distAppMinJsPath}.map`, minJsMap, "utf8");
     }
-    fs.writeFileSync(distAppJsPath, unminJsCode, "utf8");
     fs.writeFileSync(distStylesMinCssPath, minCssCode, "utf8");
     fs.writeFileSync(distIndexHtmlPath, distInlinedHtml, "utf8");
 
-    // Write root files for backward compatibility & local distribution
-    fs.writeFileSync(rootAppJsPath, unminJsCode, "utf8");
-    fs.writeFileSync(rootStylesCssPath, srcCssContent, "utf8");
-    fs.writeFileSync(rootIndexHtmlPath, rootInlinedHtml, "utf8");
-
     if (!silent) {
-      console.log("✅ Successfully built and synchronized all packages and bundles:");
-      console.log("   - dist/app.min.js (minified JS)");
+      console.log("✅ Successfully built and synchronized distribution packages:");
+      console.log("   - dist/app.min.js (minified JS + sourcemap)");
       console.log("   - dist/styles.min.css (minified CSS)");
       console.log("   - dist/index.html (minified standalone HTML)");
-      console.log("   - app.js (bundled JS)");
-      console.log("   - styles.css (source CSS)");
-      console.log("   - index.html (synchronized standalone HTML)");
     }
   }
 }

@@ -61,25 +61,34 @@ Prefill and filter a report with URL parameters. `userId` and `week` override sa
 ## 🏗️ Project Architecture
 
 ```
-sleeper-analytics/
+crossleague/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml        # GitHub Actions CI pipeline
 │       └── publish.yaml  # GitHub Pages deployment workflow
+├── src/
+│   ├── css/
+│   │   └── styles.css    # Glassmorphic design system and styling
+│   ├── js/
+│   │   ├── analytics/    # All-Play, Expected Wins, Luck Index, Efficiency
+│   │   ├── api/          # Sleeper and ESPN fantasy adapters
+│   │   ├── components/   # UI components, modals, dropdowns, tables, charts
+│   │   ├── export/       # Chat recap, CSV, and offline HTML report export
+│   │   ├── state/        # State store, caching, and URL parameter syncing
+│   │   └── index.js      # Main JavaScript module & browser entrypoint
+│   └── index.html        # Source HTML template (Vite dev server entrypoint)
+├── dist/
+│   ├── app.min.js        # Minified production bundle (+ sourcemap)
+│   ├── styles.min.css    # Minified production CSS
+│   └── index.html        # Minified standalone zero-dependency HTML application
 ├── scripts/
-│   └── bundle.js       # Bundles app.js into index.html for zero-dependency standalone usage
-├── tests/
-│   ├── analytics.test.js   # Unit tests for All-Play, Expected Wins, Luck Index, Lineup Efficiency
-│   ├── bundle.test.js      # Single-bundle syntax and HTML sync verification tests
-│   ├── pagination.test.js  # Pagination boundary & slicing logic tests
-│   └── recap.test.js       # Slack/Discord chat recap formatting tests
-├── index.html          # Standalone client-side web application
-├── styles.css          # Glassmorphic design system and styling
-├── app.js              # Application logic, Sleeper API client, state, and rendering
-├── eslint.config.js    # ESLint flat configuration
-├── package.json        # Project scripts and devDependencies
-├── Taskfile.yaml       # Development and CI task orchestration
-└── README.md           # Project documentation
+│   ├── build.js          # esbuild bundler and minifier
+│   └── generate-snapshots.js # Visual regression snapshot generator & verifier
+├── tests/                # Node.js native unit & integration test suites
+├── eslint.config.js      # ESLint flat configuration
+├── package.json          # Project scripts, exports map, and devDependencies
+├── Taskfile.yaml         # Development and CI task orchestration
+└── README.md             # Project documentation
 ```
 
 ---
@@ -90,16 +99,16 @@ This project uses [Task](https://taskfile.dev/) and [`npm`](https://nodejs.org/)
 
 ### Standard Entrypoints
 
-| Task           | Purpose                                                        | Command Behind the Scenes          |
-| -------------- | -------------------------------------------------------------- | ---------------------------------- |
-| `task install` | Install all development and testing dependencies               | `npm install`                      |
-| `task test`    | Run native unit test suite (`node:test`)                       | `npm test`                         |
-| `task lint`    | Run formatting check (Prettier) and code linting (ESLint)      | `npm run format:check && eslint .` |
-| `task fix`     | Auto-fix formatting and linting errors                         | `npm run format && eslint . --fix` |
-| `task build`   | Synchronize standalone `app.js` into `index.html`              | `node scripts/bundle.js`           |
-| `task docs`    | Build site distribution package for GitHub Pages               | `npm run docs`                     |
-| `task check`   | Complete quality check: formatting, linting, tests, and bundle | `task lint && task test && ...`    |
-| `task dev`     | Start a local development server on port 8080                  | `npx serve -l 8080 .`              |
+| Task           | Purpose                                                       | Command Behind the Scenes          |
+| -------------- | ------------------------------------------------------------- | ---------------------------------- |
+| `task install` | Install all development and testing dependencies              | `npm install`                      |
+| `task dev`     | Start Vite live-reloading dev server (0.0.0.0:3000)           | `npm run dev`                      |
+| `task test`    | Run native unit test suite (`node:test`)                      | `npm test`                         |
+| `task lint`    | Run formatting check (Prettier) and code linting (ESLint)     | `npm run format:check && eslint .` |
+| `task fix`     | Auto-fix formatting and linting errors                        | `npm run format && eslint . --fix` |
+| `task build`   | Build minified distribution bundles in `dist/`                | `node scripts/build.js`            |
+| `task docs`    | Build site distribution package for GitHub Pages              | `npm run docs`                     |
+| `task check`   | Complete quality check: formatting, linting, tests, and build | `task lint && task test && ...`    |
 
 ### Running Tests
 

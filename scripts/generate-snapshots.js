@@ -3,6 +3,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { mockEmbeddedReport } from "../tests/fixtures/mock-data.js";
+import { build } from "./build.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,8 +43,8 @@ function buildSnapshotHtmlPages() {
     fs.mkdirSync(tmpDir, { recursive: true });
   }
 
-  const indexHtml = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
-  const stylesCss = fs.readFileSync(path.join(rootDir, "styles.css"), "utf8");
+  const distIndexHtmlPath = path.join(rootDir, "dist", "index.html");
+  const indexHtml = fs.readFileSync(distIndexHtmlPath, "utf8");
 
   // Deterministic CSS override to eliminate animations and caret cursor
   const deterministicOverride = `
@@ -131,13 +132,6 @@ function buildSnapshotHtmlPages() {
 
   for (const s of scenarios) {
     let html = indexHtml;
-
-    if (html.includes('<link rel="stylesheet" href="styles.css">')) {
-      html = html.replace(
-        '<link rel="stylesheet" href="styles.css">',
-        `<style>\n${stylesCss}\n</style>`
-      );
-    }
 
     const dataScript = s.embeddedData
       ? `<script id="embedded-report-data">\nwindow.__EMBEDDED_REPORT__ = ${JSON.stringify(s.embeddedData)};\n</script>`
@@ -302,6 +296,7 @@ function capturePageScreenshot(chromePath, page, targetDir) {
 }
 
 export async function generateSnapshots({ isCheck = false } = {}) {
+  await build({ silent: true });
   const chromePath = getChromePath();
   console.log(`📸 Using browser at: ${chromePath}`);
 

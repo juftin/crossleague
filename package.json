@@ -14,16 +14,13 @@
   },
   "files": [
     "dist",
-    "src",
-    "index.html",
-    "styles.css",
-    "app.js"
+    "src"
   ],
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",
     "build:check": "node scripts/build.js --check",
-    "docs": "node scripts/build.js && mkdir -p site && cp index.html styles.css app.js site/ && touch site/.nojekyll",
+    "docs": "node scripts/build.js && mkdir -p site && cp -r dist/* site/ && touch site/.nojekyll",
     "format": "prettier --write \"**/*.{js,json,html,css,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{js,json,html,css,md,yaml,yml}\"",
     "lint": "eslint .",

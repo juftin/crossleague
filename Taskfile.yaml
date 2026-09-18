@@ -12,9 +12,9 @@ tasks:
       - npm install
 
   build:
-    desc: Synchronize and bundle app.js into index.html
+    desc: Build production bundles and standalone HTML into dist/
     cmds:
-      - node scripts/bundle.js {{.CLI_ARGS}}
+      - node scripts/build.js {{.CLI_ARGS}}
 
   format:
     desc: Format code using Prettier
@@ -53,7 +53,7 @@ tasks:
     cmds:
       - task: lint
       - task: test
-      - node scripts/bundle.js --check
+      - node scripts/build.js --check
 
   docs:
     desc: Build site distribution for GitHub Pages
