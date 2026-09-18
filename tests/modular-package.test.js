@@ -1,9 +1,10 @@
-import { describe, it } from "node:test";
+import { describe, it, before } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
+import { build } from "../scripts/build.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,6 +78,10 @@ describe("Modern JS Package Structure & Module Exports", () => {
 });
 
 describe("Minified Production Builds & Distribution", () => {
+  before(async () => {
+    await build({ isCheckMode: false, silent: true });
+  });
+
   const distAppMinJsPath = path.join(rootDir, "dist", "app.min.js");
   const distStylesMinCssPath = path.join(rootDir, "dist", "styles.min.css");
   const distIndexHtmlPath = path.join(rootDir, "dist", "index.html");
