@@ -154,8 +154,8 @@ function buildSnapshotHtmlPages() {
     const mobileStyle = s.isMobile
       ? `<style>
           html, body {
-            width: 390px !important;
-            max-width: 390px !important;
+            width: 540px !important;
+            max-width: 540px !important;
             overflow-x: hidden !important;
           }
         </style>`
@@ -192,7 +192,7 @@ function capturePageScreenshot(chromePath, page, targetDir) {
   return new Promise((resolve, reject) => {
     const outputPath = path.join(targetDir, `${page.id}.png`);
     const fileUrl = `file://${path.resolve(page.filePath)}`;
-    const windowSize = page.isMobile ? "390,844" : "1280,800";
+    const windowSize = page.isMobile ? "540,960" : "1280,800";
     const userProfileDir = path.join(tmpDir, `profile-${page.id}-${Date.now()}`);
 
     if (!fs.existsSync(userProfileDir)) {

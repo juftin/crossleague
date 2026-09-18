@@ -97,7 +97,7 @@ describe("Visual PNG Snapshot Suite", () => {
     }
   });
 
-  it("should validate PNG signatures and exact 390x844 dimensions for mobile snapshots", () => {
+  it("should validate PNG signatures and exact 540x960 dimensions for mobile snapshots", () => {
     for (const snapshotName of MOBILE_SNAPSHOTS) {
       const filePath = path.join(snapshotsDir, snapshotName);
       const meta = parsePngMetadata(filePath);
@@ -107,8 +107,8 @@ describe("Visual PNG Snapshot Suite", () => {
         `Mobile snapshot '${snapshotName}' must have a valid PNG magic header`
       );
       assert.equal(meta.chunkType, "IHDR", `Snapshot '${snapshotName}' must have IHDR first chunk`);
-      assert.equal(meta.width, 390, `Mobile snapshot '${snapshotName}' width must be 390px`);
-      assert.equal(meta.height, 844, `Mobile snapshot '${snapshotName}' height must be 844px`);
+      assert.equal(meta.width, 540, `Mobile snapshot '${snapshotName}' width must be 540px`);
+      assert.equal(meta.height, 960, `Mobile snapshot '${snapshotName}' height must be 960px`);
       assert.equal(meta.bitDepth, 8, `Snapshot '${snapshotName}' bit depth must be 8`);
       assert.ok(
         meta.fileSize > 20 * 1024,
