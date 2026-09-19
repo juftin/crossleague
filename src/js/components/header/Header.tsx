@@ -57,6 +57,8 @@ export const Header: React.FC = () => {
   const closeSettingsModal = useCrossLeagueStore(s => s.closeSettingsModal);
   const resetData = useCrossLeagueStore(s => s.resetData);
   const addToast = useCrossLeagueStore(s => s.addToast);
+  const rawRecords = useCrossLeagueStore(s => s.rawRecords);
+  const hasData = rawRecords && rawRecords.length > 0;
 
   const [inputUser, setInputUser] = useState(userName || userId);
   const [inputLeagueId, setInputLeagueId] = useState("");
@@ -224,45 +226,51 @@ export const Header: React.FC = () => {
 
         {/* Right Side: Year/Week Badges, Snapshot Indicator & Hamburger Menu Button */}
         <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3">
-          <div
-            id="headerBottomRow"
-            className="flex flex-shrink-0 flex-col items-end justify-center gap-1"
-          >
-            <div className="flex items-center gap-1">
-              <span
-                id="headerPlatformBadge"
-                title="Active fantasy platform. Change it in Menu & Controls."
-                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] leading-tight font-semibold shadow-sm sm:text-xs ${
-                  platform === "espn"
-                    ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
-                    : "border-cyan-400/30 bg-cyan-500/10 text-cyan-300"
-                }`}
-              >
-                {platform === "espn" ? <Shield className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                {platform === "espn" ? "ESPN" : "Sleeper"}
-              </span>
+          {hasData && (
+            <div
+              id="headerBottomRow"
+              className="flex flex-shrink-0 flex-col items-end justify-center gap-1"
+            >
+              <div className="flex items-center gap-1">
+                <span
+                  id="headerPlatformBadge"
+                  title="Active fantasy platform. Change it in Menu & Controls."
+                  className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] leading-tight font-semibold shadow-sm sm:text-xs ${
+                    platform === "espn"
+                      ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                      : "border-cyan-400/30 bg-cyan-500/10 text-cyan-300"
+                  }`}
+                >
+                  {platform === "espn" ? (
+                    <Shield className="h-3 w-3" />
+                  ) : (
+                    <Zap className="h-3 w-3" />
+                  )}
+                  {platform === "espn" ? "ESPN" : "Sleeper"}
+                </span>
 
-              {/* Year / Season Bubble Badge */}
+                {/* Year / Season Bubble Badge */}
+                <span
+                  id="headerSeasonBadge"
+                  title="Active Season"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-cyan-300 shadow-sm sm:text-xs"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                  <span id="headerSeasonValue">{season}</span>
+                </span>
+              </div>
+
+              {/* Week Bubble Badge */}
               <span
-                id="headerSeasonBadge"
-                title="Active Season"
-                className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-cyan-300 shadow-sm sm:text-xs"
+                id="headerWeekBadge"
+                title="Active Matchup Week"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-emerald-300 shadow-sm sm:text-xs"
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                <span id="headerSeasonValue">{season}</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                <span id="headerWeekValue">{weekLabel}</span>
               </span>
             </div>
-
-            {/* Week Bubble Badge */}
-            <span
-              id="headerWeekBadge"
-              title="Active Matchup Week"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-emerald-300 shadow-sm sm:text-xs"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-              <span id="headerWeekValue">{weekLabel}</span>
-            </span>
-          </div>
+          )}
 
           <span
             id="snapshotIndicator"
