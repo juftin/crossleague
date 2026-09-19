@@ -5,9 +5,6 @@
  * (comma, space, newline, semicolon separated).
  */
 
-import { state } from "./store.js";
-import { savePreferences, updateSettingsButtonBadge } from "./preferences.js";
-
 /**
  * Extracts and cleans numeric league IDs from a raw string input.
  *
@@ -55,66 +52,3 @@ export function getUrlParams(searchStr) {
 
   return { platform, user, season, week, mode, leagues };
 }
-
-/**
- * Adds parsed custom league IDs to store and updates UI.
- *
- * @param {string} str Raw input string containing league IDs
- * @param {Function} [renderChipsFn] Callback to re-render chip elements
- */
-export function addCustomLeagueIds(str, renderChipsFn = null) {
-  if (!str) return;
-  const parts = extractCustomLeagueIds(str);
-
-  if (parts.length === 0 && str.trim()) {
-    return;
-  }
-
-  parts.forEach(id => state.customLeagueIds.add(id));
-  if (typeof renderChipsFn === "function") {
-    renderChipsFn();
-  }
-  savePreferences();
-  updateSettingsButtonBadge();
-
-  const customLeaguesDropdownMenu = document.getElementById("customLeaguesDropdownMenu");
-  const customLeaguesDropdownChevron = document.getElementById("customLeaguesDropdownChevron");
-  const customLeaguesDropdownBtn = document.getElementById("customLeaguesDropdownBtn");
-
-  if (customLeaguesDropdownMenu && customLeaguesDropdownMenu.classList.contains("hidden")) {
-    customLeaguesDropdownMenu.classList.remove("hidden");
-    if (customLeaguesDropdownChevron) customLeaguesDropdownChevron.classList.add("rotate-180");
-    if (customLeaguesDropdownBtn) customLeaguesDropdownBtn.setAttribute("aria-expanded", "true");
-  }
-}
-
-/**
- * Removes a specific custom league ID from the store.
- *
- * @param {string} id League ID to remove
- * @param {Function} [renderChipsFn] Callback to re-render chip elements
- */
-export function removeCustomLeagueId(id, renderChipsFn = null) {
-  state.customLeagueIds.delete(id);
-  if (typeof renderChipsFn === "function") {
-    renderChipsFn();
-  }
-  savePreferences();
-  updateSettingsButtonBadge();
-}
-
-/**
- * Clears all custom league IDs from the store.
- *
- * @param {Function} [renderChipsFn] Callback to re-render chip elements
- */
-export function clearCustomLeagueIds(renderChipsFn = null) {
-  state.customLeagueIds.clear();
-  if (typeof renderChipsFn === "function") {
-    renderChipsFn();
-  }
-  savePreferences();
-  updateSettingsButtonBadge();
-}
-
-export { syncTabFromHash } from "../components/tabs.js";

@@ -26,8 +26,6 @@
 - **📋 One-Click Chat Recap & CSV Export**:
   - Formats ready-to-paste markdown rankings and superlatives for Discord, Slack, and GroupMe.
   - One-click CSV download with comprehensive stats including All-Play, Expected Wins, and Luck metrics.
-- **📁 Standalone HTML Report Exporter**:
-  - Exports a self-contained offline `.html` file with embedded snapshot data that can be shared and opened anywhere without external dependencies.
 - **💾 LocalStorage Caching**:
   - Automatically caches synced data per user, season, mode, and week for instant reloading.
 
@@ -73,7 +71,7 @@ crossleague/
 │   │   ├── analytics/    # All-Play, Expected Wins, Luck Index, Efficiency
 │   │   ├── api/          # Sleeper and ESPN fantasy adapters
 │   │   ├── components/   # UI components, modals, dropdowns, tables, charts
-│   │   ├── export/       # Chat recap, CSV, and offline HTML report export
+│   │   ├── export/       # Chat recap and CSV export helpers
 │   │   ├── state/        # State store, caching, and URL parameter syncing
 │   │   └── index.js      # Main JavaScript module & browser entrypoint
 │   └── index.html        # Source HTML template (Vite dev server entrypoint)
@@ -82,11 +80,11 @@ crossleague/
 │   ├── styles.min.css    # Minified production CSS
 │   └── index.html        # Minified standalone zero-dependency HTML application
 ├── scripts/
-│   ├── build.js          # esbuild bundler and minifier
+│   ├── build.js          # Vite bundler and minifier
 │   └── generate-snapshots.js # Visual regression snapshot generator & verifier
 ├── tests/                # Node.js native unit & integration test suites
 ├── eslint.config.js      # ESLint flat configuration
-├── package.json          # Project scripts, exports map, and devDependencies
+├── package.json          # Project scripts and devDependencies
 ├── Taskfile.yaml         # Development and CI task orchestration
 └── README.md             # Project documentation
 ```

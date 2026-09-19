@@ -30,6 +30,9 @@ jobs:
           - name: check - lint
             task: check:lint
             install: true
+          - name: check - types
+            task: check:types
+            install: true
           - name: check - build
             task: check:build
             install: true

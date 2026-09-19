@@ -60,6 +60,12 @@ tasks:
       - task: check:format
       - task: check:lint
   #######################################
+  check:types:
+    desc: Code Quality Check - Type Checking
+    cmds:
+      - npm run typecheck
+    deps: [sync]
+  #######################################
   check:build:
     desc: Code Quality Check - Bundle Synchronization
     cmds:
@@ -67,9 +73,10 @@ tasks:
     deps: [sync]
   #######################################
   check:
-    desc: Code Quality Check - Formatting + Linting + Build Check + Test
+    desc: Code Quality Check - Formatting + Linting + Type Checking + Build Check + Test
     cmds:
       - task: check:style
+      - task: check:types
       - task: test
       - task: check:build
   #######################################
@@ -77,6 +84,11 @@ tasks:
     desc: Code Quality Check - Formatting + Linting
     cmds:
       - task: check:style
+  #######################################
+  typecheck:
+    desc: Code Quality Check - Type Checking
+    cmds:
+      - task: check:types
   ########################
   # CODE QUALITY FIXES
   ########################

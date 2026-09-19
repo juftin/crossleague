@@ -44,21 +44,21 @@ export function formatLuckBadge(luckVal, _isSeason = false, actWinsStr = "0", ex
 
   if (val >= 0.5) {
     return `
-      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm cursor-help" title="🍀 Lucky Schedule Draw: Gained +${val.toFixed(2)} bonus wins above expected (${actWinsStr} actual vs ${expWinsStr} expected based on scoring)">
-        <span>🍀</span> ${formatted}
+      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm cursor-help" title="Lucky Schedule Draw: Gained +${val.toFixed(2)} bonus wins above expected (${actWinsStr} actual vs ${expWinsStr} expected based on scoring)">
+        ${formatted}
       </span>
     `;
   }
   if (val <= -0.5) {
     return `
-      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm cursor-help" title="💔 Unlucky Schedule Draw: Lost ${Math.abs(val).toFixed(2)} wins below expected (${actWinsStr} actual vs ${expWinsStr} expected due to tough opponent scores)">
-        <span>💔</span> ${formatted}
+      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm cursor-help" title="Unlucky Schedule Draw: Lost ${Math.abs(val).toFixed(2)} wins below expected (${actWinsStr} actual vs ${expWinsStr} expected due to tough opponent scores)">
+        ${formatted}
       </span>
     `;
   }
   return `
-    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-slate-800 text-slate-300 border border-slate-700 cursor-help" title="⚖️ Fair Schedule: Actual outcome closely matches scoring performance (${val >= 0 ? "+" : ""}${val.toFixed(2)} vs ${expWinsStr} expected)">
-      <span>⚖️</span> ${formatted}
+    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-slate-800 text-slate-300 border border-slate-700 cursor-help" title="Fair Schedule: Actual outcome closely matches scoring performance (${val >= 0 ? "+" : ""}${val.toFixed(2)} vs ${expWinsStr} expected)">
+      ${formatted}
     </span>
   `;
 }

@@ -3,6 +3,7 @@ import path from "node:path";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { build as viteBuild } from "vite";
+import react from "@vitejs/plugin-react";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,11 +28,15 @@ export async function build({
 } = {}) {
   const logLevel = silent ? "silent" : "warn";
 
-  // 1. Build minified JS bundle with Vite (IIFE format)
+  // 1. Build minified JS bundle with Vite (IIFE format) and React plugin
   await viteBuild({
     root: path.join(rootDir, "src"),
     logLevel,
     configFile: false,
+    plugins: [react()],
+    define: {
+      "process.env.NODE_ENV": JSON.stringify("production")
+    },
     build: {
       outDir: distDir,
       emptyOutDir: false,
@@ -93,6 +98,7 @@ export async function build({
 
   // 3. Build standalone HTML with inlined minified assets
   const templateHtml = fs.readFileSync(srcHtmlPath, "utf8");
+  const inlineJsCode = minJsCode.trim().replaceAll("</script", "<\\/script");
   let distInlinedHtml = templateHtml;
 
   if (/<style>[\s\S]*?<\/style>/i.test(distInlinedHtml)) {
@@ -114,12 +120,12 @@ export async function build({
   ) {
     distInlinedHtml = distInlinedHtml.replace(
       /<!--\s*Application Logic\s*-->[\s\S]*?<script[\s\S]*?<\/script>\s*<\/body>/i,
-      `<!-- Application Logic -->\n    <script>\n${minJsCode.trim()}\n    </script>\n  </body>`
+      () => `<!-- Application Logic -->\n    <script>\n${inlineJsCode}\n    </script>\n  </body>`
     );
   } else if (/<script[\s\S]*?<\/script>\s*<\/body>/i.test(distInlinedHtml)) {
     distInlinedHtml = distInlinedHtml.replace(
       /<script[\s\S]*?<\/script>\s*<\/body>/i,
-      `<script>\n${minJsCode.trim()}\n    </script>\n  </body>`
+      () => `<script>\n${inlineJsCode}\n    </script>\n  </body>`
     );
   }
 

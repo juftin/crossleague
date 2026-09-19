@@ -10,7 +10,6 @@ repos:
       - id: check-json
       - id: check-merge-conflict
       - id: mixed-line-ending
-      - id: no-commit-to-branch
       - id: check-added-large-files
         args: ["--maxkb=500"]
 

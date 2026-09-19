@@ -35,6 +35,12 @@ header {
   -webkit-backface-visibility: hidden;
 }
 
+.app-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+}
+
 .glass-card {
   background: rgba(15, 23, 42, 0.72);
   backdrop-filter: blur(16px);
@@ -211,6 +217,10 @@ a {
   .card-info-wrapper:hover > .card-info-popover {
     display: block;
   }
+}
+
+.card-info-wrapper:focus-within > .card-info-popover {
+  display: block;
 }
 
 @keyframes popoverFadeIn {
