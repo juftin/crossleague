@@ -4,20 +4,21 @@
 
 import { create } from "zustand";
 import { useMemo } from "react";
-import { TAB_HASH_MAP } from "./constants.js";
+import { TAB_HASH_MAP, STORAGE_KEYS } from "./constants.js";
+import { setPreference, getAllPreferences, clearAllStorage } from "./storage.js";
 
-const currentYear = new Date().getFullYear();
+const initialPreferences = getAllPreferences();
 
 export const useCrossLeagueStore = create((set, get) => ({
-  platform: "sleeper",
-  mode: "WEEKLY",
-  season: currentYear,
-  week: 1,
-  syncType: "user",
-  userId: "",
-  userName: "",
+  platform: initialPreferences.platform,
+  mode: initialPreferences.mode,
+  season: initialPreferences.season,
+  week: initialPreferences.week,
+  syncType: initialPreferences.syncType,
+  userId: initialPreferences.userId,
+  userName: initialPreferences.userName,
   userAvatar: "",
-  customLeagueIds: [],
+  customLeagueIds: initialPreferences.customLeagueIds,
   selectedLeagueIds: [],
   pendingLeagueIdsFilter: null,
 
@@ -25,9 +26,9 @@ export const useCrossLeagueStore = create((set, get) => ({
   leaguesMap: {},
   allLeaguesData: [],
   nflState: {
-    season: currentYear,
-    week: 1,
-    display_week: 1,
+    season: initialPreferences.season,
+    week: initialPreferences.week,
+    display_week: initialPreferences.week,
     season_type: "regular"
   },
   espnPlayersDb: {},
@@ -74,54 +75,44 @@ export const useCrossLeagueStore = create((set, get) => ({
 
   setPlatform: platform => {
     set({ platform, syncType: platform === "espn" ? "leagues" : get().syncType });
-    try {
-      localStorage.setItem("crossleague_platform", platform);
-    } catch {}
+    setPreference(STORAGE_KEYS.PREF_PLATFORM, platform);
   },
 
   setMode: mode => {
     set({ mode });
-    try {
-      localStorage.setItem("sleeper_mode", mode);
-    } catch {}
+    setPreference(STORAGE_KEYS.PREF_MODE, mode);
   },
 
   setSeason: season => {
     set({ season });
-    try {
-      localStorage.setItem("sleeper_season", String(season));
-    } catch {}
+    setPreference(STORAGE_KEYS.PREF_SEASON, season);
   },
 
   setWeek: week => {
     set({ week });
-    try {
-      localStorage.setItem("sleeper_week", String(week));
-    } catch {}
+    setPreference(STORAGE_KEYS.PREF_WEEK, week);
   },
 
   setSyncType: syncType => {
     set({ syncType });
-    try {
-      localStorage.setItem("sleeper_sync_type", syncType);
-    } catch {}
+    setPreference(STORAGE_KEYS.PREF_SYNC_TYPE, syncType);
   },
 
-  setUserId: userId => set({ userId }),
+  setUserId: userId => {
+    set({ userId });
+    setPreference(STORAGE_KEYS.PREF_USER_ID, userId);
+  },
+
   setUserName: userName => {
     set({ userName });
-    try {
-      localStorage.setItem("sleeper_username", userName);
-      localStorage.setItem("sleeper_user_id", userName);
-    } catch {}
+    setPreference(STORAGE_KEYS.PREF_USER_NAME, userName);
   },
+
   setUserAvatar: userAvatar => set({ userAvatar }),
 
   setCustomLeagueIds: customLeagueIds => {
     set({ customLeagueIds });
-    try {
-      localStorage.setItem("sleeper_custom_league_ids", JSON.stringify(customLeagueIds));
-    } catch {}
+    setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, customLeagueIds);
   },
 
   addCustomLeagueId: id => {
@@ -131,18 +122,28 @@ export const useCrossLeagueStore = create((set, get) => ({
     if (!current.includes(trimmed)) {
       const next = [...current, trimmed];
       set({ customLeagueIds: next });
-      try {
-        localStorage.setItem("sleeper_custom_league_ids", JSON.stringify(next));
-      } catch {}
+      setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, next);
     }
   },
 
   removeCustomLeagueId: id => {
     const next = get().customLeagueIds.filter(x => x !== id);
     set({ customLeagueIds: next });
-    try {
-      localStorage.setItem("sleeper_custom_league_ids", JSON.stringify(next));
-    } catch {}
+    setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, next);
+  },
+
+  hydratePreferences: () => {
+    const prefs = getAllPreferences();
+    set({
+      platform: prefs.platform,
+      syncType: prefs.syncType,
+      userName: prefs.userName,
+      userId: prefs.userId,
+      customLeagueIds: prefs.customLeagueIds,
+      season: prefs.season,
+      week: prefs.week,
+      mode: prefs.mode
+    });
   },
 
   setSelectedLeagueIds: selectedLeagueIds => set({ selectedLeagueIds }),
@@ -263,18 +264,22 @@ export const useCrossLeagueStore = create((set, get) => ({
   },
 
   resetData: () => {
-    try {
-      localStorage.clear();
-    } catch {}
+    clearAllStorage();
+    const currentYear = new Date().getFullYear();
     set({
-      rawRecords: [],
-      leaguesMap: {},
-      allLeaguesData: [],
-      selectedLeagueIds: [],
-      customLeagueIds: [],
+      platform: "sleeper",
+      mode: "WEEKLY",
+      season: currentYear,
+      week: 1,
+      syncType: "user",
       userId: "",
       userName: "",
       userAvatar: "",
+      customLeagueIds: [],
+      selectedLeagueIds: [],
+      rawRecords: [],
+      leaguesMap: {},
+      allLeaguesData: [],
       error: null
     });
   }

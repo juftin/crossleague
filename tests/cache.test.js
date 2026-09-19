@@ -1,27 +1,88 @@
-import { describe, it } from "node:test";
+import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
+import {
+  getReportCacheKey,
+  getCacheKey,
+  isWeekFinished,
+  saveReportToCache,
+  loadReportFromCache,
+  clearAllAppData
+} from "../src/js/state/cache.js";
+import {
+  pruneCache,
+  getPreference,
+  setPreference,
+  getAllPreferences,
+  getItem,
+  setItem
+} from "../src/js/state/storage.js";
+import { STORAGE_KEYS } from "../src/js/state/constants.js";
 
-describe("Weekly Navigation & Caching Logic", () => {
-  function getCacheKey(user, season, mode, week) {
-    const u = (user || "").toLowerCase().trim();
-    return `crossleague_cache_${u}_${season}_${mode}_${week}`;
+// In-memory mock storage implementation for Node.js test environment
+class MockStorage {
+  constructor() {
+    this.store = new Map();
   }
 
-  function isWeekFinished(season, week, state) {
-    const s = parseInt(season, 10);
-    const w = parseInt(week, 10);
-    if (!state || !state.season) return false;
-    if (s < state.season) return true;
-    if (s === state.season) {
-      if (state.season_type === "post") return true;
-      const currentNflWeek = state.week || 1;
-      return w < currentNflWeek;
-    }
-    return false;
+  get length() {
+    return this.store.size;
   }
+
+  key(index) {
+    return Array.from(this.store.keys())[index] || null;
+  }
+
+  getItem(key) {
+    return this.store.has(key) ? this.store.get(key) : null;
+  }
+
+  setItem(key, value) {
+    this.store.set(String(key), String(value));
+  }
+
+  removeItem(key) {
+    this.store.delete(key);
+  }
+
+  clear() {
+    this.store.clear();
+  }
+}
+
+describe("CrossLeague Storage & Caching Subsystem", () => {
+  let mockLocalStorage;
+
+  beforeEach(() => {
+    mockLocalStorage = new MockStorage();
+    globalThis.localStorage = mockLocalStorage;
+    globalThis.sessionStorage = new MockStorage();
+  });
 
   describe("Cache Key Generation", () => {
-    it("should normalize username and generate distinct keys per week", () => {
+    it("should generate canonical namespaced report keys", () => {
+      const keyUser = getReportCacheKey({
+        platform: "sleeper",
+        user: "Juftin ",
+        season: 2024,
+        mode: "WEEKLY",
+        week: 1
+      });
+      assert.equal(keyUser, "crossleague:cache:report:sleeper:user:juftin:2024:WEEKLY:1");
+
+      const keyLeagues = getReportCacheKey({
+        platform: "espn",
+        customLeagueIds: ["espn:999", "123"],
+        season: 2024,
+        mode: "SEASON_ROLLUP",
+        week: 5
+      });
+      assert.equal(
+        keyLeagues,
+        "crossleague:cache:report:espn:leagues:123,999:2024:SEASON_ROLLUP:5"
+      );
+    });
+
+    it("should generate backward-compatible legacy keys", () => {
       const keyW1 = getCacheKey("Juftin ", "2024", "WEEKLY", 1);
       const keyW2 = getCacheKey("juftin", "2024", "WEEKLY", 2);
       const keySeason = getCacheKey("juftin", "2024", "SEASON_ROLLUP", 5);
@@ -41,117 +102,182 @@ describe("Weekly Navigation & Caching Logic", () => {
       assert.equal(isWeekFinished("2022", 10, state), true);
     });
 
-    it("should mark prior weeks as finished in active season", () => {
+    it("should mark strictly prior weeks as finished in active season", () => {
       const state = { season: 2024, week: 5, season_type: "regular" };
       assert.equal(isWeekFinished("2024", 1, state), true);
       assert.equal(isWeekFinished("2024", 4, state), true);
-      // Week 5 is in progress
-      assert.equal(isWeekFinished("2024", 5, state), false);
-      // Week 6 is future
-      assert.equal(isWeekFinished("2024", 6, state), false);
+      assert.equal(isWeekFinished("2024", 5, state), false); // Current week is active
+      assert.equal(isWeekFinished("2024", 6, state), false); // Future week is not finished
     });
 
-    it("should mark all regular season weeks as finished when season is in post-season", () => {
-      const state = { season: 2024, week: 1, season_type: "post" };
-      assert.equal(isWeekFinished("2024", 1, state), true);
-      assert.equal(isWeekFinished("2024", 18, state), true);
+    it("should mark all regular season weeks as finished when in post-season or off-season", () => {
+      const statePost = { season: 2024, week: 1, season_type: "post" };
+      assert.equal(isWeekFinished("2024", 1, statePost), true);
+      assert.equal(isWeekFinished("2024", 18, statePost), true);
+
+      const stateOff = { season: 2024, week: 1, season_type: "off" };
+      assert.equal(isWeekFinished("2024", 1, stateOff), true);
     });
   });
 
-  describe("Cache Isolation and Retrieval", () => {
-    it("should isolate cached data per week without cross-contamination", () => {
-      const mockStorage = new Map();
+  describe("Report Caching & Retrieval", () => {
+    it("should save and restore cached reports without cross-contamination", () => {
+      const week1Records = [{ id: "t1", leagueId: "101", points: 145.2 }];
+      const leaguesMap = { 101: { id: "101", name: "Dynasty Alpha", totalRosters: 12 } };
+      const allLeaguesData = [{ league_id: "101", name: "Dynasty Alpha" }];
 
-      const saveToCache = (user, season, mode, week, records) => {
-        const key = getCacheKey(user, season, mode, week);
-        mockStorage.set(
-          key,
-          JSON.stringify({
-            version: "2.0",
-            cachedAt: new Date().toISOString(),
-            week,
-            season,
-            records
-          })
-        );
-      };
+      saveReportToCache({
+        platform: "sleeper",
+        user: "juftin",
+        season: 2024,
+        mode: "WEEKLY",
+        week: 1,
+        records: week1Records,
+        leaguesMap,
+        allLeaguesData,
+        nflState: { season: 2024, week: 5, season_type: "regular" }
+      });
 
-      const loadFromCache = (user, season, mode, week) => {
-        const key = getCacheKey(user, season, mode, week);
-        const raw = mockStorage.get(key);
-        if (!raw) return null;
-        return JSON.parse(raw);
-      };
+      // Retrieve Week 1
+      const cachedW1 = loadReportFromCache({
+        platform: "sleeper",
+        user: "juftin",
+        season: 2024,
+        mode: "WEEKLY",
+        week: 1
+      });
 
-      // Store Week 1 data
-      const week1Records = [{ id: "t1", points: 145.2 }];
-      saveToCache("juftin", "2024", "WEEKLY", 1, week1Records);
-
-      // Verify Week 1 is in cache
-      const cachedW1 = loadFromCache("juftin", "2024", "WEEKLY", 1);
       assert.ok(cachedW1);
       assert.equal(cachedW1.week, 1);
+      assert.equal(cachedW1.isFinished, true);
       assert.equal(cachedW1.records[0].points, 145.2);
+      assert.equal(cachedW1.allLeaguesData[0].name, "Dynasty Alpha");
 
-      // Verify navigating to Week 2 results in a cache miss (requiring fetch)
-      const cachedW2 = loadFromCache("juftin", "2024", "WEEKLY", 2);
+      // Verify Week 2 results in cache miss
+      const cachedW2 = loadReportFromCache({
+        platform: "sleeper",
+        user: "juftin",
+        season: 2024,
+        mode: "WEEKLY",
+        week: 2
+      });
       assert.equal(cachedW2, null);
-
-      // Store Week 2 data after fetch
-      const week2Records = [{ id: "t1", points: 128.6 }];
-      saveToCache("juftin", "2024", "WEEKLY", 2, week2Records);
-
-      // Verify both weeks are now independently cached
-      assert.equal(loadFromCache("juftin", "2024", "WEEKLY", 1).records[0].points, 145.2);
-      assert.equal(loadFromCache("juftin", "2024", "WEEKLY", 2).records[0].points, 128.6);
     });
 
-    it("should preserve allLeaguesData and leaguesMap in cached payloads", () => {
-      const mockStorage = new Map();
-      const key = getCacheKey("juftin", "2024", "WEEKLY", 1);
-      const leagues = [
-        { league_id: "101", name: "Dynasty Alpha" },
-        { league_id: "102", name: "Redraft Beta" }
-      ];
-      const leaguesMap = { 101: { name: "Dynasty Alpha" }, 102: { name: "Redraft Beta" } };
-      const records = [{ id: "101-1", leagueId: "101", league: "Dynasty Alpha", points: 120 }];
+    it("should invalidate expired cache entries based on TTL", () => {
+      const records = [{ id: "t1", points: 120 }];
+      const modernKey = getReportCacheKey({
+        platform: "sleeper",
+        user: "juftin",
+        season: 2024,
+        mode: "WEEKLY",
+        week: 5
+      });
 
-      mockStorage.set(
-        key,
-        JSON.stringify({
-          version: "2.0",
-          season: "2024",
-          week: 1,
-          records,
-          leaguesMap,
-          allLeaguesData: leagues
-        })
-      );
+      // Write active week payload with 1ms TTL
+      setItem(modernKey, {
+        version: "2.1",
+        cachedAt: new Date(Date.now() - 50).toISOString(),
+        ttlMs: 10,
+        isFinished: false,
+        platform: "sleeper",
+        mode: "WEEKLY",
+        season: 2024,
+        week: 5,
+        records
+      });
 
-      const parsed = JSON.parse(mockStorage.get(key));
-      assert.equal(parsed.allLeaguesData.length, 2);
-      assert.equal(parsed.allLeaguesData[0].name, "Dynasty Alpha");
-      assert.equal(parsed.leaguesMap["102"].name, "Redraft Beta");
+      const result = loadReportFromCache({
+        platform: "sleeper",
+        user: "juftin",
+        season: 2024,
+        mode: "WEEKLY",
+        week: 5
+      });
+      assert.equal(result, null);
     });
   });
 
-  describe("Data Clearing & State Reset", () => {
-    it("should clear all localStorage keys and reset user preferences", () => {
-      const mockStorage = new Map([
-        ["crossleague_platform", "espn"],
-        ["sleeper_username", "juftin"],
-        ["sleeper_custom_league_ids", '["123","456"]'],
-        ["crossleague_cache_juftin_2024_WEEKLY_1", '{"records":[]}']
-      ]);
+  describe("LRU Eviction & Quota Recovery", () => {
+    it("should evict expired and oldest cache entries during pruning", () => {
+      const now = Date.now();
 
-      assert.equal(mockStorage.size, 4);
+      // 1. Expired entry
+      setItem("crossleague:cache:report:sleeper:user:user1:2024:WEEKLY:1", {
+        cachedAt: new Date(now - 100000).toISOString(),
+        ttlMs: 5000,
+        isFinished: false
+      });
 
-      // Simulate clearAllData
-      mockStorage.clear();
+      // 2. Old active entry
+      setItem("crossleague:cache:report:sleeper:user:user2:2024:WEEKLY:2", {
+        cachedAt: new Date(now - 50000).toISOString(),
+        ttlMs: 1000000,
+        isFinished: false
+      });
 
-      assert.equal(mockStorage.size, 0);
-      assert.equal(mockStorage.get("sleeper_username"), undefined);
-      assert.equal(mockStorage.get("crossleague_cache_juftin_2024_WEEKLY_1"), undefined);
+      // 3. Recent finished entry
+      setItem("crossleague:cache:report:sleeper:user:user3:2024:WEEKLY:3", {
+        cachedAt: new Date(now - 1000).toISOString(),
+        ttlMs: 1000000,
+        isFinished: true
+      });
+
+      assert.equal(mockLocalStorage.length, 3);
+
+      const evicted = pruneCache(mockLocalStorage, 2);
+      assert.ok(evicted >= 1);
+      assert.equal(
+        getItem(
+          "crossleague:cache:report:sleeper:user:user1:2024:WEEKLY:1",
+          null,
+          mockLocalStorage
+        ),
+        null
+      );
+    });
+  });
+
+  describe("Preference Migration & Backward Compatibility", () => {
+    it("should transparently read legacy storage keys when modern keys are unset", () => {
+      mockLocalStorage.setItem("sleeper_username", "legacy_user");
+      mockLocalStorage.setItem("crossleague_platform", "espn");
+      mockLocalStorage.setItem("sleeper_custom_league_ids", JSON.stringify(["111", "222"]));
+      mockLocalStorage.setItem("sleeper_season", "2023");
+
+      assert.equal(getPreference(STORAGE_KEYS.PREF_USER_NAME), "legacy_user");
+      assert.equal(getPreference(STORAGE_KEYS.PREF_PLATFORM), "espn");
+      assert.deepEqual(getPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES), ["111", "222"]);
+      assert.equal(Number(getPreference(STORAGE_KEYS.PREF_SEASON)), 2023);
+
+      const prefs = getAllPreferences();
+      assert.equal(prefs.userName, "legacy_user");
+      assert.equal(prefs.platform, "espn");
+      assert.deepEqual(prefs.customLeagueIds, ["111", "222"]);
+      assert.equal(prefs.season, 2023);
+    });
+
+    it("should prioritize modern namespaced preference keys over legacy keys", () => {
+      mockLocalStorage.setItem("sleeper_username", "legacy_user");
+      setPreference(STORAGE_KEYS.PREF_USER_NAME, "modern_user");
+
+      assert.equal(getPreference(STORAGE_KEYS.PREF_USER_NAME), "modern_user");
+      assert.equal(getAllPreferences().userName, "modern_user");
+    });
+  });
+
+  describe("Data Clearing & Reset", () => {
+    it("should clear all data across storage layers", () => {
+      setPreference(STORAGE_KEYS.PREF_PLATFORM, "espn");
+      setPreference(STORAGE_KEYS.PREF_USER_NAME, "juftin");
+      setItem("crossleague:cache:report:test", { records: [] });
+
+      assert.ok(mockLocalStorage.length >= 2);
+
+      clearAllAppData();
+
+      assert.equal(mockLocalStorage.length, 0);
+      assert.equal(getPreference(STORAGE_KEYS.PREF_USER_NAME), null);
     });
   });
 });

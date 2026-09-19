@@ -6,6 +6,8 @@
  */
 
 import { state } from "../state/store.js";
+import { STORAGE_KEYS } from "../state/constants.js";
+import { getItem, setItem } from "../state/storage.js";
 
 /**
  * Initializes and caches the Sleeper & ESPN NFL player databases in memory / localStorage.
@@ -18,22 +20,16 @@ export async function initPlayersDb(onUpdateCallback = null) {
     return state.sleeperPlayersDb;
   }
 
-  try {
-    const cached = localStorage.getItem("sleeper_players_v3");
-    if (cached) {
-      state.sleeperPlayersDb = JSON.parse(cached);
-    }
-  } catch (e) {
-    console.warn("Could not read player cache:", e);
+  const cachedSleeper =
+    getItem(STORAGE_KEYS.PLAYERS_SLEEPER, null) || getItem("sleeper_players_v3", null);
+  if (cachedSleeper) {
+    state.sleeperPlayersDb = cachedSleeper;
   }
 
-  try {
-    const cachedEspn = localStorage.getItem("crossleague_espn_players_v1");
-    if (cachedEspn) {
-      state.espnPlayersDb = { ...state.espnPlayersDb, ...JSON.parse(cachedEspn) };
-    }
-  } catch (e) {
-    console.warn("Could not read ESPN player cache:", e);
+  const cachedEspn =
+    getItem(STORAGE_KEYS.PLAYERS_ESPN, null) || getItem("crossleague_espn_players_v1", null);
+  if (cachedEspn) {
+    state.espnPlayersDb = { ...state.espnPlayersDb, ...cachedEspn };
   }
 
   if (state.sleeperPlayersDb && Object.keys(state.sleeperPlayersDb).length > 0) {
@@ -64,11 +60,8 @@ export async function initPlayersDb(onUpdateCallback = null) {
       }
     }
     state.sleeperPlayersDb = stripped;
-    try {
-      localStorage.setItem("sleeper_players_v3", JSON.stringify(stripped));
-    } catch {
-      // storage quota safe
-    }
+    setItem(STORAGE_KEYS.PLAYERS_SLEEPER, stripped);
+    setItem("sleeper_players_v3", stripped);
     if (typeof onUpdateCallback === "function") {
       onUpdateCallback();
     }

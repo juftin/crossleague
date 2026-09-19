@@ -66,33 +66,8 @@ export const App: React.FC = () => {
         return;
       }
 
-      // 2. Load stored preferences from localStorage
-      const savedPlatform = localStorage.getItem("crossleague_platform");
-      if (savedPlatform === "espn" || savedPlatform === "sleeper") {
-        setPlatform(savedPlatform);
-      }
-      const savedSyncType = localStorage.getItem("sleeper_sync_type");
-      if (savedSyncType === "leagues" || savedSyncType === "user") {
-        setSyncType(savedSyncType);
-      }
-      const savedCustomLeagues = localStorage.getItem("sleeper_custom_league_ids");
-      if (savedCustomLeagues) {
-        try {
-          const parsed = JSON.parse(savedCustomLeagues);
-          if (Array.isArray(parsed)) setCustomLeagueIds(parsed.filter(Boolean));
-        } catch {}
-      }
-      const savedUser =
-        localStorage.getItem("sleeper_username") || localStorage.getItem("sleeper_user_id");
-      if (savedUser) setUserName(savedUser);
-      const savedSeason = localStorage.getItem("sleeper_season");
-      if (savedSeason) setSeason(Number(savedSeason));
-      const savedWeek = localStorage.getItem("sleeper_week");
-      if (savedWeek) setWeek(Number(savedWeek));
-      const savedMode = localStorage.getItem("sleeper_mode");
-      if (savedMode === "WEEKLY" || savedMode === "SEASON_ROLLUP") {
-        setMode(savedMode);
-      }
+      // 2. Load stored preferences from storage
+      useCrossLeagueStore.getState().hydratePreferences();
 
       // 3. URL Query Parameter overrides
       const urlParams = getUrlParams();
@@ -138,10 +113,19 @@ export const App: React.FC = () => {
             season_type: nflData.season_type || "regular"
           };
           setNflState(nfl);
-          if (!urlParams.season && !localStorage.getItem("sleeper_season") && nfl.season) {
+          if (
+            !urlParams.season &&
+            !localStorage.getItem("sleeper_season") &&
+            !localStorage.getItem("crossleague:pref:season") &&
+            nfl.season
+          ) {
             setSeason(nfl.season);
           }
-          if (!urlParams.week && !localStorage.getItem("sleeper_week")) {
+          if (
+            !urlParams.week &&
+            !localStorage.getItem("sleeper_week") &&
+            !localStorage.getItem("crossleague:pref:week")
+          ) {
             const defaultWeek = nfl.display_week || nfl.week || 1;
             if (defaultWeek >= 1 && defaultWeek <= 18) {
               setWeek(defaultWeek);

@@ -110,3 +110,55 @@ export interface ToastMessage {
   type: "success" | "error" | "info" | "warning";
   duration?: number;
 }
+
+export interface CacheEnvelope<T> {
+  version: string;
+  cachedAt: string;
+  ttlMs?: number;
+  isFinished?: boolean;
+  data: T;
+}
+
+export interface UserIdentity {
+  id: string;
+  name: string;
+  avatar?: string;
+}
+
+export interface ReportCachePayload {
+  version: string;
+  cachedAt: string;
+  isFinished: boolean;
+  platform: Platform;
+  mode: SyncMode;
+  season: number;
+  week: number;
+  user: UserIdentity;
+  records: TeamRecord[];
+  leaguesMap: Record<string, LeagueInfo>;
+  allLeaguesData: any[];
+  selectedLeagueIds: string[];
+}
+
+export interface StoredPreferences {
+  platform: Platform;
+  syncType: SyncType;
+  userName: string;
+  userId: string;
+  customLeagueIds: string[];
+  season: number;
+  week: number;
+  mode: SyncMode;
+}
+
+export interface ApiCacheEntry<T = any> {
+  timestamp: number;
+  ttlMs: number;
+  data: T;
+}
+
+export interface PlayerMetadata {
+  name: string;
+  pos: string;
+  team: string;
+}
