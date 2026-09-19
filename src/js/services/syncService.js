@@ -28,9 +28,15 @@ export async function syncData(forceRefresh = false) {
   const inputUser = isLeaguesSync ? "" : userName || userId;
 
   let targetIds =
-    pendingLeagueIdsFilter && pendingLeagueIdsFilter.length > 0
-      ? pendingLeagueIdsFilter
-      : customLeagueIds;
+    platform === "espn"
+      ? customLeagueIds && customLeagueIds.length > 0
+        ? customLeagueIds
+        : store.espnCustomLeagueIds || []
+      : syncType === "leagues"
+        ? customLeagueIds && customLeagueIds.length > 0
+          ? customLeagueIds
+          : store.sleeperCustomLeagueIds || []
+        : [];
 
   if (isLeaguesSync || platform === "espn" || (!inputUser && targetIds.length > 0)) {
     if (targetIds.length === 0) {
@@ -435,6 +441,7 @@ export async function syncData(forceRefresh = false) {
         .map(l => l.league_id)
         .filter(id => pendingLeagueIdsFilter.includes(id));
       store.setSelectedLeagueIds(activeIds.length > 0 ? activeIds : Object.keys(leaguesMap));
+      useCrossLeagueStore.setState({ pendingLeagueIdsFilter: null });
     } else {
       store.setSelectedLeagueIds(Object.keys(leaguesMap));
     }
@@ -462,7 +469,7 @@ export async function syncData(forceRefresh = false) {
       store.setUserAvatar("");
       store.setCustomLeagueIds(targetIds);
     } else {
-      store.setCustomLeagueIds([]);
+      useCrossLeagueStore.setState({ customLeagueIds: [] });
     }
 
     const currentStore = useCrossLeagueStore.getState();

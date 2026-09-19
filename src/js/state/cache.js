@@ -334,7 +334,7 @@ export function loadReportFromCache({
   if (Number(data.season) !== Number(season)) return null;
   if (data.mode !== mode) return null;
   if (Number(data.week) !== Number(week)) return null;
-  if (data.platform && data.platform !== platform) return null;
+  if ((data.platform || "sleeper") !== (platform || "sleeper")) return null;
 
   // Validate TTL
   if (data.cachedAt && data.ttlMs) {

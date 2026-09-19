@@ -270,17 +270,11 @@ export function getAllPreferences() {
   const sleeperCustomLeagueIds =
     Array.isArray(rawSleeperCustom) && rawSleeperCustom.length > 0
       ? rawSleeperCustom.filter(Boolean)
-      : platform === "sleeper"
-        ? generalCustomLeagueIds
-        : [];
+      : generalCustomLeagueIds;
 
   const rawEspnCustom = getPreference(STORAGE_KEYS.PREF_ESPN_CUSTOM_LEAGUES, null);
   const espnCustomLeagueIds =
-    Array.isArray(rawEspnCustom) && rawEspnCustom.length > 0
-      ? rawEspnCustom.filter(Boolean)
-      : platform === "espn"
-        ? generalCustomLeagueIds
-        : [];
+    Array.isArray(rawEspnCustom) && rawEspnCustom.length > 0 ? rawEspnCustom.filter(Boolean) : [];
 
   const season = Number(getPreference(STORAGE_KEYS.PREF_SEASON, currentYear)) || currentYear;
   const week = Number(getPreference(STORAGE_KEYS.PREF_WEEK, 1)) || 1;
@@ -288,26 +282,23 @@ export function getAllPreferences() {
 
   const syncType =
     platform === "espn" ? "leagues" : sleeperSyncType === "leagues" ? "leagues" : "user";
-  const customLeagueIds =
-    platform === "espn"
-      ? espnCustomLeagueIds.length > 0
-        ? espnCustomLeagueIds
-        : generalCustomLeagueIds
-      : sleeperCustomLeagueIds.length > 0
-        ? sleeperCustomLeagueIds
-        : generalCustomLeagueIds;
+  const customLeagueIds = platform === "espn" ? espnCustomLeagueIds : sleeperCustomLeagueIds;
   const userName =
-    typeof sleeperUserName === "string" && sleeperUserName
-      ? sleeperUserName
-      : typeof generalUserName === "string"
-        ? generalUserName
-        : "";
+    platform === "espn"
+      ? ""
+      : typeof sleeperUserName === "string" && sleeperUserName
+        ? sleeperUserName
+        : typeof generalUserName === "string"
+          ? generalUserName
+          : "";
   const userId =
-    typeof sleeperUserId === "string" && sleeperUserId
-      ? sleeperUserId
-      : typeof generalUserId === "string"
-        ? generalUserId
-        : "";
+    platform === "espn"
+      ? ""
+      : typeof sleeperUserId === "string" && sleeperUserId
+        ? sleeperUserId
+        : typeof generalUserId === "string"
+          ? generalUserId
+          : "";
 
   return {
     platform,

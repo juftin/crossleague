@@ -102,16 +102,21 @@ describe("React settings and league-filter interactions", () => {
     assert.equal(useCrossLeagueStore.getState().syncType, "leagues");
     assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, []);
     assert.equal(useCrossLeagueStore.getState().userName, "");
+    assert.deepEqual(useCrossLeagueStore.getState().espnCustomLeagueIds, []);
+    assert.deepEqual(useCrossLeagueStore.getState().sleeperCustomLeagueIds, ["11223344"]);
 
     // Add ESPN league ID
     store.setCustomLeagueIds(["1664455"]);
     assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["1664455"]);
+    assert.deepEqual(useCrossLeagueStore.getState().espnCustomLeagueIds, ["1664455"]);
+    assert.deepEqual(useCrossLeagueStore.getState().sleeperCustomLeagueIds, ["11223344"]);
 
     // Switch back to Sleeper: Sleeper custom leagues and username should be restored, ESPN league ID should not leak
     store.setPlatform("sleeper");
     assert.equal(useCrossLeagueStore.getState().platform, "sleeper");
     assert.equal(useCrossLeagueStore.getState().userName, "sleeper_user");
     assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["11223344"]);
+    assert.deepEqual(useCrossLeagueStore.getState().espnCustomLeagueIds, ["1664455"]);
 
     // Switch back to ESPN: ESPN league ID should be restored, Sleeper league ID should not leak
     store.setPlatform("espn");
@@ -119,6 +124,7 @@ describe("React settings and league-filter interactions", () => {
     assert.equal(useCrossLeagueStore.getState().syncType, "leagues");
     assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["1664455"]);
     assert.equal(useCrossLeagueStore.getState().userName, "");
+    assert.deepEqual(useCrossLeagueStore.getState().sleeperCustomLeagueIds, ["11223344"]);
   });
 
   it("preserves both username and custom league IDs when toggling syncType on Sleeper", () => {

@@ -103,13 +103,21 @@ export const useCrossLeagueStore = create((set, get) => ({
       let sleeperSyncType = currentState.sleeperSyncType || "user";
 
       if (currentPlatform === "espn") {
-        espnCustomLeagueIds = currentState.customLeagueIds || [];
+        if (currentState.customLeagueIds && currentState.customLeagueIds.length > 0) {
+          espnCustomLeagueIds = currentState.customLeagueIds;
+        }
         setPreference(STORAGE_KEYS.PREF_ESPN_CUSTOM_LEAGUES, espnCustomLeagueIds);
       } else {
-        sleeperUserName = currentState.userName || "";
-        sleeperUserId = currentState.userId || "";
-        sleeperSyncType = currentState.syncType || "user";
-        sleeperCustomLeagueIds = currentState.customLeagueIds || [];
+        sleeperUserName = currentState.userName || currentState.sleeperUserName || "";
+        sleeperUserId = currentState.userId || currentState.sleeperUserId || "";
+        sleeperSyncType = currentState.syncType || currentState.sleeperSyncType || "user";
+        if (
+          currentState.syncType === "leagues" &&
+          currentState.customLeagueIds &&
+          currentState.customLeagueIds.length > 0
+        ) {
+          sleeperCustomLeagueIds = currentState.customLeagueIds;
+        }
         setPreference(STORAGE_KEYS.PREF_SLEEPER_USER_NAME, sleeperUserName);
         setPreference(STORAGE_KEYS.PREF_SLEEPER_USER_ID, sleeperUserId);
         setPreference(STORAGE_KEYS.PREF_SLEEPER_SYNC_TYPE, sleeperSyncType);
@@ -150,11 +158,11 @@ export const useCrossLeagueStore = create((set, get) => ({
         sleeperSyncType,
         userName: nextUserName,
         userId: nextUserId,
-        userAvatar: ""
+        userAvatar: "",
+        pendingLeagueIdsFilter: null
       });
 
       setPreference(STORAGE_KEYS.PREF_PLATFORM, platform);
-      setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, nextCustomLeagueIds);
       setPreference(STORAGE_KEYS.PREF_SYNC_TYPE, nextSyncType);
       setPreference(STORAGE_KEYS.PREF_USER_NAME, nextUserName);
       setPreference(STORAGE_KEYS.PREF_USER_ID, nextUserId);
@@ -222,8 +230,8 @@ export const useCrossLeagueStore = create((set, get) => ({
     } else {
       set({ customLeagueIds, sleeperCustomLeagueIds: customLeagueIds });
       setPreference(STORAGE_KEYS.PREF_SLEEPER_CUSTOM_LEAGUES, customLeagueIds);
+      setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, customLeagueIds);
     }
-    setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, customLeagueIds);
   },
 
   addCustomLeagueId: id => {

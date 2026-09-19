@@ -275,18 +275,18 @@ describe("CrossLeague Storage & Caching Subsystem", () => {
   describe("Preference Migration & Backward Compatibility", () => {
     it("should transparently read legacy storage keys when modern keys are unset", () => {
       mockLocalStorage.setItem("sleeper_username", "legacy_user");
-      mockLocalStorage.setItem("crossleague_platform", "espn");
+      mockLocalStorage.setItem("crossleague_platform", "sleeper");
       mockLocalStorage.setItem("sleeper_custom_league_ids", JSON.stringify(["111", "222"]));
       mockLocalStorage.setItem("sleeper_season", "2023");
 
       assert.equal(getPreference(STORAGE_KEYS.PREF_USER_NAME), "legacy_user");
-      assert.equal(getPreference(STORAGE_KEYS.PREF_PLATFORM), "espn");
+      assert.equal(getPreference(STORAGE_KEYS.PREF_PLATFORM), "sleeper");
       assert.deepEqual(getPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES), ["111", "222"]);
       assert.equal(Number(getPreference(STORAGE_KEYS.PREF_SEASON)), 2023);
 
       const prefs = getAllPreferences();
       assert.equal(prefs.userName, "legacy_user");
-      assert.equal(prefs.platform, "espn");
+      assert.equal(prefs.platform, "sleeper");
       assert.deepEqual(prefs.customLeagueIds, ["111", "222"]);
       assert.equal(prefs.season, 2023);
     });

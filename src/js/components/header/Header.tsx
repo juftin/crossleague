@@ -216,6 +216,7 @@ export const Header: React.FC = () => {
       setInputLeagueId("");
     }
 
+    useCrossLeagueStore.setState({ pendingLeagueIdsFilter: null });
     setPlatform(draftPlatform);
     setSeason(draftSeason);
     setMode(draftMode);
@@ -230,7 +231,7 @@ export const Header: React.FC = () => {
       setSyncType(draftSyncType);
       if (draftSyncType === "user") {
         setUserName(draftSleeperUser.trim());
-        setCustomLeagueIds([]);
+        useCrossLeagueStore.setState({ customLeagueIds: [] });
       } else {
         setCustomLeagueIds(finalSleeperLeagues);
         setUserName("");
