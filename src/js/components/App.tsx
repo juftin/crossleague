@@ -31,6 +31,7 @@ export const App: React.FC = () => {
   const mode = useCrossLeagueStore(s => s.mode);
   const setMode = useCrossLeagueStore(s => s.setMode);
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
+  const setTheme = useCrossLeagueStore(s => s.setTheme);
   const setUserName = useCrossLeagueStore(s => s.setUserName);
   const setSyncType = useCrossLeagueStore(s => s.setSyncType);
   const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
@@ -41,6 +42,9 @@ export const App: React.FC = () => {
   // Initialize from embedded report, URL parameters, or localStorage
   useEffect(() => {
     async function init() {
+      const savedTheme = localStorage.getItem("crossleague_theme");
+      setTheme(savedTheme === "light" ? "light" : "dark");
+
       // 1. Load a snapshot fixture when generating visual regression screenshots.
       const snapshot = (window as any).__CROSSLEAGUE_SNAPSHOT_DATA__;
       if (snapshot) {
@@ -170,6 +174,7 @@ export const App: React.FC = () => {
     init();
   }, [
     setPlatform,
+    setTheme,
     setSyncType,
     setCustomLeagueIds,
     setUserName,
