@@ -120,4 +120,29 @@ describe("React settings and league-filter interactions", () => {
     assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["1664455"]);
     assert.equal(useCrossLeagueStore.getState().userName, "");
   });
+
+  it("preserves both username and custom league IDs when toggling syncType on Sleeper", () => {
+    resetStore();
+    const store = useCrossLeagueStore.getState();
+
+    store.setPlatform("sleeper");
+    store.setSyncType("user");
+    store.setUserName("commissioner123");
+    store.setCustomLeagueIds(["99887766"]);
+
+    assert.equal(useCrossLeagueStore.getState().sleeperUserName, "commissioner123");
+    assert.deepEqual(useCrossLeagueStore.getState().sleeperCustomLeagueIds, ["99887766"]);
+
+    // Toggle to leagues syncType
+    store.setSyncType("leagues");
+    assert.equal(useCrossLeagueStore.getState().syncType, "leagues");
+    assert.equal(useCrossLeagueStore.getState().sleeperUserName, "commissioner123");
+    assert.deepEqual(useCrossLeagueStore.getState().sleeperCustomLeagueIds, ["99887766"]);
+
+    // Toggle back to user syncType
+    store.setSyncType("user");
+    assert.equal(useCrossLeagueStore.getState().syncType, "user");
+    assert.equal(useCrossLeagueStore.getState().sleeperUserName, "commissioner123");
+    assert.deepEqual(useCrossLeagueStore.getState().sleeperCustomLeagueIds, ["99887766"]);
+  });
 });

@@ -123,8 +123,10 @@ export const App: React.FC = () => {
       }
 
       if (urlLeagues && urlLeagues.length > 0) {
-        setCustomLeagueIds(urlLeagues);
-        if (!urlUser) {
+        if (urlUser) {
+          useCrossLeagueStore.setState({ pendingLeagueIdsFilter: urlLeagues });
+        } else {
+          setCustomLeagueIds(urlLeagues);
           setSyncType("leagues");
           setUserName("");
           setUserId("");

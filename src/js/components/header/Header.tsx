@@ -39,9 +39,11 @@ export const Header: React.FC = () => {
   const userId = useCrossLeagueStore(s => s.userId);
   const setUserId = useCrossLeagueStore(s => s.setUserId);
   const setUserAvatar = useCrossLeagueStore(s => s.setUserAvatar);
+  const sleeperUserName = useCrossLeagueStore(s => s.sleeperUserName);
+  const sleeperCustomLeagueIds = useCrossLeagueStore(s => s.sleeperCustomLeagueIds);
+  const espnCustomLeagueIds = useCrossLeagueStore(s => s.espnCustomLeagueIds);
   const customLeagueIds = useCrossLeagueStore(s => s.customLeagueIds);
   const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
-  const removeCustomLeagueId = useCrossLeagueStore(s => s.removeCustomLeagueId);
   const leaguesMap = useCrossLeagueStore(s => s.leaguesMap);
   const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
   const toggleSelectedLeagueId = useCrossLeagueStore(s => s.toggleSelectedLeagueId);
@@ -62,17 +64,66 @@ export const Header: React.FC = () => {
   const rawRecords = useCrossLeagueStore(s => s.rawRecords);
   const hasData = rawRecords && rawRecords.length > 0;
 
-  const [inputUser, setInputUser] = useState(userName || userId);
+  const [draftPlatform, setDraftPlatform] = useState(platform);
+  const [draftSyncType, setDraftSyncType] = useState(syncType);
+  const [draftSleeperUser, setDraftSleeperUser] = useState(sleeperUserName || userName || userId);
+  const [draftSleeperLeagues, setDraftSleeperLeagues] = useState<string[]>(
+    sleeperCustomLeagueIds?.length > 0
+      ? sleeperCustomLeagueIds
+      : platform === "sleeper"
+        ? customLeagueIds
+        : []
+  );
+  const [draftEspnLeagues, setDraftEspnLeagues] = useState<string[]>(
+    espnCustomLeagueIds?.length > 0
+      ? espnCustomLeagueIds
+      : platform === "espn"
+        ? customLeagueIds
+        : []
+  );
+  const [draftSeason, setDraftSeason] = useState(season);
+  const [draftMode, setDraftMode] = useState(mode);
   const [inputLeagueId, setInputLeagueId] = useState("");
-  const [draftEspnLeagueInput, setDraftEspnLeagueInput] = useState("");
-  const [draftSleeperLeagueInput, setDraftSleeperLeagueInput] = useState("");
-  const [draftSleeperUserInput, setDraftSleeperUserInput] = useState("");
   const [isLeagueFilterOpen, setIsLeagueFilterOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Sync draft state with store whenever settings modal opens
   useEffect(() => {
-    setInputUser(userName || userId);
-  }, [userName, userId, isSettingsOpen]);
+    if (isSettingsOpen) {
+      setDraftPlatform(platform);
+      setDraftSyncType(syncType);
+      setDraftSleeperUser(sleeperUserName || userName || userId);
+      setDraftSleeperLeagues(
+        sleeperCustomLeagueIds?.length > 0
+          ? sleeperCustomLeagueIds
+          : platform === "sleeper"
+            ? customLeagueIds
+            : []
+      );
+      setDraftEspnLeagues(
+        espnCustomLeagueIds?.length > 0
+          ? espnCustomLeagueIds
+          : platform === "espn"
+            ? customLeagueIds
+            : []
+      );
+      setDraftSeason(season);
+      setDraftMode(mode);
+      setInputLeagueId("");
+    }
+  }, [
+    isSettingsOpen,
+    platform,
+    syncType,
+    userName,
+    userId,
+    customLeagueIds,
+    sleeperUserName,
+    sleeperCustomLeagueIds,
+    espnCustomLeagueIds,
+    season,
+    mode
+  ]);
 
   // Handle click outside settings dropdown
   useEffect(() => {
@@ -122,35 +173,72 @@ export const Header: React.FC = () => {
   const selectedCount =
     selectedLeagueIds.length === 0 ? totalLeaguesCount : selectedLeagueIds.length;
 
+  const activeDraftLeagues = draftPlatform === "espn" ? draftEspnLeagues : draftSleeperLeagues;
+
   const handleAddLeagueId = () => {
     if (!inputLeagueId.trim()) return;
     const parsed = extractCustomLeagueIds(inputLeagueId);
     if (parsed.length > 0) {
-      const merged = Array.from(new Set([...customLeagueIds, ...parsed]));
-      setCustomLeagueIds(merged);
+      if (draftPlatform === "espn") {
+        setDraftEspnLeagues(Array.from(new Set([...draftEspnLeagues, ...parsed])));
+      } else {
+        setDraftSleeperLeagues(Array.from(new Set([...draftSleeperLeagues, ...parsed])));
+      }
     }
     setInputLeagueId("");
   };
 
+  const handleRemoveLeagueId = (idToRemove: string) => {
+    if (draftPlatform === "espn") {
+      setDraftEspnLeagues(draftEspnLeagues.filter(id => id !== idToRemove));
+    } else {
+      setDraftSleeperLeagues(draftSleeperLeagues.filter(id => id !== idToRemove));
+    }
+  };
+
   const handleApplySettings = (e: React.FormEvent) => {
     e.preventDefault();
+
+    let finalEspnLeagues = [...draftEspnLeagues];
+    let finalSleeperLeagues = [...draftSleeperLeagues];
+
     if (inputLeagueId.trim()) {
       const parsed = extractCustomLeagueIds(inputLeagueId);
       if (parsed.length > 0) {
-        const merged = Array.from(new Set([...customLeagueIds, ...parsed]));
-        setCustomLeagueIds(merged);
+        if (draftPlatform === "espn") {
+          finalEspnLeagues = Array.from(new Set([...finalEspnLeagues, ...parsed]));
+          setDraftEspnLeagues(finalEspnLeagues);
+        } else {
+          finalSleeperLeagues = Array.from(new Set([...finalSleeperLeagues, ...parsed]));
+          setDraftSleeperLeagues(finalSleeperLeagues);
+        }
       }
       setInputLeagueId("");
     }
-    if (syncType === "user" && platform !== "espn") {
-      setUserName(inputUser.trim());
-      setCustomLeagueIds([]);
-    } else {
+
+    setPlatform(draftPlatform);
+    setSeason(draftSeason);
+    setMode(draftMode);
+
+    if (draftPlatform === "espn") {
+      setSyncType("leagues");
+      setCustomLeagueIds(finalEspnLeagues);
       setUserName("");
       setUserId("");
       setUserAvatar("");
-      setInputUser("");
+    } else {
+      setSyncType(draftSyncType);
+      if (draftSyncType === "user") {
+        setUserName(draftSleeperUser.trim());
+        setCustomLeagueIds([]);
+      } else {
+        setCustomLeagueIds(finalSleeperLeagues);
+        setUserName("");
+        setUserId("");
+        setUserAvatar("");
+      }
     }
+
     closeSettingsModal();
     syncData(true);
   };
@@ -442,16 +530,9 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="platformSleeperBtn"
-                      onClick={() => {
-                        if (platform === "espn") {
-                          setDraftEspnLeagueInput(inputLeagueId);
-                          setInputLeagueId(draftSleeperLeagueInput);
-                          setInputUser(draftSleeperUserInput || userName || userId);
-                        }
-                        setPlatform("sleeper");
-                      }}
+                      onClick={() => setDraftPlatform("sleeper")}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
-                        platform === "sleeper"
+                        draftPlatform === "sleeper"
                           ? "bg-slate-800 text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
@@ -462,16 +543,9 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="platformEspnBtn"
-                      onClick={() => {
-                        if (platform !== "espn") {
-                          setDraftSleeperLeagueInput(inputLeagueId);
-                          setDraftSleeperUserInput(inputUser);
-                          setInputLeagueId(draftEspnLeagueInput);
-                        }
-                        setPlatform("espn");
-                      }}
+                      onClick={() => setDraftPlatform("espn")}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs transition ${
-                        platform === "espn"
+                        draftPlatform === "espn"
                           ? "border border-rose-500/40 bg-rose-900/80 font-bold text-white shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
@@ -487,19 +561,15 @@ export const Header: React.FC = () => {
                   <div
                     id="syncTypeButtonsContainer"
                     className={`flex items-center rounded-xl border border-slate-800 bg-slate-900 p-1 text-xs font-bold ${
-                      platform === "espn" ? "hidden" : ""
+                      draftPlatform === "espn" ? "hidden" : ""
                     }`}
                   >
                     <button
                       type="button"
                       id="syncTypeUserBtn"
-                      onClick={() => {
-                        setSyncType("user");
-                        setCustomLeagueIds([]);
-                        setInputLeagueId("");
-                      }}
+                      onClick={() => setDraftSyncType("user")}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center transition ${
-                        syncType === "user"
+                        draftSyncType === "user"
                           ? "bg-slate-800 font-bold text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
@@ -510,15 +580,9 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="syncTypeLeaguesBtn"
-                      onClick={() => {
-                        setSyncType("leagues");
-                        setUserName("");
-                        setUserId("");
-                        setUserAvatar("");
-                        setInputUser("");
-                      }}
+                      onClick={() => setDraftSyncType("leagues")}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center transition ${
-                        syncType === "leagues"
+                        draftSyncType === "leagues"
                           ? "bg-slate-800 font-bold text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
@@ -531,7 +595,7 @@ export const Header: React.FC = () => {
                   {/* Username Panel */}
                   <div
                     id="userSyncPanel"
-                    className={syncType === "user" && platform !== "espn" ? "" : "hidden"}
+                    className={draftSyncType === "user" && draftPlatform !== "espn" ? "" : "hidden"}
                   >
                     <label
                       htmlFor="userIdInput"
@@ -546,8 +610,8 @@ export const Header: React.FC = () => {
                       <input
                         type="text"
                         id="userIdInput"
-                        value={inputUser}
-                        onChange={e => setInputUser(e.target.value)}
+                        value={draftSleeperUser}
+                        onChange={e => setDraftSleeperUser(e.target.value)}
                         placeholder="e.g. username or numeric ID"
                         className="w-full rounded-xl border border-slate-700/80 bg-slate-900 px-3.5 py-2 pl-9 text-sm font-medium text-white placeholder-slate-500 transition-all focus:border-transparent focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
@@ -558,11 +622,11 @@ export const Header: React.FC = () => {
                   {/* League IDs Panel */}
                   <div
                     id="leaguesSyncPanel"
-                    className={`space-y-2.5 ${syncType === "leagues" || platform === "espn" ? "" : "hidden"}`}
+                    className={`space-y-2.5 ${draftSyncType === "leagues" || draftPlatform === "espn" ? "" : "hidden"}`}
                   >
                     <label className="block flex items-center justify-between text-xs font-black tracking-wider text-slate-400 uppercase">
                       <span id="customLeaguesLabel">
-                        {platform === "espn" ? "ESPN League IDs (Public)" : "League IDs"}
+                        {draftPlatform === "espn" ? "ESPN League IDs (Public)" : "League IDs"}
                       </span>
                       <span className="text-[10px] font-medium text-slate-500">multi-league</span>
                     </label>
@@ -580,7 +644,9 @@ export const Header: React.FC = () => {
                               handleAddLeagueId();
                             }
                           }}
-                          placeholder={platform === "espn" ? "e.g. espn:12345678" : "e.g. 12345678"}
+                          placeholder={
+                            draftPlatform === "espn" ? "e.g. espn:12345678" : "e.g. 12345678"
+                          }
                           className="w-full rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-2 pl-8 font-mono text-xs text-white placeholder-slate-500 transition-all focus:border-transparent focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
                         <span className="absolute top-2 left-2.5 font-mono text-xs text-slate-500">
@@ -602,7 +668,7 @@ export const Header: React.FC = () => {
                       id="customLeagueIdsChips"
                       className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto"
                     >
-                      {customLeagueIds.map(id => (
+                      {activeDraftLeagues.map(id => (
                         <span
                           key={id}
                           className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 font-mono text-xs text-slate-200"
@@ -610,7 +676,7 @@ export const Header: React.FC = () => {
                           <span>{id}</span>
                           <button
                             type="button"
-                            onClick={() => removeCustomLeagueId(id)}
+                            onClick={() => handleRemoveLeagueId(id)}
                             className="ml-1 cursor-pointer font-bold text-slate-400 hover:text-rose-400"
                           >
                             <X className="h-3.5 w-3.5" />
@@ -632,8 +698,8 @@ export const Header: React.FC = () => {
                     </label>
                     <select
                       id="modeSelect"
-                      value={mode}
-                      onChange={e => setMode(e.target.value as SyncMode)}
+                      value={draftMode}
+                      onChange={e => setDraftMode(e.target.value as SyncMode)}
                       className="w-full cursor-pointer rounded-xl border border-slate-700/80 bg-slate-900 px-2.5 py-2 text-xs font-semibold text-white transition-all focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:text-sm"
                     >
                       <option value="WEEKLY">Weekly Matchup</option>
@@ -650,8 +716,8 @@ export const Header: React.FC = () => {
                     </label>
                     <select
                       id="seasonInput"
-                      value={season}
-                      onChange={e => setSeason(Number(e.target.value))}
+                      value={draftSeason}
+                      onChange={e => setDraftSeason(Number(e.target.value))}
                       className="w-full cursor-pointer rounded-xl border border-slate-700/80 bg-slate-900 px-2.5 py-2 text-xs font-semibold text-white transition-all focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:text-sm"
                     >
                       {[2026, 2025, 2024, 2023, 2022, 2021].map(yr => (
