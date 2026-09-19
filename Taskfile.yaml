@@ -127,6 +127,12 @@ tasks:
     cmds:
       - npm run dev
     deps: [sync]
+  #######################################
+  pages:dev:
+    desc: Start Cloudflare Pages Local Preview Server
+    cmds:
+      - npm run pages:dev -- {{.CLI_ARGS}}
+    deps: [build]
   ########################
   # INTERNAL TASKS
   ########################
