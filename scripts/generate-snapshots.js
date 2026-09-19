@@ -109,6 +109,19 @@ function buildSnapshotHtmlPages() {
         "window.switchTab('awards', false); if (window.openSettingsModal) window.openSettingsModal();"
     },
     {
+      id: "light-awards",
+      embeddedData: mockEmbeddedReport,
+      theme: "light",
+      actionScript: "window.switchTab('awards', false);"
+    },
+    {
+      id: "light-settings-modal",
+      embeddedData: mockEmbeddedReport,
+      theme: "light",
+      actionScript:
+        "window.switchTab('awards', false); if (window.openSettingsModal) window.openSettingsModal();"
+    },
+    {
       id: "luck-modal",
       embeddedData: mockEmbeddedReport,
       actionScript:
@@ -118,6 +131,13 @@ function buildSnapshotHtmlPages() {
       id: "mobile-awards",
       embeddedData: mockEmbeddedReport,
       isMobile: true,
+      actionScript: "window.switchTab('awards', false);"
+    },
+    {
+      id: "mobile-light-awards",
+      embeddedData: mockEmbeddedReport,
+      isMobile: true,
+      theme: "light",
       actionScript: "window.switchTab('awards', false);"
     },
     {
@@ -135,6 +155,9 @@ function buildSnapshotHtmlPages() {
 
     const dataScript = s.embeddedData
       ? `<script>\nwindow.__CROSSLEAGUE_SNAPSHOT_DATA__ = ${JSON.stringify(s.embeddedData)};\n</script>`
+      : "";
+    const themeScript = s.theme
+      ? `<script>\nlocalStorage.setItem("crossleague_theme", "${s.theme}");\ndocument.documentElement.classList.replace("dark", "${s.theme}");\n</script>`
       : "";
 
     const runnerScript = `
@@ -168,10 +191,10 @@ function buildSnapshotHtmlPages() {
     if (html.includes("</head>")) {
       html = html.replace(
         "</head>",
-        () => `${deterministicOverride}\n${mobileStyle}\n${dataScript}\n</head>`
+        () => `${deterministicOverride}\n${mobileStyle}\n${themeScript}\n${dataScript}\n</head>`
       );
     } else {
-      html = `${deterministicOverride}\n${mobileStyle}\n${dataScript}\n${html}`;
+      html = `${deterministicOverride}\n${mobileStyle}\n${themeScript}\n${dataScript}\n${html}`;
     }
 
     if (html.includes("</body>")) {

@@ -77,6 +77,10 @@ html.light [class*="text-rose"] {
   color: #a84f45;
 }
 
+html.light h1.bg-clip-text {
+  background-image: linear-gradient(to right, #0f172a, #334155, #047857);
+}
+
 html.light [class*="bg-emerald"],
 html.light [class*="bg-cyan"] {
   background-color: rgba(85, 125, 85, 0.12);

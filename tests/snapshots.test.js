@@ -58,14 +58,20 @@ describe("Visual PNG Snapshot Suite", () => {
     "luck.png",
     "players.png",
     "settings-modal.png",
+    "light-awards.png",
+    "light-settings-modal.png",
     "luck-modal.png"
   ];
 
-  const MOBILE_SNAPSHOTS = ["mobile-awards.png", "mobile-leaderboard.png"];
+  const MOBILE_SNAPSHOTS = [
+    "mobile-awards.png",
+    "mobile-light-awards.png",
+    "mobile-leaderboard.png"
+  ];
 
   const ALL_SNAPSHOTS = [...DESKTOP_SNAPSHOTS, ...MOBILE_SNAPSHOTS];
 
-  it("should have all 11 required dashboard tab & modal snapshot PNG files", () => {
+  it("should have all 14 required dashboard tab & modal snapshot PNG files", () => {
     assert.ok(fs.existsSync(snapshotsDir), "Snapshots directory must exist");
 
     for (const snapshotName of ALL_SNAPSHOTS) {
