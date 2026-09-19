@@ -205,9 +205,9 @@ export const LeaderboardTab: React.FC = () => {
           </span>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="table-scroll-container rounded-xl border border-slate-800">
           <table className="w-full border-collapse text-left" id="mainTable">
-            <thead className="border-b border-slate-800 bg-slate-900/90 text-[11px] font-black tracking-wider text-slate-400 uppercase select-none sm:text-xs md:text-sm">
+            <thead className="sticky-table-header border-b border-slate-800 bg-slate-900/95 text-[11px] font-black tracking-wider text-slate-400 uppercase select-none sm:text-xs md:text-sm">
               <tr>
                 <th
                   className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
