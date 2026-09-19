@@ -137,7 +137,9 @@ describe("CrossLeague Storage & Caching Subsystem", () => {
         records: week1Records,
         leaguesMap,
         allLeaguesData,
-        nflState: { season: 2024, week: 5, season_type: "regular" }
+        nflState: { season: 2024, week: 5, season_type: "regular" },
+        userId: "998877",
+        userAvatar: "avatar_hash_123"
       });
 
       // Retrieve Week 1
@@ -152,6 +154,8 @@ describe("CrossLeague Storage & Caching Subsystem", () => {
       assert.ok(cachedW1);
       assert.equal(cachedW1.week, 1);
       assert.equal(cachedW1.isFinished, true);
+      assert.equal(cachedW1.user.id, "998877");
+      assert.equal(cachedW1.user.avatar, "avatar_hash_123");
       assert.equal(cachedW1.records[0].points, 145.2);
       assert.equal(cachedW1.allLeaguesData[0].name, "Dynasty Alpha");
 

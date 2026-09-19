@@ -62,6 +62,15 @@ export async function syncData(forceRefresh = false) {
       if (cached.selectedLeagueIds && cached.selectedLeagueIds.length > 0) {
         store.setSelectedLeagueIds(cached.selectedLeagueIds);
       }
+      if (cached.user?.id && !store.userId) {
+        store.setUserId(cached.user.id);
+      }
+      if (cached.user?.avatar && !store.userAvatar) {
+        store.setUserAvatar(cached.user.avatar);
+      }
+      if (cached.user?.name && !store.userName) {
+        store.setUserName(cached.user.name);
+      }
       initPlayersDb();
       store.setError(null);
       store.setLoading(false);
@@ -407,6 +416,8 @@ export async function syncData(forceRefresh = false) {
     saveReportToCache({
       platform,
       user: inputUser,
+      userId: store.userId,
+      userAvatar: store.userAvatar,
       customLeagueIds: targetIds,
       season,
       mode,

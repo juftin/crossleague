@@ -12,7 +12,7 @@ import { LuckModal } from "./modals/LuckModal.tsx";
 import { ToastContainer } from "./common/Toast.tsx";
 import { MobileBottomNav } from "./common/MobileBottomNav.tsx";
 import { syncData } from "../services/syncService.js";
-import { getUrlParams } from "../state/urlParams.js";
+import { getUrlParams, extractCustomLeagueIds } from "../state/urlParams.js";
 import { BASE_URL, HASH_TAB_MAP } from "../state/constants.js";
 import { cachedApiFetch } from "../state/cache.js";
 import { getMaxPlayedWeek } from "../state/preferences.js";
@@ -79,55 +79,63 @@ export const App: React.FC = () => {
 
       // 3. URL Query Parameter overrides
       const urlParams = getUrlParams();
-      const hasUrlUser = Boolean(urlParams.user);
-      const hasUrlLeagues = Boolean(urlParams.leagues);
-      const hasUrlParams = Boolean(
-        urlParams.platform ||
-        urlParams.user ||
-        urlParams.leagues ||
-        urlParams.season ||
-        urlParams.week ||
-        urlParams.mode
-      );
+      const currentStore = useCrossLeagueStore.getState();
 
-      if (hasUrlParams) {
-        setRawRecords([]);
-        setLeaguesMap({});
-        setAllLeaguesData([]);
+      const urlPlatform = urlParams.platform
+        ? urlParams.platform.toLowerCase() === "espn"
+          ? "espn"
+          : "sleeper"
+        : null;
+      const urlUser = urlParams.user ? urlParams.user.trim() : null;
+      const urlLeagues = urlParams.leagues ? extractCustomLeagueIds(urlParams.leagues) : null;
+      const urlSeason = urlParams.season ? Number(urlParams.season) : null;
+      const urlWeek = urlParams.week ? Number(urlParams.week) : null;
+      const urlMode = urlParams.mode
+        ? urlParams.mode.toUpperCase() === "SEASON_ROLLUP"
+          ? "SEASON_ROLLUP"
+          : "WEEKLY"
+        : null;
+
+      const isUserDifferent =
+        urlUser !== null && urlUser.toLowerCase() !== (currentStore.userName || "").toLowerCase();
+      const isLeaguesDifferent =
+        urlLeagues !== null &&
+        (urlLeagues.length !== currentStore.customLeagueIds.length ||
+          urlLeagues.some(id => !currentStore.customLeagueIds.includes(id)));
+
+      if (urlPlatform) {
+        setPlatform(urlPlatform);
       }
 
-      if (urlParams.platform) {
-        setPlatform(urlParams.platform.toLowerCase() === "espn" ? "espn" : "sleeper");
-      }
-      if (hasUrlUser) {
+      if (urlUser) {
         setSyncType("user");
-        setUserName(urlParams.user!.trim());
-        setUserId("");
-        setUserAvatar("");
-        if (!hasUrlLeagues) {
-          setCustomLeagueIds([]);
-          setSelectedLeagueIds([]);
-        }
-      }
-      if (hasUrlLeagues) {
-        const ids = urlParams
-          .leagues!.split(",")
-          .map((id: string) => id.trim())
-          .filter(Boolean);
-        setCustomLeagueIds(ids);
-        setSelectedLeagueIds(ids);
-        if (!hasUrlUser) {
-          setSyncType("leagues");
-          setUserName("");
+        setUserName(urlUser);
+        if (isUserDifferent) {
           setUserId("");
           setUserAvatar("");
+          if (!urlLeagues) {
+            setCustomLeagueIds([]);
+            setSelectedLeagueIds([]);
+          }
         }
       }
-      if (urlParams.season) setSeason(Number(urlParams.season));
-      if (urlParams.week) setWeek(Number(urlParams.week));
-      if (urlParams.mode) {
-        setMode(urlParams.mode.toUpperCase() === "SEASON_ROLLUP" ? "SEASON_ROLLUP" : "WEEKLY");
+
+      if (urlLeagues && urlLeagues.length > 0) {
+        setCustomLeagueIds(urlLeagues);
+        setSelectedLeagueIds(urlLeagues);
+        if (!urlUser) {
+          setSyncType("leagues");
+          if (isLeaguesDifferent || currentStore.syncType !== "leagues") {
+            setUserName("");
+            setUserId("");
+            setUserAvatar("");
+          }
+        }
       }
+
+      if (urlSeason) setSeason(urlSeason);
+      if (urlWeek) setWeek(urlWeek);
+      if (urlMode) setMode(urlMode);
 
       // 4. Tab from hash
       if (typeof window !== "undefined" && window.location.hash) {
@@ -174,10 +182,10 @@ export const App: React.FC = () => {
       }
 
       // 6. Check if user is set, then auto-sync
-      const currentStore = useCrossLeagueStore.getState();
+      const storeState = useCrossLeagueStore.getState();
       const hasUser =
-        Boolean(currentStore.userName) ||
-        (currentStore.syncType === "leagues" && currentStore.customLeagueIds.length > 0) ||
+        Boolean(storeState.userName) ||
+        (storeState.syncType === "leagues" && storeState.customLeagueIds.length > 0) ||
         Boolean(urlParams.user) ||
         Boolean(urlParams.leagues);
 

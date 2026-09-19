@@ -224,6 +224,8 @@ export function clearApiCache() {
 export function saveReportToCache({
   platform = "sleeper",
   user = "",
+  userId = "",
+  userAvatar = "",
   customLeagueIds = [],
   season,
   mode = "WEEKLY",
@@ -250,7 +252,8 @@ export function saveReportToCache({
     week: Number(week),
     user: {
       name: user,
-      id: user
+      id: userId || user,
+      avatar: userAvatar || ""
     },
     records: records,
     leaguesMap: leaguesMap,
