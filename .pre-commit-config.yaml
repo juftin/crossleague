@@ -3,37 +3,51 @@
 repos:
   - repo: local
     hooks:
-      - id: task-format
+      - id: format
         name: Code Quality & Formatting Check (Prettier)
-        entry: task check:format
+        entry: npm run format:check
         language: system
         pass_filenames: false
         stages: [pre-commit]
 
-      - id: task-lint
+      - id: lint
         name: Code Quality & Linting (ESLint)
-        entry: task check:lint
+        entry: npm run lint
         language: system
         pass_filenames: false
         stages: [pre-commit]
 
-      - id: task-typecheck
+      - id: typecheck
         name: TypeScript Type Checking (tsc)
-        entry: task check:types
+        entry: npm run typecheck
         language: system
         pass_filenames: false
         stages: [pre-commit]
 
-      - id: task-knip
+      - id: knip
         name: Dead Code & Dependency Analysis (knip)
-        entry: task check:knip
+        entry: npm run knip
         language: system
         pass_filenames: false
         stages: [pre-commit]
 
-      - id: task-check
-        name: Full Verification Pipeline & Visual Snapshots (Taskfile)
-        entry: task check
+      - id: build-check
+        name: Production Bundle Synchronization Check
+        entry: npm run build:check
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: test
+        name: Automated Test Suite
+        entry: npm test
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: snapshots-check
+        name: Visual Snapshot Baseline Check
+        entry: npm run snapshots:check
         language: system
         pass_filenames: false
         stages: [pre-push]
