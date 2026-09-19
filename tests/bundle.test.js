@@ -192,7 +192,7 @@ describe("Source & Bundle Integrity", () => {
     );
   });
 
-  it("should apply sticky table header classes to all tabs containing tables", () => {
+  it("should apply sticky table header hook and classes to all tabs containing tables", () => {
     const leaderboardCode = fs.readFileSync(
       path.join(rootDir, "src", "js", "components", "tabs", "LeaderboardTab.tsx"),
       "utf8"
@@ -206,19 +206,34 @@ describe("Source & Bundle Integrity", () => {
       "utf8"
     );
     const cssCode = fs.readFileSync(path.join(rootDir, "src", "css", "styles.css"), "utf8");
+    const hookCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "common", "useStickyTableHeader.ts"),
+      "utf8"
+    );
 
     assert.ok(
-      leaderboardCode.includes("sticky-table-header"),
-      "LeaderboardTab must use sticky-table-header"
-    );
-    assert.ok(luckCode.includes("sticky-table-header"), "LuckTab must use sticky-table-header");
-    assert.ok(
-      playersCode.includes("sticky-table-header"),
-      "PlayersTab must use sticky-table-header"
+      leaderboardCode.includes("useStickyTableHeader"),
+      "LeaderboardTab must use useStickyTableHeader hook"
     );
     assert.ok(
-      cssCode.includes(".sticky-table-header"),
-      "styles.css must define .sticky-table-header rule"
+      luckCode.includes("useStickyTableHeader"),
+      "LuckTab must use useStickyTableHeader hook"
+    );
+    assert.ok(
+      playersCode.includes("useStickyTableHeader"),
+      "PlayersTab must use useStickyTableHeader hook"
+    );
+    assert.ok(
+      cssCode.includes(".table-scroll-container"),
+      "styles.css must define .table-scroll-container rule"
+    );
+    assert.ok(
+      cssCode.includes("overflow-x: auto"),
+      "styles.css must maintain horizontal table scrolling with overflow-x: auto"
+    );
+    assert.ok(
+      hookCode.includes("translate3d"),
+      "useStickyTableHeader must perform hardware-accelerated translations"
     );
   });
 });

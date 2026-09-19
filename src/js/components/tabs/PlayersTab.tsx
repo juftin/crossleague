@@ -2,6 +2,7 @@ import React, { useMemo, useEffect } from "react";
 import { useCrossLeagueStore, useActiveRecords } from "../../state/useCrossLeagueStore.js";
 import { aggregatePlayers } from "../../analytics/aggregation.js";
 import { getPlayerInfo, initPlayersDb } from "../../api/players.js";
+import { useStickyTableHeader } from "../common/useStickyTableHeader.ts";
 import {
   Sparkles,
   Crown,
@@ -25,6 +26,7 @@ import {
 } from "lucide-react";
 
 export const PlayersTab: React.FC = () => {
+  const tableRef = useStickyTableHeader();
   const records = useActiveRecords();
   const mode = useCrossLeagueStore(s => s.mode);
   const week = useCrossLeagueStore(s => s.week);
@@ -395,7 +397,7 @@ export const PlayersTab: React.FC = () => {
 
         {/* Player Leaderboard Table */}
         <div className="table-scroll-container rounded-xl border border-slate-800">
-          <table className="w-full border-collapse text-left" id="playerTable">
+          <table ref={tableRef} className="w-full border-collapse text-left" id="playerTable">
             <thead className="sticky-table-header border-b border-slate-800 bg-slate-900/95 text-[11px] font-black tracking-wider text-slate-400 uppercase select-none sm:text-xs md:text-sm">
               <tr>
                 <th className="w-10 px-2 py-2.5 text-center sm:w-12 sm:px-4 sm:py-3.5">#</th>
