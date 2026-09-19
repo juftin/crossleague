@@ -130,6 +130,7 @@ export async function build({
   }
 
   fs.writeFileSync(distIndexHtmlPath, distInlinedHtml, "utf8");
+  fs.writeFileSync(path.join(distDir, ".nojekyll"), "", "utf8");
 
   if (isCheckMode) {
     if (

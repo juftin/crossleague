@@ -119,12 +119,6 @@ tasks:
     cmds:
       - node scripts/build.js {{.CLI_ARGS}}
     deps: [sync]
-  #######################################
-  site:
-    desc: Build Web Application Distribution for GitHub Pages
-    cmds:
-      - npm run site
-    deps: [sync]
   ########################
   # DEVELOPMENT
   ########################

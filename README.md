@@ -105,7 +105,6 @@ This project uses [Task](https://taskfile.dev/) and [`npm`](https://nodejs.org/)
 | `task lint`    | Run formatting check (Prettier) and code linting (ESLint)     | `npm run format:check && eslint .` |
 | `task fix`     | Auto-fix formatting and linting errors                        | `npm run format && eslint . --fix` |
 | `task build`   | Build minified distribution bundles in `dist/`                | `node scripts/build.js`            |
-| `task site`    | Build site distribution package for GitHub Pages              | `npm run site`                     |
 | `task check`   | Complete quality check: formatting, linting, tests, and build | `task lint && task test && ...`    |
 
 ### Running Tests

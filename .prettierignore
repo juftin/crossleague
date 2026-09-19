@@ -3,6 +3,5 @@ package-lock.json
 index.html
 app.js
 dist/
-site/
 coverage/
 .DS_Store
