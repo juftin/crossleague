@@ -1,66 +1,136 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
 version: "3"
 
 tasks:
+  ########################
+  # DEFAULT TASK
+  ########################
   default:
-    desc: Run standard verification suite (lint, test, build check)
+    desc: List Available Tasks
     cmds:
-      - task: check
-
+      - task --list-all --sort alphanumeric
+    silent: true
+  ########################
+  # INSTALL AND DEPENDENCIES
+  ########################
   install:
-    desc: Install project dependencies
+    desc: Install Project + Dev Dependencies
     cmds:
-      - npm install
-
-  build:
-    desc: Build production bundles and standalone HTML into dist/
+      - task: pre-commit-install
+      - task: sync
+  ########################
+  # TESTING
+  ########################
+  test:
+    desc: Run Tests
     cmds:
-      - node scripts/build.js {{.CLI_ARGS}}
-
-  format:
-    desc: Format code using Prettier
+      - npm test -- {{.CLI_ARGS}}
+    deps: [sync]
+  #######################################
+  snapshots:
+    desc: Generate Visual PNG Snapshots
     cmds:
-      - npm run format
-
-  lint:
-    desc: Check code quality and formatting
+      - node scripts/generate-snapshots.js {{.CLI_ARGS}}
+    deps: [sync]
+  #######################################
+  snapshots:check:
+    desc: Verify Visual PNG Snapshots against Baselines
+    cmds:
+      - node scripts/generate-snapshots.js --check {{.CLI_ARGS}}
+    deps: [sync]
+  ########################
+  # CODE QUALITY CHECKS
+  ########################
+  check:format:
+    desc: Code Quality Check - Formatting
     cmds:
       - npm run format:check
+    deps: [sync]
+  #######################################
+  check:lint:
+    desc: Code Quality Check - Linting
+    cmds:
       - npm run lint
-
-  fix:
-    desc: Auto-fix formatting and linting issues
+    deps: [sync]
+  #######################################
+  check:style:
+    desc: Code Quality Check - Formatting + Linting
+    cmds:
+      - task: check:format
+      - task: check:lint
+  #######################################
+  check:build:
+    desc: Code Quality Check - Bundle Synchronization
+    cmds:
+      - node scripts/build.js --check
+    deps: [sync]
+  #######################################
+  check:
+    desc: Code Quality Check - Formatting + Linting + Build Check + Test
+    cmds:
+      - task: check:style
+      - task: test
+      - task: check:build
+  #######################################
+  lint:
+    desc: Code Quality Check - Formatting + Linting
+    cmds:
+      - task: check:style
+  ########################
+  # CODE QUALITY FIXES
+  ########################
+  fmt:
+    desc: Code Quality Auto-Fix - Formatting
     cmds:
       - npm run format
+    deps: [sync]
+  #######################################
+  fix:
+    desc: Code Quality Auto-Fix - Formatting + Linting
+    cmds:
+      - task: fmt
       - npm run lint:fix
-
-  test:
-    desc: Run automated test suite
+    deps: [sync]
+  ########################
+  # BUILD AND DISTRIBUTION
+  ########################
+  build:
+    desc: Build Production Bundles and Standalone HTML
     cmds:
-      - npm test {{.CLI_ARGS}}
-
-  snapshots:
-    desc: Generate visual PNG snapshots for dashboard tabs and modals
-    cmds:
-      - node scripts/generate-snapshots.js
-
-  snapshots:check:
-    desc: Verify visual PNG snapshots against baselines
-    cmds:
-      - node scripts/generate-snapshots.js --check
-
-  check:
-    desc: Complete verification pipeline (lint, test, build sync check)
-    cmds:
-      - task: lint
-      - task: test
-      - node scripts/build.js --check
-
+      - node scripts/build.js {{.CLI_ARGS}}
+    deps: [sync]
+  ########################
+  # DOCUMENTATION AND DEVELOPMENT
+  ########################
   docs:
-    desc: Build site distribution for GitHub Pages
+    desc: Build Site Distribution for GitHub Pages
     cmds:
       - npm run docs
-
+    deps: [sync]
+  #######################################
   dev:
-    desc: Start local development preview server
+    desc: Start Local Development Preview Server
     cmds:
       - npm run dev
+    deps: [sync]
+  ########################
+  # INTERNAL TASKS
+  ########################
+  sync:
+    desc: Install Project Dependencies
+    internal: true
+    cmds:
+      - npm install {{.CLI_ARGS}}
+  #######################################
+  pre-commit-install:
+    desc: Install Pre-Commit Hooks
+    internal: true
+    cmds:
+      - cmd: |
+          if [ "{{.CI | default 0}}" = "0" ]; then
+              uv tool run --isolated pre-commit install --install-hooks
+          fi
+        silent: true
+    status:
+      - test ! -f {{.ROOT_DIR}}/.pre-commit-config.yaml

@@ -64,7 +64,7 @@ Prefill and filter a report with URL parameters. `userId` and `week` override sa
 crossleague/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml        # GitHub Actions CI pipeline
+│       ├── ci.yaml       # GitHub Actions CI pipeline
 │       └── publish.yaml  # GitHub Pages deployment workflow
 ├── src/
 │   ├── css/

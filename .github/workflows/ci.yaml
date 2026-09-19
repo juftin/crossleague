@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  ci:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.name }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: check - format
+            task: check:format
+            install: true
+          - name: check - lint
+            task: check:lint
+            install: true
+          - name: check - build
+            task: check:build
+            install: true
+          - name: test - 20
+            task: test
+            install: true
+            run_on_push: true
+            node: "20"
+          - name: test - 22
+            task: test
+            install: true
+            run_on_push: true
+            node: "22"
+          - name: test - 24
+            task: test
+            install: true
+            run_on_push: true
+            node: "24"
+          - name: snapshots
+            task: snapshots:check
+            install: true
+          - name: pre-commit
+            task: install
+            install: true
+    steps:
+      - name: setup-node
+        if: matrix.node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: ${{ matrix.name }}
+        if: github.event_name == 'pull_request' || matrix.run_on_push
+        uses: juftin/actions/taskfile@v1
+        with:
+          task: ${{ matrix.task }}
+          checkout: true
+          install: ${{ matrix.install || false }}
+          fetch-depth: ${{ matrix.name == 'pre-commit' && '0' || '1' }}
+          setup-uv: ${{ matrix.name == 'pre-commit' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: upload-snapshots
+        if: failure() && matrix.name == 'snapshots'
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-snapshots
+          path: |
+            snapshots/*.png
+            tests/.snapshot-tmp/**
+      - name: pre-commit
+        if: matrix.name == 'pre-commit' && github.event_name == 'pull_request'
+        run: |
+          uv tool run --isolated \
+            --with pre-commit-uv \
+            pre-commit run \
+              --color always \
+              --from-ref ${{ github.event.pull_request.base.sha }} \
+              --to-ref ${{ github.event.pull_request.head.sha }}
