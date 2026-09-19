@@ -292,7 +292,6 @@ export function loadCachedData(data, callbacks = {}) {
   const reportContent = document.getElementById("reportContent");
   const copyRecapBtn = document.getElementById("copyRecapBtn");
   const shareUrlBtn = document.getElementById("shareUrlBtn");
-  const downloadReportBtn = document.getElementById("downloadReportBtn");
   const exportCsvBtn = document.getElementById("exportCsvBtn");
 
   if (initialState) initialState.classList.add("hidden");
@@ -300,7 +299,6 @@ export function loadCachedData(data, callbacks = {}) {
   if (reportContent) reportContent.classList.remove("hidden");
   if (copyRecapBtn) copyRecapBtn.classList.remove("hidden");
   if (shareUrlBtn) shareUrlBtn.classList.remove("hidden");
-  if (downloadReportBtn) downloadReportBtn.classList.remove("hidden");
   if (exportCsvBtn) exportCsvBtn.classList.remove("hidden");
 
   initPlayersDb();
@@ -430,7 +428,6 @@ export function clearAllData(callbacks = {}) {
   const headerWeekBadge = document.getElementById("headerWeekBadge");
   const shareUrlBtn = document.getElementById("shareUrlBtn");
   const copyRecapBtn = document.getElementById("copyRecapBtn");
-  const downloadReportBtn = document.getElementById("downloadReportBtn");
 
   if (userIdInput) userIdInput.value = "";
   if (customLeagueIdInput) customLeagueIdInput.value = "";
@@ -447,7 +444,6 @@ export function clearAllData(callbacks = {}) {
   if (headerWeekBadge) headerWeekBadge.classList.add("hidden");
   if (shareUrlBtn) shareUrlBtn.classList.add("hidden");
   if (copyRecapBtn) copyRecapBtn.classList.add("hidden");
-  if (downloadReportBtn) downloadReportBtn.classList.add("hidden");
 
   if (window.history && window.history.replaceState) {
     window.history.replaceState(null, "", window.location.pathname);
