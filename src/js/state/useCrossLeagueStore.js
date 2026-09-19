@@ -79,8 +79,24 @@ export const useCrossLeagueStore = create((set, get) => ({
   expandedPlayerIds: [],
 
   setPlatform: platform => {
-    set({ platform, syncType: platform === "espn" ? "leagues" : get().syncType });
-    setPreference(STORAGE_KEYS.PREF_PLATFORM, platform);
+    const currentPlatform = get().platform;
+    if (currentPlatform !== platform) {
+      const isEspn = platform === "espn";
+      set({
+        platform,
+        syncType: isEspn ? "leagues" : "user",
+        customLeagueIds: [],
+        selectedLeagueIds: [],
+        ...(isEspn ? { userName: "", userId: "", userAvatar: "" } : {})
+      });
+      setPreference(STORAGE_KEYS.PREF_PLATFORM, platform);
+      setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, []);
+      setPreference(STORAGE_KEYS.PREF_SYNC_TYPE, isEspn ? "leagues" : "user");
+      if (isEspn) {
+        setPreference(STORAGE_KEYS.PREF_USER_NAME, "");
+        setPreference(STORAGE_KEYS.PREF_USER_ID, "");
+      }
+    }
   },
 
   setMode: mode => {

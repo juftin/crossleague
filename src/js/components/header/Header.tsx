@@ -431,7 +431,11 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="platformSleeperBtn"
-                      onClick={() => setPlatform("sleeper")}
+                      onClick={() => {
+                        setPlatform("sleeper");
+                        setInputLeagueId("");
+                        setInputUser("");
+                      }}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
                         platform === "sleeper"
                           ? "bg-slate-800 text-slate-200 shadow-sm"
@@ -444,7 +448,11 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="platformEspnBtn"
-                      onClick={() => setPlatform("espn")}
+                      onClick={() => {
+                        setPlatform("espn");
+                        setInputLeagueId("");
+                        setInputUser("");
+                      }}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs transition ${
                         platform === "espn"
                           ? "border border-rose-500/40 bg-rose-900/80 font-bold text-white shadow-sm"
@@ -468,7 +476,11 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="syncTypeUserBtn"
-                      onClick={() => setSyncType("user")}
+                      onClick={() => {
+                        setSyncType("user");
+                        setCustomLeagueIds([]);
+                        setInputLeagueId("");
+                      }}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center transition ${
                         syncType === "user"
                           ? "bg-slate-800 font-bold text-slate-200 shadow-sm"
@@ -481,7 +493,13 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="syncTypeLeaguesBtn"
-                      onClick={() => setSyncType("leagues")}
+                      onClick={() => {
+                        setSyncType("leagues");
+                        setUserName("");
+                        setUserId("");
+                        setUserAvatar("");
+                        setInputUser("");
+                      }}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center transition ${
                         syncType === "leagues"
                           ? "bg-slate-800 font-bold text-slate-200 shadow-sm"

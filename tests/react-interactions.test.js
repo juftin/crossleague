@@ -83,4 +83,32 @@ describe("React settings and league-filter interactions", () => {
     store.closeLuckModal();
     assert.equal(useCrossLeagueStore.getState().isLuckModalOpen, false);
   });
+
+  it("clears custom leagues and resets syncType when switching platforms", () => {
+    resetStore();
+    const store = useCrossLeagueStore.getState();
+
+    // Set initial Sleeper state with custom leagues
+    store.setPlatform("sleeper");
+    store.setUserName("sleeper_user");
+    store.setCustomLeagueIds(["11223344"]);
+    assert.equal(useCrossLeagueStore.getState().platform, "sleeper");
+    assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["11223344"]);
+
+    // Switch to ESPN
+    store.setPlatform("espn");
+    assert.equal(useCrossLeagueStore.getState().platform, "espn");
+    assert.equal(useCrossLeagueStore.getState().syncType, "leagues");
+    assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, []);
+    assert.equal(useCrossLeagueStore.getState().userName, "");
+
+    // Add ESPN league ID and switch back to Sleeper
+    store.setCustomLeagueIds(["1664455"]);
+    assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["1664455"]);
+
+    store.setPlatform("sleeper");
+    assert.equal(useCrossLeagueStore.getState().platform, "sleeper");
+    assert.equal(useCrossLeagueStore.getState().syncType, "user");
+    assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, []);
+  });
 });
