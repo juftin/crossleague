@@ -16,8 +16,11 @@ export function extractCustomLeagueIds(rawStr) {
   const parts = rawStr
     .split(/[\s,;\n\t]+/)
     .map(s => {
-      let cleaned = s.trim().replace(/^#/, "");
-      const urlMatch = cleaned.match(/leagueId=(\d+)/i);
+      let cleaned = s
+        .trim()
+        .replace(/^#/, "")
+        .replace(/^(espn|sleeper):/i, "");
+      const urlMatch = cleaned.match(/(?:leagueId=|\/leagues?\/)(\d+)/i);
       if (urlMatch) {
         cleaned = urlMatch[1];
       }

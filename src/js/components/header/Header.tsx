@@ -64,6 +64,9 @@ export const Header: React.FC = () => {
 
   const [inputUser, setInputUser] = useState(userName || userId);
   const [inputLeagueId, setInputLeagueId] = useState("");
+  const [draftEspnLeagueInput, setDraftEspnLeagueInput] = useState("");
+  const [draftSleeperLeagueInput, setDraftSleeperLeagueInput] = useState("");
+  const [draftSleeperUserInput, setDraftSleeperUserInput] = useState("");
   const [isLeagueFilterOpen, setIsLeagueFilterOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -131,6 +134,14 @@ export const Header: React.FC = () => {
 
   const handleApplySettings = (e: React.FormEvent) => {
     e.preventDefault();
+    if (inputLeagueId.trim()) {
+      const parsed = extractCustomLeagueIds(inputLeagueId);
+      if (parsed.length > 0) {
+        const merged = Array.from(new Set([...customLeagueIds, ...parsed]));
+        setCustomLeagueIds(merged);
+      }
+      setInputLeagueId("");
+    }
     if (syncType === "user" && platform !== "espn") {
       setUserName(inputUser.trim());
       setCustomLeagueIds([]);
@@ -432,9 +443,12 @@ export const Header: React.FC = () => {
                       type="button"
                       id="platformSleeperBtn"
                       onClick={() => {
+                        if (platform === "espn") {
+                          setDraftEspnLeagueInput(inputLeagueId);
+                          setInputLeagueId(draftSleeperLeagueInput);
+                          setInputUser(draftSleeperUserInput || userName || userId);
+                        }
                         setPlatform("sleeper");
-                        setInputLeagueId("");
-                        setInputUser("");
                       }}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
                         platform === "sleeper"
@@ -449,9 +463,12 @@ export const Header: React.FC = () => {
                       type="button"
                       id="platformEspnBtn"
                       onClick={() => {
+                        if (platform !== "espn") {
+                          setDraftSleeperLeagueInput(inputLeagueId);
+                          setDraftSleeperUserInput(inputUser);
+                          setInputLeagueId(draftEspnLeagueInput);
+                        }
                         setPlatform("espn");
-                        setInputLeagueId("");
-                        setInputUser("");
                       }}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs transition ${
                         platform === "espn"

@@ -105,7 +105,10 @@ CrossLeague standardizes all persistent keys under the `crossleague:` namespace:
 | **Preferences**     | `crossleague:pref:platform`                                           | Active platform (`sleeper` \| `espn`)   |
 | **Preferences**     | `crossleague:pref:username`                                           | Saved Sleeper username                  |
 | **Preferences**     | `crossleague:pref:user_id`                                            | Saved Sleeper numeric user ID           |
-| **Preferences**     | `crossleague:pref:custom_leagues`                                     | Saved custom league ID array            |
+| **Preferences**     | `crossleague:pref:custom_leagues`                                     | Active custom league ID array           |
+| **Preferences**     | `crossleague:pref:sleeper_username`                                   | Saved Sleeper username                  |
+| **Preferences**     | `crossleague:pref:sleeper_custom_leagues`                             | Platform-isolated Sleeper league IDs    |
+| **Preferences**     | `crossleague:pref:espn_custom_leagues`                                | Platform-isolated ESPN league IDs       |
 | **Preferences**     | `crossleague:pref:season`                                             | Active season year                      |
 | **Preferences**     | `crossleague:pref:week`                                               | Active matchup week                     |
 | **Preferences**     | `crossleague:pref:mode`                                               | Sync mode (`WEEKLY` \| `SEASON_ROLLUP`) |
@@ -113,6 +116,10 @@ CrossLeague standardizes all persistent keys under the `crossleague:` namespace:
 | **API Cache**       | `crossleague:cache:api:{url}`                                         | Upstream HTTP endpoint response         |
 | **Player Database** | `crossleague:cache:players:sleeper`                                   | Normalized Sleeper fantasy players DB   |
 | **Player Database** | `crossleague:cache:players:espn`                                      | Cached ESPN player metadata             |
+
+### Platform Preference Isolation
+
+To prevent cross-contamination between platforms (e.g. ESPN league IDs accidentally sent to Sleeper, or Sleeper usernames passed to ESPN), CrossLeague preserves separate platform-scoped preferences (`sleeperCustomLeagueIds`, `espnCustomLeagueIds`, `sleeperUserName`). When switching between ESPN and Sleeper in the Settings menu, each platform's saved entries are restored without overwriting the other.
 
 ### Backward Compatibility Migration
 

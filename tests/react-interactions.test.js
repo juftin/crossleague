@@ -84,31 +84,40 @@ describe("React settings and league-filter interactions", () => {
     assert.equal(useCrossLeagueStore.getState().isLuckModalOpen, false);
   });
 
-  it("clears custom leagues and resets syncType when switching platforms", () => {
+  it("isolates and preserves platform-scoped league IDs and usernames when switching platforms", () => {
     resetStore();
     const store = useCrossLeagueStore.getState();
 
-    // Set initial Sleeper state with custom leagues
+    // Set initial Sleeper state with custom leagues and username
     store.setPlatform("sleeper");
     store.setUserName("sleeper_user");
     store.setCustomLeagueIds(["11223344"]);
     assert.equal(useCrossLeagueStore.getState().platform, "sleeper");
+    assert.equal(useCrossLeagueStore.getState().userName, "sleeper_user");
     assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["11223344"]);
 
-    // Switch to ESPN
+    // Switch to ESPN: Sleeper league ID / user should not leak to ESPN
     store.setPlatform("espn");
     assert.equal(useCrossLeagueStore.getState().platform, "espn");
     assert.equal(useCrossLeagueStore.getState().syncType, "leagues");
     assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, []);
     assert.equal(useCrossLeagueStore.getState().userName, "");
 
-    // Add ESPN league ID and switch back to Sleeper
+    // Add ESPN league ID
     store.setCustomLeagueIds(["1664455"]);
     assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["1664455"]);
 
+    // Switch back to Sleeper: Sleeper custom leagues and username should be restored, ESPN league ID should not leak
     store.setPlatform("sleeper");
     assert.equal(useCrossLeagueStore.getState().platform, "sleeper");
-    assert.equal(useCrossLeagueStore.getState().syncType, "user");
-    assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, []);
+    assert.equal(useCrossLeagueStore.getState().userName, "sleeper_user");
+    assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["11223344"]);
+
+    // Switch back to ESPN: ESPN league ID should be restored, Sleeper league ID should not leak
+    store.setPlatform("espn");
+    assert.equal(useCrossLeagueStore.getState().platform, "espn");
+    assert.equal(useCrossLeagueStore.getState().syncType, "leagues");
+    assert.deepEqual(useCrossLeagueStore.getState().customLeagueIds, ["1664455"]);
+    assert.equal(useCrossLeagueStore.getState().userName, "");
   });
 });

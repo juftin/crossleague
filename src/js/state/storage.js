@@ -252,22 +252,74 @@ export function setPreference(key, value) {
 export function getAllPreferences() {
   const currentYear = new Date().getFullYear();
 
-  const platform = getPreference(STORAGE_KEYS.PREF_PLATFORM, "sleeper");
-  const syncType = getPreference(STORAGE_KEYS.PREF_SYNC_TYPE, "user");
-  const userName = getPreference(STORAGE_KEYS.PREF_USER_NAME, "");
-  const userId = getPreference(STORAGE_KEYS.PREF_USER_ID, "");
-  const customLeaguesRaw = getPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, []);
-  const customLeagueIds = Array.isArray(customLeaguesRaw) ? customLeaguesRaw.filter(Boolean) : [];
+  const rawPlatform = getPreference(STORAGE_KEYS.PREF_PLATFORM, "sleeper");
+  const platform = rawPlatform === "espn" ? "espn" : "sleeper";
+
+  const generalUserName = getPreference(STORAGE_KEYS.PREF_USER_NAME, "");
+  const generalUserId = getPreference(STORAGE_KEYS.PREF_USER_ID, "");
+  const generalSyncType = getPreference(STORAGE_KEYS.PREF_SYNC_TYPE, "user");
+  const generalCustomLeaguesRaw = getPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, []);
+  const generalCustomLeagueIds = Array.isArray(generalCustomLeaguesRaw)
+    ? generalCustomLeaguesRaw.filter(Boolean)
+    : [];
+
+  const sleeperSyncType = getPreference(STORAGE_KEYS.PREF_SLEEPER_SYNC_TYPE, generalSyncType);
+  const sleeperUserName = getPreference(STORAGE_KEYS.PREF_SLEEPER_USER_NAME, generalUserName);
+  const sleeperUserId = getPreference(STORAGE_KEYS.PREF_SLEEPER_USER_ID, generalUserId);
+  const rawSleeperCustom = getPreference(STORAGE_KEYS.PREF_SLEEPER_CUSTOM_LEAGUES, null);
+  const sleeperCustomLeagueIds =
+    Array.isArray(rawSleeperCustom) && rawSleeperCustom.length > 0
+      ? rawSleeperCustom.filter(Boolean)
+      : platform === "sleeper"
+        ? generalCustomLeagueIds
+        : [];
+
+  const rawEspnCustom = getPreference(STORAGE_KEYS.PREF_ESPN_CUSTOM_LEAGUES, null);
+  const espnCustomLeagueIds =
+    Array.isArray(rawEspnCustom) && rawEspnCustom.length > 0
+      ? rawEspnCustom.filter(Boolean)
+      : platform === "espn"
+        ? generalCustomLeagueIds
+        : [];
+
   const season = Number(getPreference(STORAGE_KEYS.PREF_SEASON, currentYear)) || currentYear;
   const week = Number(getPreference(STORAGE_KEYS.PREF_WEEK, 1)) || 1;
   const mode = getPreference(STORAGE_KEYS.PREF_MODE, "WEEKLY");
 
+  const syncType =
+    platform === "espn" ? "leagues" : sleeperSyncType === "leagues" ? "leagues" : "user";
+  const customLeagueIds =
+    platform === "espn"
+      ? espnCustomLeagueIds.length > 0
+        ? espnCustomLeagueIds
+        : generalCustomLeagueIds
+      : sleeperCustomLeagueIds.length > 0
+        ? sleeperCustomLeagueIds
+        : generalCustomLeagueIds;
+  const userName =
+    typeof sleeperUserName === "string" && sleeperUserName
+      ? sleeperUserName
+      : typeof generalUserName === "string"
+        ? generalUserName
+        : "";
+  const userId =
+    typeof sleeperUserId === "string" && sleeperUserId
+      ? sleeperUserId
+      : typeof generalUserId === "string"
+        ? generalUserId
+        : "";
+
   return {
-    platform: platform === "espn" ? "espn" : "sleeper",
-    syncType: syncType === "leagues" ? "leagues" : "user",
-    userName: typeof userName === "string" ? userName : "",
-    userId: typeof userId === "string" ? userId : "",
+    platform,
+    syncType,
+    userName,
+    userId,
     customLeagueIds,
+    sleeperUserName: typeof sleeperUserName === "string" ? sleeperUserName : "",
+    sleeperUserId: typeof sleeperUserId === "string" ? sleeperUserId : "",
+    sleeperSyncType: sleeperSyncType === "leagues" ? "leagues" : "user",
+    sleeperCustomLeagueIds,
+    espnCustomLeagueIds,
     season,
     week,
     mode: mode === "SEASON_ROLLUP" ? "SEASON_ROLLUP" : "WEEKLY"
