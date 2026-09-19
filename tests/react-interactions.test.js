@@ -8,6 +8,7 @@ import { getActiveRecords, useCrossLeagueStore } from "../src/js/state/useCrossL
 function resetStore() {
   useCrossLeagueStore.setState({
     activeTab: "awards",
+    theme: "dark",
     isSettingsOpen: false,
     isLuckModalOpen: false,
     leaguesMap: {
@@ -43,6 +44,17 @@ describe("React settings and league-filter interactions", () => {
 
     store.toggleSettingsDropdown(false);
     assert.equal(useCrossLeagueStore.getState().isSettingsOpen, false);
+  });
+
+  it("changes the selected color theme through the shared store", () => {
+    resetStore();
+    const store = useCrossLeagueStore.getState();
+
+    store.setTheme("light");
+    assert.equal(useCrossLeagueStore.getState().theme, "light");
+
+    store.setTheme("dark");
+    assert.equal(useCrossLeagueStore.getState().theme, "dark");
   });
 
   it("filters records when a league is deselected and restores them when selected", () => {

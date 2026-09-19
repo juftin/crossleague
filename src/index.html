@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CrossLeague • Multi-League Fantasy Dashboard</title>
+    <script>
+      try {
+        if (localStorage.getItem("crossleague_theme") === "light") {
+          document.documentElement.classList.replace("dark", "light");
+        }
+      } catch {}
+    </script>
     <script data-cfasync="false" src="https://cdn.tailwindcss.com"></script>
     <script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -83,6 +90,8 @@
       id="customLeagueIdsChips"
       id="modeSelect"
       id="seasonInput"
+      id="themeLightBtn"
+      id="themeDarkBtn"
       id="leagueDropdownContainer"
       id="leagueDropdownBtn"
       id="leagueDropdownLabel"

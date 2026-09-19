@@ -10,6 +10,7 @@ const currentYear = new Date().getFullYear();
 
 export const useCrossLeagueStore = create((set, get) => ({
   platform: "sleeper",
+  theme: "dark",
   mode: "WEEKLY",
   season: currentYear,
   week: 1,
@@ -76,6 +77,18 @@ export const useCrossLeagueStore = create((set, get) => ({
     set({ platform, syncType: platform === "espn" ? "leagues" : get().syncType });
     try {
       localStorage.setItem("crossleague_platform", platform);
+    } catch {}
+  },
+
+  setTheme: theme => {
+    const nextTheme = theme === "light" ? "light" : "dark";
+    set({ theme: nextTheme });
+    try {
+      localStorage.setItem("crossleague_theme", nextTheme);
+    } catch {}
+    try {
+      document.documentElement.classList.toggle("dark", nextTheme === "dark");
+      document.documentElement.classList.toggle("light", nextTheme === "light");
     } catch {}
   },
 
@@ -272,11 +285,16 @@ export const useCrossLeagueStore = create((set, get) => ({
       allLeaguesData: [],
       selectedLeagueIds: [],
       customLeagueIds: [],
+      theme: "dark",
       userId: "",
       userName: "",
       userAvatar: "",
       error: null
     });
+    try {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    } catch {}
   }
 }));
 

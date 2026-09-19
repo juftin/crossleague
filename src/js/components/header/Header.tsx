@@ -17,7 +17,9 @@ import {
   TrendingUp,
   Grid,
   Clover,
-  Star
+  Star,
+  Moon,
+  Sun
 } from "lucide-react";
 import { useCrossLeagueStore } from "../../state/useCrossLeagueStore.js";
 import { copyChatRecap } from "../../export/recap.js";
@@ -32,6 +34,8 @@ export const Header: React.FC = () => {
   const setActiveTab = useCrossLeagueStore(s => s.setActiveTab);
   const platform = useCrossLeagueStore(s => s.platform);
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
+  const theme = useCrossLeagueStore(s => s.theme);
+  const setTheme = useCrossLeagueStore(s => s.setTheme);
   const syncType = useCrossLeagueStore(s => s.syncType);
   const setSyncType = useCrossLeagueStore(s => s.setSyncType);
   const userName = useCrossLeagueStore(s => s.userName);
@@ -408,6 +412,47 @@ export const Header: React.FC = () => {
 
               {/* 2. Account & Scope Settings Form */}
               <form id="filterForm" onSubmit={handleApplySettings} className="space-y-3.5">
+                {/* Appearance Selector */}
+                <div className="space-y-1.5">
+                  <span className="block px-1 text-[10px] font-black tracking-wider text-slate-400 uppercase">
+                    Appearance
+                  </span>
+                  <div
+                    className="flex items-center rounded-xl border border-slate-800 bg-slate-900 p-1 text-xs font-bold"
+                    role="group"
+                    aria-label="Color theme"
+                  >
+                    <button
+                      type="button"
+                      id="themeLightBtn"
+                      onClick={() => setTheme("light")}
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
+                        theme === "light"
+                          ? "bg-slate-800 text-slate-200 shadow-sm"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                      aria-pressed={theme === "light"}
+                    >
+                      <Sun className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Light</span>
+                    </button>
+                    <button
+                      type="button"
+                      id="themeDarkBtn"
+                      onClick={() => setTheme("dark")}
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
+                        theme === "dark"
+                          ? "bg-slate-800 text-slate-200 shadow-sm"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                      aria-pressed={theme === "dark"}
+                    >
+                      <Moon className="h-3.5 w-3.5 text-cyan-400" />
+                      <span>Dark</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Platform Selector */}
                 <div className="space-y-1.5">
                   <span className="block px-1 text-[10px] font-black tracking-wider text-slate-400 uppercase">

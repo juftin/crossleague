@@ -12,6 +12,88 @@ body {
   overflow-x: hidden;
 }
 
+/* Light theme overrides retain the dashboard's slate and emerald visual language. */
+html.light,
+html.light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html.light body::before {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.16) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.14) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%);
+}
+
+html.light .glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+html.light [class*="bg-slate-950"] {
+  background-color: #f8fafc;
+}
+
+html.light [class*="bg-slate-900"] {
+  background-color: #f1f5f9;
+}
+
+html.light [class*="bg-slate-800"] {
+  background-color: #e2e8f0;
+}
+
+html.light [class*="border-slate-8"],
+html.light [class*="border-slate-7"] {
+  border-color: #cbd5e1;
+}
+
+html.light [class*="text-white"],
+html.light [class*="text-slate-100"],
+html.light [class*="text-slate-200"] {
+  color: #0f172a;
+}
+
+html.light [class*="text-slate-3"],
+html.light [class*="text-slate-4"],
+html.light [class*="text-slate-5"] {
+  color: #475569;
+}
+
+html.light [class*="text-emerald"],
+html.light [class*="text-cyan"] {
+  color: #557d55;
+}
+
+html.light [class*="text-amber"] {
+  color: #9a6a27;
+}
+
+html.light [class*="text-indigo"] {
+  color: #6d668f;
+}
+
+html.light [class*="text-rose"] {
+  color: #a84f45;
+}
+
+html.light [class*="bg-emerald"],
+html.light [class*="bg-cyan"] {
+  background-color: rgba(85, 125, 85, 0.12);
+}
+
+html.light [class*="bg-amber"] {
+  background-color: rgba(154, 106, 39, 0.12);
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.8);
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.7);
+}
+
 .hidden {
   display: none;
 }
