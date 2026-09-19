@@ -23,6 +23,11 @@ interface CrossLeagueState {
   userName: string;
   userAvatar: string;
   customLeagueIds: string[];
+  sleeperUserName: string;
+  sleeperUserId: string;
+  sleeperSyncType: "user" | "leagues";
+  sleeperCustomLeagueIds: string[];
+  espnCustomLeagueIds: string[];
   selectedLeagueIds: string[];
   pendingLeagueIdsFilter: string[] | null;
 
@@ -59,7 +64,7 @@ interface CrossLeagueState {
 
 - **`useActiveRecords()`**: Returns `rawRecords` filtered by `selectedLeagueIds`.
 - **`useActiveLeaguesMap()`**: Returns a subset of `leaguesMap` for selected leagues.
-- **`useCrossLeagueStore(s => s.actionName)`**: Access store mutators (e.g. `setPlatform`, `setMode`, `setSeason`, `setWeek`, `hydratePreferences`).
+- **`useCrossLeagueStore(s => s.actionName)`**: Access partitioned store mutators (e.g. `setPlatform`, `setSleeperUser`, `setSleeperSyncType`, `setSleeperCustomLeagueIds`, `setEspnCustomLeagueIds`, `setMode`, `setSeason`, `setWeek`, `hydratePreferences`).
 
 ---
 

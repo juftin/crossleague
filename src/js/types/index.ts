@@ -146,6 +146,11 @@ export interface StoredPreferences {
   userName: string;
   userId: string;
   customLeagueIds: string[];
+  sleeperUserName?: string;
+  sleeperUserId?: string;
+  sleeperSyncType?: SyncType;
+  sleeperCustomLeagueIds?: string[];
+  espnCustomLeagueIds?: string[];
   season: number;
   week: number;
   mode: SyncMode;
