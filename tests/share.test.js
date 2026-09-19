@@ -274,4 +274,24 @@ describe("Shareable URL & Parameter Extraction", () => {
       false
     );
   });
+
+  it("should clear query string parameters using clearUrlParams without modifying path or hash", async () => {
+    const { clearUrlParams } = await import("../src/js/state/urlParams.js");
+    let replacedUrl = "";
+    globalThis.window = {
+      location: {
+        pathname: "/dashboard",
+        search: "?user=testuser&week=3",
+        hash: "#luck"
+      },
+      history: {
+        replaceState: (_state, _title, url) => {
+          replacedUrl = url;
+        }
+      }
+    };
+
+    clearUrlParams();
+    assert.equal(replacedUrl, "/dashboard#luck");
+  });
 });

@@ -52,3 +52,13 @@ export function getUrlParams(searchStr) {
 
   return { platform, user, season, week, mode, leagues };
 }
+
+/**
+ * Removes query parameters from the browser's address bar without reloading the page.
+ */
+export function clearUrlParams() {
+  if (typeof window !== "undefined" && window.history?.replaceState && window.location) {
+    const cleanUrl = window.location.pathname + (window.location.hash || "");
+    window.history.replaceState(null, "", cleanUrl);
+  }
+}

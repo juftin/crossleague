@@ -33,8 +33,14 @@ export const App: React.FC = () => {
   const setMode = useCrossLeagueStore(s => s.setMode);
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
   const setUserName = useCrossLeagueStore(s => s.setUserName);
+  const setUserId = useCrossLeagueStore(s => s.setUserId);
+  const setUserAvatar = useCrossLeagueStore(s => s.setUserAvatar);
   const setSyncType = useCrossLeagueStore(s => s.setSyncType);
   const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
+  const setSelectedLeagueIds = useCrossLeagueStore(s => s.setSelectedLeagueIds);
+  const setRawRecords = useCrossLeagueStore(s => s.setRawRecords);
+  const setLeaguesMap = useCrossLeagueStore(s => s.setLeaguesMap);
+  const setAllLeaguesData = useCrossLeagueStore(s => s.setAllLeaguesData);
   const setNflState = useCrossLeagueStore(s => s.setNflState);
   const openSettingsModal = useCrossLeagueStore(s => s.openSettingsModal);
   const rawRecords = useCrossLeagueStore(s => s.rawRecords);
@@ -73,20 +79,49 @@ export const App: React.FC = () => {
 
       // 3. URL Query Parameter overrides
       const urlParams = getUrlParams();
+      const hasUrlUser = Boolean(urlParams.user);
+      const hasUrlLeagues = Boolean(urlParams.leagues);
+      const hasUrlParams = Boolean(
+        urlParams.platform ||
+        urlParams.user ||
+        urlParams.leagues ||
+        urlParams.season ||
+        urlParams.week ||
+        urlParams.mode
+      );
+
+      if (hasUrlParams) {
+        setRawRecords([]);
+        setLeaguesMap({});
+        setAllLeaguesData([]);
+      }
+
       if (urlParams.platform) {
         setPlatform(urlParams.platform.toLowerCase() === "espn" ? "espn" : "sleeper");
       }
-      if (urlParams.user) {
+      if (hasUrlUser) {
         setSyncType("user");
-        setUserName(urlParams.user.trim());
+        setUserName(urlParams.user!.trim());
+        setUserId("");
+        setUserAvatar("");
+        if (!hasUrlLeagues) {
+          setCustomLeagueIds([]);
+          setSelectedLeagueIds([]);
+        }
       }
-      if (urlParams.leagues) {
-        const ids = urlParams.leagues
-          .split(",")
+      if (hasUrlLeagues) {
+        const ids = urlParams
+          .leagues!.split(",")
           .map((id: string) => id.trim())
           .filter(Boolean);
         setCustomLeagueIds(ids);
-        if (!urlParams.user) setSyncType("leagues");
+        setSelectedLeagueIds(ids);
+        if (!hasUrlUser) {
+          setSyncType("leagues");
+          setUserName("");
+          setUserId("");
+          setUserAvatar("");
+        }
       }
       if (urlParams.season) setSeason(Number(urlParams.season));
       if (urlParams.week) setWeek(Number(urlParams.week));
@@ -158,7 +193,13 @@ export const App: React.FC = () => {
     setPlatform,
     setSyncType,
     setCustomLeagueIds,
+    setSelectedLeagueIds,
     setUserName,
+    setUserId,
+    setUserAvatar,
+    setRawRecords,
+    setLeaguesMap,
+    setAllLeaguesData,
     setSeason,
     setWeek,
     setMode,

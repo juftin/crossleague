@@ -6,6 +6,7 @@ import { create } from "zustand";
 import { useMemo } from "react";
 import { TAB_HASH_MAP, STORAGE_KEYS } from "./constants.js";
 import { getItem, setPreference, getAllPreferences, clearAllStorage } from "./storage.js";
+import { clearUrlParams } from "./urlParams.js";
 
 const initialPreferences = getAllPreferences();
 const initialSleeperPlayers =
@@ -272,6 +273,7 @@ export const useCrossLeagueStore = create((set, get) => ({
 
   resetData: () => {
     clearAllStorage();
+    clearUrlParams();
     const currentYear = new Date().getFullYear();
     set({
       platform: "sleeper",

@@ -54,6 +54,7 @@ export const PlayersTab: React.FC = () => {
 
   const allPlayers = useMemo<any[]>(() => {
     return aggregatePlayers(records, isSeason, week, getPlayerInfo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [records, isSeason, week, sleeperPlayersDb, espnPlayersDb]);
 
   // Positional MVPs
