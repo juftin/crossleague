@@ -37,6 +37,8 @@ export const Header: React.FC = () => {
   const userName = useCrossLeagueStore(s => s.userName);
   const setUserName = useCrossLeagueStore(s => s.setUserName);
   const userId = useCrossLeagueStore(s => s.userId);
+  const setUserId = useCrossLeagueStore(s => s.setUserId);
+  const setUserAvatar = useCrossLeagueStore(s => s.setUserAvatar);
   const customLeagueIds = useCrossLeagueStore(s => s.customLeagueIds);
   const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
   const removeCustomLeagueId = useCrossLeagueStore(s => s.removeCustomLeagueId);
@@ -131,6 +133,12 @@ export const Header: React.FC = () => {
     e.preventDefault();
     if (syncType === "user" && platform !== "espn") {
       setUserName(inputUser.trim());
+      setCustomLeagueIds([]);
+    } else {
+      setUserName("");
+      setUserId("");
+      setUserAvatar("");
+      setInputUser("");
     }
     closeSettingsModal();
     syncData(true);

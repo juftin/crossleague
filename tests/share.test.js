@@ -192,6 +192,20 @@ describe("Shareable URL & Parameter Extraction", () => {
     assert.equal(customLeagueIds.has("old_league_1"), false);
   });
 
+  it("should wipe prior league IDs when loading query params with user", () => {
+    let customLeagueIds = ["1664455", "998877"];
+    let userName = "";
+
+    const queryParams = { user: "newuser", season: "2024", week: "1" };
+    if (queryParams.user && !queryParams.leagues) {
+      userName = queryParams.user;
+      customLeagueIds = [];
+    }
+
+    assert.equal(userName, "newuser");
+    assert.deepEqual(customLeagueIds, []);
+  });
+
   it("should invalidate cache if cached settings or platform do not match current query parameters", () => {
     const cachedData = {
       version: "2.0",

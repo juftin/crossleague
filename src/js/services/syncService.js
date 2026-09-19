@@ -63,14 +63,22 @@ export async function syncData(forceRefresh = false) {
       if (cached.selectedLeagueIds && cached.selectedLeagueIds.length > 0) {
         store.setSelectedLeagueIds(cached.selectedLeagueIds);
       }
-      if (cached.user?.id && !store.userId) {
-        store.setUserId(cached.user.id);
-      }
-      if (cached.user?.avatar && !store.userAvatar) {
-        store.setUserAvatar(cached.user.avatar);
-      }
-      if (cached.user?.name && !store.userName) {
-        store.setUserName(cached.user.name);
+      if (isLeaguesSync) {
+        store.setUserName("");
+        store.setUserId("");
+        store.setUserAvatar("");
+        store.setCustomLeagueIds(targetIds);
+      } else {
+        store.setCustomLeagueIds([]);
+        if (cached.user?.id && !store.userId) {
+          store.setUserId(cached.user.id);
+        }
+        if (cached.user?.avatar && !store.userAvatar) {
+          store.setUserAvatar(cached.user.avatar);
+        }
+        if (cached.user?.name && !store.userName) {
+          store.setUserName(cached.user.name);
+        }
       }
       if (cached.espnPlayersDb && Object.keys(cached.espnPlayersDb).length > 0) {
         store.setEspnPlayersDb(cached.espnPlayersDb);
@@ -448,18 +456,28 @@ export async function syncData(forceRefresh = false) {
       nflState: store.nflState
     });
 
+    if (isLeaguesSync) {
+      store.setUserName("");
+      store.setUserId("");
+      store.setUserAvatar("");
+      store.setCustomLeagueIds(targetIds);
+    } else {
+      store.setCustomLeagueIds([]);
+    }
+
+    const currentStore = useCrossLeagueStore.getState();
     updateUrlParams({
       platform,
-      user: inputUser,
-      userId: store.userId,
-      userName: store.userName,
-      customLeagueIds: targetIds,
-      selectedLeagueIds: store.selectedLeagueIds,
+      user: isLeaguesSync ? "" : inputUser,
+      userId: currentStore.userId,
+      userName: currentStore.userName,
+      customLeagueIds: isLeaguesSync ? targetIds : [],
+      selectedLeagueIds: currentStore.selectedLeagueIds,
       allLeaguesData: combinedLeaguesData,
       season,
       mode,
       week,
-      syncType: store.syncType,
+      syncType: currentStore.syncType,
       rawRecords: combinedRecords
     });
 

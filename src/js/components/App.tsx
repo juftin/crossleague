@@ -102,10 +102,6 @@ export const App: React.FC = () => {
 
       const isUserDifferent =
         urlUser !== null && urlUser.toLowerCase() !== (currentStore.userName || "").toLowerCase();
-      const isLeaguesDifferent =
-        urlLeagues !== null &&
-        (urlLeagues.length !== currentStore.customLeagueIds.length ||
-          urlLeagues.some(id => !currentStore.customLeagueIds.includes(id)));
 
       if (urlPlatform) {
         setPlatform(urlPlatform);
@@ -114,11 +110,13 @@ export const App: React.FC = () => {
       if (urlUser) {
         setSyncType("user");
         setUserName(urlUser);
+        if (!urlLeagues) {
+          setCustomLeagueIds([]);
+        }
         if (isUserDifferent) {
           setUserId("");
           setUserAvatar("");
           if (!urlLeagues) {
-            setCustomLeagueIds([]);
             setSelectedLeagueIds([]);
           }
         }
@@ -128,11 +126,9 @@ export const App: React.FC = () => {
         setCustomLeagueIds(urlLeagues);
         if (!urlUser) {
           setSyncType("leagues");
-          if (isLeaguesDifferent || currentStore.syncType !== "leagues") {
-            setUserName("");
-            setUserId("");
-            setUserAvatar("");
-          }
+          setUserName("");
+          setUserId("");
+          setUserAvatar("");
         }
       }
 
