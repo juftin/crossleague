@@ -151,11 +151,9 @@ export const Header: React.FC = () => {
   };
 
   const handleClearData = () => {
-    if (window.confirm("Clear all stored data, cached leagues, credentials, and settings?")) {
-      resetData();
-      addToast("Data cleared successfully", "info");
-      closeSettingsModal();
-    }
+    resetData();
+    addToast("Data cleared successfully", "info");
+    closeSettingsModal();
   };
 
   const tabs: Array<{ id: TabId; elementId: string; label: string; icon: React.ReactNode }> = [
