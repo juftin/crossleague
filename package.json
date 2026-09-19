@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "knip": "knip",
-    "test": "node --test tests/**/*.test.js",
+    "test": "node --test",
     "snapshots": "node scripts/generate-snapshots.js",
     "snapshots:check": "node scripts/generate-snapshots.js --check",
     "dev": "vite --host 0.0.0.0"
