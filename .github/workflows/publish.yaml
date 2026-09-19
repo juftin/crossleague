@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
 name: publish
 
 on:
@@ -35,18 +37,23 @@ jobs:
           node-version: 22
           cache: "npm"
 
-      - name: setup-task
-        uses: arduino/setup-task@v2
+      - name: cache-node-modules
+        id: node-modules-cache
+        uses: actions/cache@v4
         with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-22-${{ hashFiles('package-lock.json') }}
 
-      - name: install
-        run: task install
-
-      - name: build-docs
-        run: task docs
+      - name: build
+        uses: juftin/actions/taskfile@v1
+        with:
+          task: build
+          checkout: false
+          install: ${{ steps.node-modules-cache.outputs.cache-hit != 'true' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: github-pages
         uses: juftin/actions/github-pages@v1
+        with:
+          path: dist
         id: deployment

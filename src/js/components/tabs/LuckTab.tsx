@@ -59,7 +59,7 @@ export const LuckTab: React.FC = () => {
       return { paginatedRecords: [], totalPages: 0, totalCount: 0, startIdx: 0, endIdx: 0 };
     }
 
-    let filtered = records.filter(item => {
+    const filtered = records.filter(item => {
       const luck = item.luck || (item as any).luckIndex || 0;
       if (luckCategory === "LUCKY" && luck <= 0.5) return false;
       if (luckCategory === "FAIR" && (luck < -0.5 || luck > 0.5)) return false;
@@ -158,26 +158,26 @@ export const LuckTab: React.FC = () => {
   }, [isAllPlayInfoOpen]);
 
   return (
-    <div id="viewLuck" className="space-y-6 w-full">
+    <div id="viewLuck" className="w-full space-y-6">
       {/* Educational / Explanation Hero Card */}
-      <div className="glass-card rounded-2xl p-5 sm:p-6 border border-emerald-500/20 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-slate-900/90 relative overflow-hidden space-y-4">
+      <div className="glass-card relative space-y-4 overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-slate-900/90 p-5 sm:p-6">
         {/* Card Header Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3.5">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <Clover className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-lg sm:text-xl font-black text-white tracking-wide">
+        <div className="flex flex-col justify-between gap-3 border-b border-slate-800/80 pb-3.5 sm:flex-row sm:items-center">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Clover className="h-5 w-5 text-emerald-400" />
+            <h3 className="text-lg font-black tracking-wide text-white sm:text-xl">
               Schedule Luck & All-Play Index
             </h3>
-            <div ref={allPlayInfoRef} className="relative inline-flex card-info-wrapper group">
+            <div ref={allPlayInfoRef} className="card-info-wrapper group relative inline-flex">
               <button
                 type="button"
-                className="card-info-trigger px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono inline-flex items-center gap-1 hover:bg-emerald-500/30 transition"
+                className="card-info-trigger inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/20 px-2.5 py-0.5 font-mono text-xs font-bold text-emerald-300 transition hover:bg-emerald-500/30"
                 aria-describedby="allPlayFormulaInfo"
                 aria-expanded={isAllPlayInfoOpen}
                 onClick={() => setIsAllPlayInfoOpen(isOpen => !isOpen)}
               >
                 All-Play Formula
-                <HelpCircle className="w-3 h-3 opacity-70 group-hover:opacity-100" />
+                <HelpCircle className="h-3 w-3 opacity-70 group-hover:opacity-100" />
               </button>
               <div
                 id="allPlayFormulaInfo"
@@ -195,24 +195,24 @@ export const LuckTab: React.FC = () => {
             id="btnOpenLuckModal"
             type="button"
             onClick={openLuckModal}
-            className="self-start sm:self-auto px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 text-xs sm:text-sm font-bold transition inline-flex items-center gap-2 shadow-sm cursor-pointer"
+            className="inline-flex cursor-pointer items-center gap-2 self-start rounded-xl border border-emerald-500/30 bg-slate-950 px-4 py-2 text-xs font-bold text-emerald-400 shadow-sm transition hover:bg-slate-800 hover:text-emerald-300 sm:self-auto sm:text-sm"
             title="View full Luck Index, Expected Wins (xW), and All-Play simulation methodology."
           >
-            <HelpCircle className="w-4 h-4 text-emerald-400" />
+            <HelpCircle className="h-4 w-4 text-emerald-400" />
             <span>Read Full Methodology</span>
           </button>
         </div>
 
         {/* 3 Legend Tier Cards (Grid) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
+        <div className="grid grid-cols-1 gap-2.5 pt-1 md:grid-cols-3">
           <div
-            className="p-2.5 rounded-xl bg-slate-950/60 border border-emerald-500/20 flex items-start gap-2"
+            className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-slate-950/60 p-2.5"
             title="Positive Luck Index (>= +0.50): Won games against opponents who had down scoring weeks."
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0"></span>
+            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400"></span>
             <div className="text-xs">
-              <strong className="text-emerald-300 font-bold inline-flex items-center gap-1">
-                <Clover className="w-3.5 h-3.5" /> &gt; +0.50 (Lucky):
+              <strong className="inline-flex items-center gap-1 font-bold text-emerald-300">
+                <Clover className="h-3.5 w-3.5" /> &gt; +0.50 (Lucky):
               </strong>{" "}
               <span className="text-slate-400">
                 Gained extra wins from favorable schedule matchups
@@ -220,13 +220,13 @@ export const LuckTab: React.FC = () => {
             </div>
           </div>
           <div
-            className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-700/50 flex items-start gap-2"
+            className="flex items-start gap-2 rounded-xl border border-slate-700/50 bg-slate-950/60 p-2.5"
             title="Neutral Luck Index (-0.50 to +0.50): Record aligns directly with scoring output."
           >
-            <span className="w-2 h-2 rounded-full bg-slate-400 mt-1.5 flex-shrink-0"></span>
+            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-slate-400"></span>
             <div className="text-xs">
-              <strong className="text-slate-300 font-bold inline-flex items-center gap-1">
-                <Scale className="w-3.5 h-3.5" /> -0.50 to +0.50 (Fair):
+              <strong className="inline-flex items-center gap-1 font-bold text-slate-300">
+                <Scale className="h-3.5 w-3.5" /> -0.50 to +0.50 (Fair):
               </strong>{" "}
               <span className="text-slate-400">
                 Win-loss record mirrors true scoring performance
@@ -234,77 +234,75 @@ export const LuckTab: React.FC = () => {
             </div>
           </div>
           <div
-            className="p-2.5 rounded-xl bg-slate-950/60 border border-rose-500/20 flex items-start gap-2"
+            className="flex items-start gap-2 rounded-xl border border-rose-500/20 bg-slate-950/60 p-2.5"
             title="Negative Luck Index (<= -0.50): Lost games despite putting up strong weekly scores because opponents scored higher."
           >
-            <span className="w-2 h-2 rounded-full bg-rose-400 mt-1.5 flex-shrink-0"></span>
+            <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-rose-400"></span>
             <div className="text-xs">
-              <strong className="text-rose-300 font-bold inline-flex items-center gap-1">
-                <HeartCrack className="w-3.5 h-3.5" /> &lt; -0.50 (Unlucky):
+              <strong className="inline-flex items-center gap-1 font-bold text-rose-300">
+                <HeartCrack className="h-3.5 w-3.5" /> &lt; -0.50 (Unlucky):
               </strong>{" "}
-              <span className="text-slate-400">
-                Lost matchups despite strong point totals
-              </span>
+              <span className="text-slate-400">Lost matchups despite strong point totals</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* 4 Superlative Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Luckiest */}
         <div
           id="luckLuckiestCard"
-          className="glass-card rounded-2xl p-5 border border-emerald-500/30 bg-emerald-950/20 glass-card-hover flex flex-col justify-between"
+          className="glass-card glass-card-hover flex flex-col justify-between rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5"
         >
           <div>
             <div className="flex items-center justify-between">
-              <div className="relative inline-block card-info-wrapper group">
+              <div className="card-info-wrapper group relative inline-block">
                 <button
                   type="button"
-                  className="card-info-trigger text-xs font-black uppercase tracking-wider text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 focus:outline-none transition cursor-pointer"
+                  className="card-info-trigger flex cursor-pointer items-center gap-1.5 text-xs font-black tracking-wider text-emerald-400 uppercase transition hover:text-emerald-300 focus:outline-none"
                   aria-expanded="false"
                 >
                   <span className="flex items-center gap-1.5">
-                    <Clover className="w-4 h-4" /> Luckiest Squad
+                    <Clover className="h-4 w-4" /> Luckiest Squad
                   </span>
-                  <HelpCircle className="w-3 h-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  <HelpCircle className="h-3 w-3 opacity-70 transition-opacity group-hover:opacity-100" />
                 </button>
                 <div className="card-info-popover" role="tooltip">
-                  <div className="text-[11px] text-slate-200 leading-relaxed font-normal">
+                  <div className="text-[11px] leading-relaxed font-normal text-slate-200">
                     Highest positive luck index — gained the most bonus wins above scoring
                     expectation due to favorable opponent matchups.
                   </div>
                 </div>
               </div>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold border border-emerald-500/30">
+              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/20 px-2.5 py-0.5 font-mono text-xs font-bold text-emerald-300">
                 Lucky Draw
               </span>
             </div>
             <div
               id="statLuckiestVal"
-              className="text-3xl font-black text-emerald-300 font-mono mt-2"
+              className="mt-2 font-mono text-3xl font-black text-emerald-300"
             >
               {luckiest
                 ? `+${(luckiest.luck || (luckiest as any).luckIndex || 0).toFixed(2)}`
                 : "+0.00"}
             </div>
           </div>
-          <div className="mt-2 pt-2 border-t border-emerald-500/20">
-            <div id="statLuckiestTeam" className="text-sm font-bold text-slate-100 truncate">
+          <div className="mt-2 border-t border-emerald-500/20 pt-2">
+            <div id="statLuckiestTeam" className="truncate text-sm font-bold text-slate-100">
               {luckiest ? `${luckiest.manager} - ${luckiest.teamName}` : "-"}
             </div>
             <div
               id="statLuckiestLeague"
-              className="text-xs font-semibold text-emerald-300/90 truncate flex items-center gap-1 mt-0.5"
+              className="mt-0.5 flex items-center gap-1 truncate text-xs font-semibold text-emerald-300/90"
               title="League Name"
             >
-              <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+              <Trophy className="h-3 w-3 flex-shrink-0 text-emerald-400" />
               <span className="truncate">
                 {luckiest ? (luckiest as any).league || luckiest.leagueName : "-"}
               </span>
             </div>
-            <div id="statLuckiestSub" className="text-xs text-slate-400 mt-1 font-medium">
+            <div id="statLuckiestSub" className="mt-1 text-xs font-medium text-slate-400">
               {luckiest
                 ? `${luckiest.wins || 0}W-${luckiest.losses || 0}L (vs ${(luckiest.expectedWins || 0).toFixed(1)} xW)`
                 : "-"}
@@ -315,56 +313,56 @@ export const LuckTab: React.FC = () => {
         {/* Unluckiest */}
         <div
           id="luckUnluckiestCard"
-          className="glass-card rounded-2xl p-5 border border-rose-500/30 bg-rose-950/20 glass-card-hover flex flex-col justify-between"
+          className="glass-card glass-card-hover flex flex-col justify-between rounded-2xl border border-rose-500/30 bg-rose-950/20 p-5"
         >
           <div>
             <div className="flex items-center justify-between">
-              <div className="relative inline-block card-info-wrapper group">
+              <div className="card-info-wrapper group relative inline-block">
                 <button
                   type="button"
-                  className="card-info-trigger text-xs font-black uppercase tracking-wider text-rose-400 hover:text-rose-300 flex items-center gap-1.5 focus:outline-none transition cursor-pointer"
+                  className="card-info-trigger flex cursor-pointer items-center gap-1.5 text-xs font-black tracking-wider text-rose-400 uppercase transition hover:text-rose-300 focus:outline-none"
                   aria-expanded="false"
                 >
                   <span className="flex items-center gap-1.5">
-                    <HeartCrack className="w-4 h-4" /> Unluckiest Squad
+                    <HeartCrack className="h-4 w-4" /> Unluckiest Squad
                   </span>
-                  <HelpCircle className="w-3 h-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  <HelpCircle className="h-3 w-3 opacity-70 transition-opacity group-hover:opacity-100" />
                 </button>
                 <div className="card-info-popover" role="tooltip">
-                  <div className="text-[11px] text-slate-200 leading-relaxed font-normal">
+                  <div className="text-[11px] leading-relaxed font-normal text-slate-200">
                     Lowest negative luck index — lost the most games below scoring expectation due
                     to high-scoring opponent matchups.
                   </div>
                 </div>
               </div>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-mono font-bold border border-rose-500/30">
+              <span className="rounded-full border border-rose-500/30 bg-rose-500/20 px-2.5 py-0.5 font-mono text-xs font-bold text-rose-300">
                 Tough Schedule
               </span>
             </div>
             <div
               id="statUnluckiestVal"
-              className="text-3xl font-black text-rose-400 font-mono mt-2"
+              className="mt-2 font-mono text-3xl font-black text-rose-400"
             >
               {unluckiest
                 ? (unluckiest.luck || (unluckiest as any).luckIndex || 0).toFixed(2)
                 : "-0.00"}
             </div>
           </div>
-          <div className="mt-2 pt-2 border-t border-rose-500/20">
-            <div id="statUnluckiestTeam" className="text-sm font-bold text-slate-100 truncate">
+          <div className="mt-2 border-t border-rose-500/20 pt-2">
+            <div id="statUnluckiestTeam" className="truncate text-sm font-bold text-slate-100">
               {unluckiest ? `${unluckiest.manager} - ${unluckiest.teamName}` : "-"}
             </div>
             <div
               id="statUnluckiestLeague"
-              className="text-xs font-semibold text-rose-300/90 truncate flex items-center gap-1 mt-0.5"
+              className="mt-0.5 flex items-center gap-1 truncate text-xs font-semibold text-rose-300/90"
               title="League Name"
             >
-              <Trophy className="w-3 h-3 text-rose-400 flex-shrink-0" />
+              <Trophy className="h-3 w-3 flex-shrink-0 text-rose-400" />
               <span className="truncate">
                 {unluckiest ? (unluckiest as any).league || unluckiest.leagueName : "-"}
               </span>
             </div>
-            <div id="statUnluckiestSub" className="text-xs text-slate-400 mt-1 font-medium">
+            <div id="statUnluckiestSub" className="mt-1 text-xs font-medium text-slate-400">
               {unluckiest
                 ? `${unluckiest.wins || 0}W-${unluckiest.losses || 0}L (vs ${(unluckiest.expectedWins || 0).toFixed(1)} xW)`
                 : "-"}
@@ -375,54 +373,54 @@ export const LuckTab: React.FC = () => {
         {/* All-Play Leader */}
         <div
           id="luckAllPlayLeaderCard"
-          className="glass-card rounded-2xl p-5 border border-amber-500/30 bg-amber-950/20 glass-card-hover flex flex-col justify-between"
+          className="glass-card glass-card-hover flex flex-col justify-between rounded-2xl border border-amber-500/30 bg-amber-950/20 p-5"
         >
           <div>
             <div className="flex items-center justify-between">
-              <div className="relative inline-block card-info-wrapper group">
+              <div className="card-info-wrapper group relative inline-block">
                 <button
                   type="button"
-                  className="card-info-trigger text-xs font-black uppercase tracking-wider text-amber-400 hover:text-amber-300 flex items-center gap-1.5 focus:outline-none transition cursor-pointer"
+                  className="card-info-trigger flex cursor-pointer items-center gap-1.5 text-xs font-black tracking-wider text-amber-400 uppercase transition hover:text-amber-300 focus:outline-none"
                   aria-expanded="false"
                 >
                   <span className="flex items-center gap-1.5">
-                    <Crown className="w-4 h-4" /> All-Play Powerhouse
+                    <Crown className="h-4 w-4" /> All-Play Powerhouse
                   </span>
-                  <HelpCircle className="w-3 h-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  <HelpCircle className="h-3 w-3 opacity-70 transition-opacity group-hover:opacity-100" />
                 </button>
                 <div className="card-info-popover" role="tooltip">
-                  <div className="text-[11px] text-slate-200 leading-relaxed font-normal">
+                  <div className="text-[11px] leading-relaxed font-normal text-slate-200">
                     Squad with the highest win percentage when simulated against every other league
                     team every week.
                   </div>
                 </div>
               </div>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold border border-amber-500/30">
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/20 px-2.5 py-0.5 font-mono text-xs font-bold text-amber-300">
                 True Dominance
               </span>
             </div>
             <div
               id="statAllPlayLeaderVal"
-              className="text-3xl font-black text-amber-300 font-mono mt-2"
+              className="mt-2 font-mono text-3xl font-black text-amber-300"
             >
               {allPlayLeader ? `${(allPlayLeader.allPlayWinPct || 0).toFixed(1)}%` : "0%"}
             </div>
           </div>
-          <div className="mt-2 pt-2 border-t border-amber-500/20">
-            <div id="statAllPlayLeaderTeam" className="text-sm font-bold text-slate-100 truncate">
+          <div className="mt-2 border-t border-amber-500/20 pt-2">
+            <div id="statAllPlayLeaderTeam" className="truncate text-sm font-bold text-slate-100">
               {allPlayLeader ? `${allPlayLeader.manager} - ${allPlayLeader.teamName}` : "-"}
             </div>
             <div
               id="statAllPlayLeaderLeague"
-              className="text-xs font-semibold text-amber-300/90 truncate flex items-center gap-1 mt-0.5"
+              className="mt-0.5 flex items-center gap-1 truncate text-xs font-semibold text-amber-300/90"
               title="League Name"
             >
-              <Trophy className="w-3 h-3 text-amber-400 flex-shrink-0" />
+              <Trophy className="h-3 w-3 flex-shrink-0 text-amber-400" />
               <span className="truncate">
                 {allPlayLeader ? (allPlayLeader as any).league || allPlayLeader.leagueName : "-"}
               </span>
             </div>
-            <div id="statAllPlayLeaderSub" className="text-xs text-slate-400 mt-1 font-medium">
+            <div id="statAllPlayLeaderSub" className="mt-1 text-xs font-medium text-slate-400">
               {allPlayLeader
                 ? `${allPlayLeader.allPlayWins || 0}W - ${allPlayLeader.allPlayLosses || 0}L All-Play Record`
                 : "-"}
@@ -433,59 +431,59 @@ export const LuckTab: React.FC = () => {
         {/* Toughest Opponents */}
         <div
           id="luckToughestCard"
-          className="glass-card rounded-2xl p-5 border border-indigo-500/30 bg-indigo-950/20 glass-card-hover flex flex-col justify-between"
+          className="glass-card glass-card-hover flex flex-col justify-between rounded-2xl border border-indigo-500/30 bg-indigo-950/20 p-5"
         >
           <div>
             <div className="flex items-center justify-between">
-              <div className="relative inline-block card-info-wrapper group">
+              <div className="card-info-wrapper group relative inline-block">
                 <button
                   type="button"
-                  className="card-info-trigger text-xs font-black uppercase tracking-wider text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 focus:outline-none transition cursor-pointer"
+                  className="card-info-trigger flex cursor-pointer items-center gap-1.5 text-xs font-black tracking-wider text-indigo-400 uppercase transition hover:text-indigo-300 focus:outline-none"
                   aria-expanded="false"
                 >
                   <span className="flex items-center gap-1.5">
-                    <Shield className="w-4 h-4" /> Toughest Opponents
+                    <Shield className="h-4 w-4" /> Toughest Opponents
                   </span>
-                  <HelpCircle className="w-3 h-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  <HelpCircle className="h-3 w-3 opacity-70 transition-opacity group-hover:opacity-100" />
                 </button>
                 <div className="card-info-popover popover-right" role="tooltip">
-                  <div className="text-[11px] text-slate-200 leading-relaxed font-normal">
+                  <div className="text-[11px] leading-relaxed font-normal text-slate-200">
                     Faced the highest average opponent scoring output (Points Against) across all
                     matchups.
                   </div>
                 </div>
               </div>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono font-bold border border-indigo-500/30">
+              <span className="rounded-full border border-indigo-500/30 bg-indigo-500/20 px-2.5 py-0.5 font-mono text-xs font-bold text-indigo-300">
                 Heavy Schedule
               </span>
             </div>
             <div
               id="statToughestScheduleVal"
-              className="text-3xl font-black text-indigo-300 font-mono mt-2"
+              className="mt-2 font-mono text-3xl font-black text-indigo-300"
             >
               {toughest
                 ? ((toughest as any).pointsAgainst || (toughest as any).pa || 0).toFixed(1)
                 : "0.0"}
             </div>
           </div>
-          <div className="mt-2 pt-2 border-t border-indigo-500/20">
+          <div className="mt-2 border-t border-indigo-500/20 pt-2">
             <div
               id="statToughestScheduleTeam"
-              className="text-sm font-bold text-slate-100 truncate"
+              className="truncate text-sm font-bold text-slate-100"
             >
               {toughest ? `${toughest.manager} - ${toughest.teamName}` : "-"}
             </div>
             <div
               id="statToughestScheduleLeague"
-              className="text-xs font-semibold text-indigo-300/90 truncate flex items-center gap-1 mt-0.5"
+              className="mt-0.5 flex items-center gap-1 truncate text-xs font-semibold text-indigo-300/90"
               title="League Name"
             >
-              <Trophy className="w-3 h-3 text-indigo-400 flex-shrink-0" />
+              <Trophy className="h-3 w-3 flex-shrink-0 text-indigo-400" />
               <span className="truncate">
                 {toughest ? (toughest as any).league || toughest.leagueName : "-"}
               </span>
             </div>
-            <div id="statToughestScheduleSub" className="text-xs text-slate-400 mt-1 font-medium">
+            <div id="statToughestScheduleSub" className="mt-1 text-xs font-medium text-slate-400">
               Points Against Total
             </div>
           </div>
@@ -493,9 +491,9 @@ export const LuckTab: React.FC = () => {
       </div>
 
       {/* Master Luck Table */}
-      <div className="glass-card rounded-2xl p-4 sm:p-6 border border-slate-800 space-y-4 w-full">
+      <div className="glass-card w-full space-y-4 rounded-2xl border border-slate-800 p-4 sm:p-6">
         {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+        <div className="flex flex-col items-stretch justify-between gap-3 border-b border-slate-800/80 pb-4 sm:flex-row sm:items-center">
           <div className="relative flex-1 sm:w-80">
             <input
               type="text"
@@ -503,16 +501,16 @@ export const LuckTab: React.FC = () => {
               placeholder="Search manager, squad, league..."
               value={luckSearch}
               onChange={e => setLuckSearch(e.target.value)}
-              className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              className="w-full rounded-xl border border-slate-700/80 bg-slate-950/90 py-2 pr-4 pl-10 text-sm font-medium text-white placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3 pointer-events-none" />
+            <Search className="pointer-events-none absolute top-3 left-3.5 h-4 w-4 text-slate-500" />
           </div>
           <div className="flex items-center gap-2">
             <select
               id="luckCategoryFilter"
               value={luckCategory}
               onChange={e => setLuckCategory(e.target.value)}
-              className="bg-slate-950/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none font-semibold cursor-pointer"
+              className="cursor-pointer rounded-xl border border-slate-700/80 bg-slate-950/90 px-3 py-2 text-xs font-semibold text-white focus:outline-none sm:text-sm"
               title="Filter table by Schedule Luck Tier"
             >
               <option value="ALL">All Luck Tiers</option>
@@ -523,7 +521,7 @@ export const LuckTab: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs sm:text-sm text-slate-400 px-1">
+        <div className="flex items-center justify-between px-1 text-xs text-slate-400 sm:text-sm">
           <span id="luckRowCount">Showing {totalCount} squads</span>
           <span className="text-xs text-slate-500 italic">
             Click column headers to sort by metric
@@ -531,11 +529,11 @@ export const LuckTab: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-slate-800">
-          <table className="w-full text-left border-collapse" id="luckTable">
-            <thead className="bg-slate-900/90 text-slate-400 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider border-b border-slate-800 select-none">
+          <table className="w-full border-collapse text-left" id="luckTable">
+            <thead className="border-b border-slate-800 bg-slate-900/90 text-[11px] font-black tracking-wider text-slate-400 uppercase select-none sm:text-xs md:text-sm">
               <tr>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Rank")}
                   title="Sort by Rank"
                 >
@@ -547,16 +545,16 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "Rank" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Manager")}
                   title="Sort by Manager"
                 >
@@ -568,16 +566,16 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "Manager" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("League")}
                   title="Sort by League"
                 >
@@ -589,16 +587,16 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "League" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-center transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Actual")}
                   title="Sort by Actual Record"
                 >
@@ -610,16 +608,16 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "Actual" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-center transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("AllPlay")}
                   title="Sort by All-Play Record"
                 >
@@ -631,16 +629,16 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "AllPlay" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-center transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Expected")}
                   title="Sort by Expected Wins"
                 >
@@ -652,16 +650,16 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "Expected" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-center transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Luck")}
                   title="Sort by Luck Index"
                 >
@@ -673,16 +671,16 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "Luck" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-right cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-right transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("PF")}
                   title="Sort by Points For"
                 >
@@ -694,16 +692,16 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "PF" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-right cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-right transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("PA")}
                   title="Sort by Points Against"
                 >
@@ -715,9 +713,9 @@ export const LuckTab: React.FC = () => {
                     >
                       {luckSortColumn === "PA" ? (
                         luckSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
@@ -766,27 +764,27 @@ export const LuckTab: React.FC = () => {
                 return (
                   <tr
                     key={team.id || `${team.leagueId}-${team.rosterId}`}
-                    className="hover:bg-slate-800/60 transition"
+                    className="transition hover:bg-slate-800/60"
                   >
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 font-mono font-bold text-slate-400 whitespace-nowrap">
+                    <td className="px-2 py-2.5 font-mono font-bold whitespace-nowrap text-slate-400 sm:px-4 sm:py-3.5">
                       #{rank}
                     </td>
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4">
+                    <td className="px-2 py-2.5 sm:px-4 sm:py-3.5">
                       <div className="flex items-center gap-3">
                         {avatarUrl && (
                           <img
                             src={avatarUrl}
-                            className="w-9 h-9 rounded-full object-cover border border-slate-700 flex-shrink-0"
+                            className="h-9 w-9 flex-shrink-0 rounded-full border border-slate-700 object-cover"
                             alt=""
                             onError={e => ((e.target as HTMLElement).style.display = "none")}
                           />
                         )}
                         <div className="min-w-0">
-                          <div className="font-black text-slate-100 truncate" title={team.manager}>
+                          <div className="truncate font-black text-slate-100" title={team.manager}>
                             {team.manager}
                           </div>
                           <div
-                            className="text-[11px] text-slate-400 truncate font-semibold"
+                            className="truncate text-[11px] font-semibold text-slate-400"
                             title={team.teamName}
                           >
                             {team.teamName}
@@ -794,48 +792,48 @@ export const LuckTab: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4">
-                      <div className="flex items-center gap-1.5 max-w-[200px] text-slate-300 font-medium truncate">
-                        <Trophy className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                    <td className="px-2 py-2.5 sm:px-4 sm:py-3.5">
+                      <div className="flex max-w-[200px] items-center gap-1.5 truncate font-medium text-slate-300">
+                        <Trophy className="h-3 w-3 flex-shrink-0 text-amber-400" />
                         <span className="truncate">{(team as any).league || team.leagueName}</span>
                       </div>
                     </td>
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center">
+                    <td className="px-2 py-2.5 text-center sm:px-4 sm:py-3.5">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-black border ${actualRecordClass}`}
+                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-xs font-black ${actualRecordClass}`}
                       >
                         {outcome === "win" && (
-                          <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                          <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
                         )}
                         {actualRecord}
                       </span>
-                      <div className="text-[11px] text-slate-400 mt-0.5 font-medium truncate max-w-[120px] mx-auto">
+                      <div className="mx-auto mt-0.5 max-w-[120px] truncate text-[11px] font-medium text-slate-400">
                         vs {opponentName}
                       </div>
                     </td>
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center font-mono">
+                    <td className="px-2 py-2.5 text-center font-mono sm:px-4 sm:py-3.5">
                       <div className="font-bold text-slate-200">
                         {allPlayWins}W − {allPlayLosses}L
                         {allPlayTies > 0 ? ` − ${allPlayTies}T` : ""}
                       </div>
-                      <div className="text-xs text-cyan-400 font-semibold">{allPlayPct}% Win</div>
+                      <div className="text-xs font-semibold text-cyan-400">{allPlayPct}% Win</div>
                     </td>
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center font-mono font-bold text-slate-300">
+                    <td className="px-2 py-2.5 text-center font-mono font-bold text-slate-300 sm:px-4 sm:py-3.5">
                       {expWins.toFixed(2)}
                     </td>
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center">
+                    <td className="px-2 py-2.5 text-center sm:px-4 sm:py-3.5">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-mono font-black text-xs ${luckBadgeClass}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-mono text-xs font-black ${luckBadgeClass}`}
                       >
-                        <LuckIcon className="w-3.5 h-3.5" />
+                        <LuckIcon className="h-3.5 w-3.5" />
                         {luckVal > 0 ? `+${luckVal.toFixed(2)}` : luckVal.toFixed(2)}
                       </span>
                     </td>
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-right font-mono font-bold text-emerald-400">
+                    <td className="px-2 py-2.5 text-right font-mono font-bold text-emerald-400 sm:px-4 sm:py-3.5">
                       {(team.points || 0).toFixed(2)}{" "}
                       <span className="text-xs font-normal text-slate-400">pts</span>
                     </td>
-                    <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-right font-mono font-bold text-slate-300">
+                    <td className="px-2 py-2.5 text-right font-mono font-bold text-slate-300 sm:px-4 sm:py-3.5">
                       {paVal.toFixed(2)}{" "}
                       <span className="text-xs font-normal text-slate-400">pts</span>
                     </td>
@@ -849,18 +847,18 @@ export const LuckTab: React.FC = () => {
         {/* Paginator */}
         <div
           id="luckPaginationFooter"
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 text-xs sm:text-sm text-slate-400"
+          className="flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-3 text-xs text-slate-400 sm:flex-row sm:text-sm"
         >
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700/80">
-              <span className="text-slate-400 font-bold text-xs">Show:</span>
+            <div className="flex items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-1.5">
+              <span className="text-xs font-bold text-slate-400">Show:</span>
               <select
                 id="luckPageSizeSelect"
                 value={luckPageSize >= 10000 ? "all" : String(luckPageSize)}
                 onChange={e =>
                   setLuckPageSize(e.target.value === "all" ? Infinity : Number(e.target.value))
                 }
-                className="bg-transparent text-white font-black text-xs focus:outline-none cursor-pointer"
+                className="cursor-pointer bg-transparent text-xs font-black text-white focus:outline-none"
               >
                 <option value="25" className="bg-slate-900 text-white">
                   25
@@ -876,7 +874,7 @@ export const LuckTab: React.FC = () => {
                 </option>
               </select>
             </div>
-            <span id="luckPageInfoText" className="text-slate-400 font-medium">
+            <span id="luckPageInfoText" className="font-medium text-slate-400">
               {totalCount === 0
                 ? "Showing 0 of 0"
                 : `Showing ${startIdx}–${endIdx} of ${totalCount}`}
@@ -885,16 +883,16 @@ export const LuckTab: React.FC = () => {
 
           <div
             id="luckPaginationControls"
-            className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end"
+            className="flex flex-wrap items-center justify-center gap-1 sm:justify-end sm:gap-1.5"
           >
             <button
               id="btnPrevLuckPage"
               type="button"
               disabled={luckPage <= 1 || totalCount === 0}
               onClick={() => setLuckPage(luckPage - 1)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+              className="flex cursor-pointer items-center gap-1 rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft className="h-3.5 w-3.5" />
               <span>Prev</span>
             </button>
 
@@ -907,10 +905,10 @@ export const LuckTab: React.FC = () => {
                     key={p}
                     type="button"
                     onClick={() => setLuckPage(p)}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center ${
+                    className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-xl text-xs font-bold transition sm:h-8 sm:w-8 ${
                       isCurrent
-                        ? "bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/20"
-                        : "bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80"
+                        ? "bg-emerald-500 font-black text-slate-950 shadow-lg shadow-emerald-500/20"
+                        : "border border-slate-700/80 bg-slate-900 text-slate-300 hover:bg-slate-800"
                     }`}
                   >
                     {p}
@@ -924,10 +922,10 @@ export const LuckTab: React.FC = () => {
               type="button"
               disabled={luckPage >= totalPages || totalCount === 0}
               onClick={() => setLuckPage(luckPage + 1)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+              className="flex cursor-pointer items-center gap-1 rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
               <span>Next</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>

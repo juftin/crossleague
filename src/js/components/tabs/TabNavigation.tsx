@@ -12,43 +12,43 @@ export const TabNavigation: React.FC = () => {
       id: "awards",
       elementId: "tabAwards",
       label: "Awards & Superlatives",
-      icon: <Trophy className="w-4 h-4 text-amber-400" />
+      icon: <Trophy className="h-4 w-4 text-amber-400" />
     },
     {
       id: "leaderboard",
       elementId: "tabLeaderboard",
       label: "Cross-League Board",
-      icon: <BarChart3 className="w-4 h-4 text-emerald-400" />
+      icon: <BarChart3 className="h-4 w-4 text-emerald-400" />
     },
     {
       id: "visuals",
       elementId: "tabVisuals",
       label: "Visual Analytics",
-      icon: <TrendingUp className="w-4 h-4 text-cyan-400" />
+      icon: <TrendingUp className="h-4 w-4 text-cyan-400" />
     },
     {
       id: "leagueGrid",
       elementId: "tabLeagueGrid",
       label: "League Breakdown",
-      icon: <Grid className="w-4 h-4 text-indigo-400" />
+      icon: <Grid className="h-4 w-4 text-indigo-400" />
     },
     {
       id: "luck",
       elementId: "tabLuck",
       label: "Luck Index",
-      icon: <Clover className="w-4 h-4 text-emerald-400" />
+      icon: <Clover className="h-4 w-4 text-emerald-400" />
     },
     {
       id: "players",
       elementId: "tabPlayers",
       label: "Player Analytics",
-      icon: <Star className="w-4 h-4 text-amber-300" />
+      icon: <Star className="h-4 w-4 text-amber-300" />
     }
   ];
 
   return (
-    <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-6 gap-2 overflow-x-auto custom-scrollbar">
-      <div className="flex items-center gap-1.5 sm:gap-2 min-w-max">
+    <div className="custom-scrollbar mb-6 flex items-center justify-between gap-2 overflow-x-auto border-b border-slate-800 pb-3">
+      <div className="flex min-w-max items-center gap-1.5 sm:gap-2">
         {tabs.map(t => {
           const isActive = activeTab === t.id;
           return (
@@ -57,10 +57,10 @@ export const TabNavigation: React.FC = () => {
               id={t.elementId}
               type="button"
               onClick={() => setActiveTab(t.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition duration-150 cursor-pointer ${
+              className={`flex cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition duration-150 sm:text-sm ${
                 isActive
-                  ? "bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 shadow-sm"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-transparent"
+                  ? "border border-emerald-500/40 bg-emerald-950/80 text-emerald-300 shadow-sm"
+                  : "border border-transparent text-slate-400 hover:bg-slate-900 hover:text-slate-200"
               }`}
             >
               <span>{t.icon}</span>

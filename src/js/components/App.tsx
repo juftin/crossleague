@@ -24,16 +24,13 @@ export const App: React.FC = () => {
   const loadingText = useCrossLeagueStore(s => s.loadingText);
   const progress = useCrossLeagueStore(s => s.progress);
   const error = useCrossLeagueStore(s => s.error);
-  const setError = useCrossLeagueStore(s => s.setError);
   const week = useCrossLeagueStore(s => s.week);
   const setWeek = useCrossLeagueStore(s => s.setWeek);
   const season = useCrossLeagueStore(s => s.season);
   const setSeason = useCrossLeagueStore(s => s.setSeason);
   const mode = useCrossLeagueStore(s => s.mode);
   const setMode = useCrossLeagueStore(s => s.setMode);
-  const platform = useCrossLeagueStore(s => s.platform);
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
-  const userName = useCrossLeagueStore(s => s.userName);
   const setUserName = useCrossLeagueStore(s => s.setUserName);
   const setSyncType = useCrossLeagueStore(s => s.setSyncType);
   const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
@@ -238,27 +235,27 @@ export const App: React.FC = () => {
   }, [setActiveTab]);
 
   return (
-    <div className="text-slate-100 min-h-screen antialiased flex flex-col pt-16 sm:pt-24 md:pt-44 lg:pt-36 selection:bg-emerald-500 selection:text-slate-950">
+    <div className="flex min-h-screen flex-col pt-16 text-slate-100 antialiased selection:bg-emerald-500 selection:text-slate-950 sm:pt-24 md:pt-44 lg:pt-36">
       <Header />
 
       {/* Main Content Container (Full-Width Fluid) */}
-      <main className="flex-1 w-full px-3 sm:px-8 lg:px-12 pt-2 pb-24 sm:pt-2 sm:pb-8 space-y-4 sm:space-y-6">
+      <main className="w-full flex-1 space-y-4 px-3 pt-2 pb-24 sm:space-y-6 sm:px-8 sm:pt-2 sm:pb-8 lg:px-12">
         {/* Live Loading Bar */}
         {loading && (
           <div id="statusContainer" className="space-y-2 pb-2">
-            <div className="flex justify-between text-xs sm:text-sm font-bold text-slate-300">
+            <div className="flex justify-between text-xs font-bold text-slate-300 sm:text-sm">
               <span id="statusText" className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span className="h-2.5 w-2.5 animate-ping rounded-full bg-emerald-400"></span>
                 {loadingText || "Loading rosters & matchups..."}
               </span>
-              <span id="progressText" className="font-mono text-emerald-400 font-bold">
+              <span id="progressText" className="font-mono font-bold text-emerald-400">
                 {progress}%
               </span>
             </div>
-            <div className="w-full bg-slate-900/90 rounded-full h-2.5 p-0.5 border border-slate-800 overflow-hidden">
+            <div className="h-2.5 w-full overflow-hidden rounded-full border border-slate-800 bg-slate-900/90 p-0.5">
               <div
                 id="progressBar"
-                className="bg-gradient-to-r from-emerald-500 via-cyan-400 to-teal-300 h-full rounded-full transition-all duration-300 shadow-lg shadow-emerald-500/40"
+                className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-teal-300 shadow-lg shadow-emerald-500/40 transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -269,9 +266,9 @@ export const App: React.FC = () => {
         {error && (
           <div
             id="errorBanner"
-            className="bg-rose-950/40 border border-rose-500/30 text-rose-200 rounded-xl p-4 text-sm sm:text-base flex items-start gap-3 backdrop-blur"
+            className="flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-950/40 p-4 text-sm text-rose-200 backdrop-blur sm:text-base"
           >
-            <AlertCircle className="w-6 h-6 flex-shrink-0 text-rose-400 mt-0.5" />
+            <AlertCircle className="mt-0.5 h-6 w-6 flex-shrink-0 text-rose-400" />
             <div id="errorMessage" className="font-semibold">
               {error}
             </div>
@@ -281,19 +278,19 @@ export const App: React.FC = () => {
         {/* Skeleton Loading Placeholder */}
         {loading && rawRecords.length === 0 && (
           <div id="skeletonLoader" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="h-48 rounded-2xl skeleton-loader"></div>
-              <div className="h-52 rounded-2xl skeleton-loader"></div>
-              <div className="h-48 rounded-2xl skeleton-loader"></div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+              <div className="skeleton-loader h-48 rounded-2xl"></div>
+              <div className="skeleton-loader h-52 rounded-2xl"></div>
+              <div className="skeleton-loader h-48 rounded-2xl"></div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="h-28 rounded-xl skeleton-loader"></div>
-              <div className="h-28 rounded-xl skeleton-loader"></div>
-              <div className="h-28 rounded-xl skeleton-loader"></div>
-              <div className="h-28 rounded-xl skeleton-loader"></div>
-              <div className="h-28 rounded-xl skeleton-loader col-span-1"></div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="skeleton-loader h-28 rounded-xl"></div>
+              <div className="skeleton-loader h-28 rounded-xl"></div>
+              <div className="skeleton-loader h-28 rounded-xl"></div>
+              <div className="skeleton-loader h-28 rounded-xl"></div>
+              <div className="skeleton-loader col-span-1 h-28 rounded-xl"></div>
             </div>
-            <div className="h-96 rounded-2xl skeleton-loader"></div>
+            <div className="skeleton-loader h-96 rounded-2xl"></div>
           </div>
         )}
 
@@ -301,15 +298,15 @@ export const App: React.FC = () => {
         {rawRecords.length === 0 && !loading && (
           <div
             id="initialState"
-            className="glass-card rounded-2xl p-16 text-center text-slate-400 space-y-5 border border-slate-800 max-w-3xl mx-auto my-12"
+            className="glass-card mx-auto my-12 max-w-3xl space-y-5 rounded-2xl border border-slate-800 p-16 text-center text-slate-400"
           >
-            <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400 shadow-xl">
-              <Zap className="w-10 h-10 text-emerald-400" />
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 shadow-xl">
+              <Zap className="h-10 w-10 text-emerald-400" />
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-white">
+            <h3 className="text-2xl font-black text-white sm:text-3xl">
               Who Actually Ran the League?
             </h3>
-            <p className="text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
+            <p className="mx-auto max-w-lg text-base leading-relaxed text-slate-400">
               Drop your Sleeper handle above to stack all your squads and league rivals on one
               universal power board.
             </p>
@@ -330,10 +327,10 @@ export const App: React.FC = () => {
       </main>
 
       {/* Footer (Full-Width Fluid) */}
-      <footer className="border-t border-slate-900 bg-slate-950/80 py-7 text-center text-sm text-slate-500 mt-auto w-full">
-        <div className="w-full px-4 sm:px-8 lg:px-12 flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
-          <div className="text-slate-400 font-semibold inline-flex items-center gap-1.5">
-            <Zap className="w-4 h-4 text-emerald-400" />
+      <footer className="mt-auto w-full border-t border-slate-900 bg-slate-950/80 py-7 text-center text-sm text-slate-500">
+        <div className="flex w-full flex-col items-center justify-center gap-3 px-4 text-center sm:flex-row sm:px-8 lg:px-12">
+          <div className="inline-flex items-center gap-1.5 font-semibold text-slate-400">
+            <Zap className="h-4 w-4 text-emerald-400" />
             <span>CrossLeague • Fantasy Football Power Rankings</span>
           </div>
         </div>

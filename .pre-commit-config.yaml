@@ -1,26 +1,53 @@
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-json
-      - id: check-added-large-files
-        args: ["--maxkb=500"]
+# yaml-language-server: $schema=https://schemastore.org/pre-commit-config.json
 
+repos:
   - repo: local
     hooks:
-      - id: task-lint
-        name: Code Quality & Linting (Taskfile)
-        entry: task lint
+      - id: format
+        name: Code Quality & Formatting Check (Prettier)
+        entry: npm run format:check
         language: system
         pass_filenames: false
         stages: [pre-commit]
 
-      - id: task-check
-        name: Full Verification Pipeline & Visual Snapshots (Taskfile)
-        entry: task check
+      - id: lint
+        name: Code Quality & Linting (ESLint)
+        entry: npm run lint
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: typecheck
+        name: TypeScript Type Checking (tsc)
+        entry: npm run typecheck
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: knip
+        name: Dead Code & Dependency Analysis (knip)
+        entry: npm run knip
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: build-check
+        name: Production Bundle Synchronization Check
+        entry: npm run build:check
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: test
+        name: Automated Test Suite
+        entry: npm test
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: snapshots-check
+        name: Visual Snapshot Baseline Check
+        entry: npm run snapshots:check
         language: system
         pass_filenames: false
         stages: [pre-push]

@@ -8,9 +8,7 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronLeft,
-  ChevronRight,
-  Flame,
-  Snowflake
+  ChevronRight
 } from "lucide-react";
 import { useCrossLeagueStore, useActiveRecords } from "../../state/useCrossLeagueStore.js";
 import { getAvatarUrl } from "../../api/sleeper.js";
@@ -58,7 +56,7 @@ export const LeaderboardTab: React.FC = () => {
       }));
 
       // Filter by tier and search query
-      let filtered = masterWithRank.filter(item => {
+      const filtered = masterWithRank.filter(item => {
         const pts = item.points || 0;
         if (isSeason) {
           if (tierFilter === "BOOM" && pts < 130) return false;
@@ -154,10 +152,10 @@ export const LeaderboardTab: React.FC = () => {
   };
 
   return (
-    <div id="viewLeaderboard" className="space-y-4 w-full">
+    <div id="viewLeaderboard" className="w-full space-y-4">
       {/* Advanced Filter & Search Deck */}
-      <div className="glass-card rounded-2xl p-3.5 sm:p-5 border border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 w-full">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto flex-1">
+      <div className="glass-card flex w-full flex-col items-stretch justify-between gap-3 rounded-2xl border border-slate-800 p-3.5 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+        <div className="flex w-full flex-1 flex-col items-stretch gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
           {/* Search */}
           <div className="relative flex-1 sm:w-80">
             <input
@@ -166,9 +164,9 @@ export const LeaderboardTab: React.FC = () => {
               placeholder="Search manager, squad, league..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
+              className="w-full rounded-xl border border-slate-700/80 bg-slate-950/90 py-2.5 pr-4 pl-10 text-xs font-medium text-white placeholder-slate-500 focus:border-transparent focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:text-sm"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+            <Search className="absolute top-3 left-3.5 h-4 w-4 text-slate-500" />
           </div>
 
           {/* Score Tier Filter */}
@@ -176,7 +174,7 @@ export const LeaderboardTab: React.FC = () => {
             id="scoreTierSelect"
             value={tierFilter}
             onChange={e => setTierFilter(e.target.value)}
-            className="bg-slate-950/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold cursor-pointer"
+            className="cursor-pointer rounded-xl border border-slate-700/80 bg-slate-950/90 px-3.5 py-2.5 text-xs font-semibold text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:text-sm"
           >
             {isSeason ? (
               <>
@@ -198,8 +196,8 @@ export const LeaderboardTab: React.FC = () => {
       </div>
 
       {/* Master Power Board Table */}
-      <div className="glass-card rounded-2xl p-4 sm:p-6 border border-slate-800 space-y-4 w-full">
-        <div className="flex items-center justify-between text-xs sm:text-sm text-slate-400 px-1">
+      <div className="glass-card w-full space-y-4 rounded-2xl border border-slate-800 p-4 sm:p-6">
+        <div className="flex items-center justify-between px-1 text-xs text-slate-400 sm:text-sm">
           <span id="rowCount">
             {records.length === 0
               ? "Showing 0 squads"
@@ -208,11 +206,11 @@ export const LeaderboardTab: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-slate-800">
-          <table className="w-full text-left border-collapse" id="mainTable">
-            <thead className="bg-slate-900/90 text-slate-400 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider border-b border-slate-800 select-none">
+          <table className="w-full border-collapse text-left" id="mainTable">
+            <thead className="border-b border-slate-800 bg-slate-900/90 text-[11px] font-black tracking-wider text-slate-400 uppercase select-none sm:text-xs md:text-sm">
               <tr>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Rank")}
                   title="Sort by Rank"
                 >
@@ -224,16 +222,16 @@ export const LeaderboardTab: React.FC = () => {
                     >
                       {sortColumn === "Rank" ? (
                         sortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Points")}
                   title="Sort by Points"
                 >
@@ -245,16 +243,16 @@ export const LeaderboardTab: React.FC = () => {
                     >
                       {sortColumn === "Points" ? (
                         sortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Manager")}
                   title="Sort by Manager"
                 >
@@ -266,16 +264,16 @@ export const LeaderboardTab: React.FC = () => {
                     >
                       {sortColumn === "Manager" ? (
                         sortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Team")}
                   title="Sort by Squad"
                 >
@@ -287,16 +285,16 @@ export const LeaderboardTab: React.FC = () => {
                     >
                       {sortColumn === "Team" ? (
                         sortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("League")}
                   title="Sort by League"
                 >
@@ -308,16 +306,16 @@ export const LeaderboardTab: React.FC = () => {
                     >
                       {sortColumn === "League" ? (
                         sortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-center transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Record")}
                   title="Sort by Matchup / Win %"
                 >
@@ -329,16 +327,16 @@ export const LeaderboardTab: React.FC = () => {
                     >
                       {sortColumn === "Record" ? (
                         sortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-center transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => handleSort("Efficiency")}
                   title="Sort by Lineup Efficiency"
                 >
@@ -350,15 +348,15 @@ export const LeaderboardTab: React.FC = () => {
                     >
                       {sortColumn === "Efficiency" ? (
                         sortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
-                <th className="py-2.5 sm:py-3.5 px-1.5 sm:px-3 w-10 sm:w-12 text-center" />
+                <th className="w-10 px-1.5 py-2.5 text-center sm:w-12 sm:px-3 sm:py-3.5" />
               </tr>
             </thead>
             <tbody
@@ -371,32 +369,32 @@ export const LeaderboardTab: React.FC = () => {
                 const leagueTitle = (r as any).league || r.leagueName || "League";
 
                 let rankBadge = (
-                  <span className="font-black text-slate-400 font-mono text-xs sm:text-base">
+                  <span className="font-mono text-xs font-black text-slate-400 sm:text-base">
                     #{r.rank}
                   </span>
                 );
                 if (r.rank === 1) {
                   rankBadge = (
-                    <span className="inline-flex items-center gap-1 font-black text-amber-300 text-xs sm:text-base">
-                      <Crown className="w-4 h-4 text-amber-300" /> #1
+                    <span className="inline-flex items-center gap-1 text-xs font-black text-amber-300 sm:text-base">
+                      <Crown className="h-4 w-4 text-amber-300" /> #1
                     </span>
                   );
                 } else if (r.rank === 2) {
                   rankBadge = (
-                    <span className="inline-flex items-center gap-1 font-black text-slate-200 text-xs sm:text-base">
-                      <Medal className="w-4 h-4 text-slate-200" /> #2
+                    <span className="inline-flex items-center gap-1 text-xs font-black text-slate-200 sm:text-base">
+                      <Medal className="h-4 w-4 text-slate-200" /> #2
                     </span>
                   );
                 } else if (r.rank === 3) {
                   rankBadge = (
-                    <span className="inline-flex items-center gap-1 font-black text-amber-500 text-xs sm:text-base">
-                      <Medal className="w-4 h-4 text-amber-500" /> #3
+                    <span className="inline-flex items-center gap-1 text-xs font-black text-amber-500 sm:text-base">
+                      <Medal className="h-4 w-4 text-amber-500" /> #3
                     </span>
                   );
                 }
 
                 // Matchup Result Pill
-                let matchupPill = <span className="text-slate-600 text-[10px] sm:text-xs">-</span>;
+                let matchupPill = <span className="text-[10px] text-slate-600 sm:text-xs">-</span>;
                 if (isSeason) {
                   const winPct = r.winPct || 0;
                   const winClass =
@@ -409,11 +407,11 @@ export const LeaderboardTab: React.FC = () => {
                   matchupPill = (
                     <div className="text-center">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-mono font-black ${winClass}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[10px] font-black sm:px-3 sm:py-1 sm:text-xs ${winClass}`}
                       >
                         {r.wins || 0}W - {r.losses || 0}L{(r.ties || 0) > 0 ? ` - ${r.ties}T` : ""}
                       </span>
-                      <div className="text-[10px] sm:text-xs text-slate-400 font-mono mt-0.5">
+                      <div className="mt-0.5 font-mono text-[10px] text-slate-400 sm:text-xs">
                         {winPct}% Win
                       </div>
                     </div>
@@ -422,12 +420,12 @@ export const LeaderboardTab: React.FC = () => {
                   if (r.outcome === "win") {
                     matchupPill = (
                       <div className="text-center">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" /> W (+
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/20 px-2 py-0.5 text-[10px] font-black text-emerald-300 sm:px-2.5 sm:py-1 sm:text-xs">
+                          <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" /> W (+
                           {Math.abs(r.margin || 0).toFixed(1)})
                         </span>
                         <div
-                          className="text-[10px] sm:text-xs text-slate-400 truncate max-w-[110px] sm:max-w-[130px] mt-0.5 font-medium mx-auto"
+                          className="mx-auto mt-0.5 max-w-[110px] truncate text-[10px] font-medium text-slate-400 sm:max-w-[130px] sm:text-xs"
                           title={`vs ${r.opponentName || "Opponent"}`}
                         >
                           vs {r.opponentName || "Opp"}
@@ -437,12 +435,12 @@ export const LeaderboardTab: React.FC = () => {
                   } else if (r.outcome === "loss") {
                     matchupPill = (
                       <div className="text-center">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                          <span className="w-2 h-2 rounded-full bg-rose-400 inline-block" /> L (-
+                        <span className="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/20 px-2 py-0.5 text-[10px] font-black text-rose-300 sm:px-2.5 sm:py-1 sm:text-xs">
+                          <span className="inline-block h-2 w-2 rounded-full bg-rose-400" /> L (-
                           {Math.abs(r.margin || 0).toFixed(1)})
                         </span>
                         <div
-                          className="text-[10px] sm:text-xs text-slate-400 truncate max-w-[110px] sm:max-w-[130px] mt-0.5 font-medium mx-auto"
+                          className="mx-auto mt-0.5 max-w-[110px] truncate text-[10px] font-medium text-slate-400 sm:max-w-[130px] sm:text-xs"
                           title={`vs ${r.opponentName || "Opponent"}`}
                         >
                           vs {r.opponentName || "Opp"}
@@ -452,8 +450,8 @@ export const LeaderboardTab: React.FC = () => {
                   } else if (r.outcome === "tie") {
                     matchupPill = (
                       <div className="text-center">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-slate-800 text-slate-300 border border-slate-700">
-                          <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" /> TIE
+                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] font-black text-slate-300 sm:px-2.5 sm:py-1 sm:text-xs">
+                          <span className="inline-block h-2 w-2 rounded-full bg-slate-400" /> TIE
                         </span>
                       </div>
                     );
@@ -461,12 +459,12 @@ export const LeaderboardTab: React.FC = () => {
                     matchupPill = (
                       <div className="text-center">
                         <span
-                          className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-slate-800/80 text-slate-400 border border-slate-700/60 truncate max-w-[110px] sm:max-w-[130px] mx-auto"
+                          className="mx-auto inline-flex max-w-[110px] items-center gap-1 truncate rounded-full border border-slate-700/60 bg-slate-800/80 px-2 py-0.5 text-[10px] font-medium text-slate-400 sm:max-w-[130px] sm:px-2.5 sm:py-1 sm:text-xs"
                           title={`vs ${r.opponentName || "Opponent"}`}
                         >
                           vs {r.opponentName || "Opp"}
                         </span>
-                        <div className="text-[10px] sm:text-xs text-slate-500 font-mono mt-0.5">
+                        <div className="mt-0.5 font-mono text-[10px] text-slate-500 sm:text-xs">
                           Upcoming
                         </div>
                       </div>
@@ -482,65 +480,65 @@ export const LeaderboardTab: React.FC = () => {
                 return (
                   <React.Fragment key={r.id}>
                     <tr className="transition-colors hover:bg-slate-800/60">
-                      <td className="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">{rankBadge}</td>
+                      <td className="px-2 py-2.5 whitespace-nowrap sm:px-4 sm:py-4">{rankBadge}</td>
 
-                      <td className="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">
+                      <td className="px-2 py-2.5 whitespace-nowrap sm:px-4 sm:py-4">
                         <div className="space-y-0.5 sm:space-y-1">
                           <div
-                            className={`font-mono text-sm sm:text-lg font-black ${
+                            className={`font-mono text-sm font-black sm:text-lg ${
                               r.rank <= 3 ? "text-emerald-400" : "text-white"
                             }`}
                           >
                             {(r.points || 0).toFixed(2)}{" "}
-                            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">
+                            <span className="text-[10px] font-semibold text-slate-400 sm:text-xs">
                               {isSeason ? "ppg" : "pts"}
                             </span>
                           </div>
-                          <div className="w-24 sm:w-36 bg-slate-800/90 rounded-full h-1 sm:h-1.5 overflow-hidden">
+                          <div className="h-1 w-24 overflow-hidden rounded-full bg-slate-800/90 sm:h-1.5 sm:w-36">
                             <div
-                              className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full"
+                              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400"
                               style={{ width: `${r.percentOfMax}%` }}
                             />
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap">
+                      <td className="px-2 py-2.5 whitespace-nowrap sm:px-4 sm:py-4">
                         <div className="flex items-center gap-2 sm:gap-3">
                           {avatarUrl && (
                             <img
                               src={avatarUrl}
-                              className="w-7 h-7 sm:w-9 sm:h-9 rounded-full object-cover border border-slate-700 flex-shrink-0"
+                              className="h-7 w-7 flex-shrink-0 rounded-full border border-slate-700 object-cover sm:h-9 sm:w-9"
                               alt=""
                               onError={e => ((e.target as HTMLElement).style.display = "none")}
                             />
                           )}
                           <div className="min-w-0">
-                            <span className="font-black text-xs sm:text-base text-slate-100 truncate block">
+                            <span className="block truncate text-xs font-black text-slate-100 sm:text-base">
                               {r.manager}
                             </span>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-2.5 sm:py-4 px-2 sm:px-4 whitespace-nowrap text-[11px] sm:text-sm text-slate-300 font-medium truncate max-w-[140px] sm:max-w-[180px]">
+                      <td className="max-w-[140px] truncate px-2 py-2.5 text-[11px] font-medium whitespace-nowrap text-slate-300 sm:max-w-[180px] sm:px-4 sm:py-4 sm:text-sm">
                         {r.teamName}
                       </td>
 
-                      <td className="py-2.5 sm:py-4 px-2 sm:px-4 text-slate-300 font-medium">
-                        <div className="text-[11px] sm:text-sm font-bold text-slate-200 break-words leading-snug max-w-[200px] sm:max-w-[260px]">
+                      <td className="px-2 py-2.5 font-medium text-slate-300 sm:px-4 sm:py-4">
+                        <div className="max-w-[200px] text-[11px] leading-snug font-bold break-words text-slate-200 sm:max-w-[260px] sm:text-sm">
                           <span>{leagueTitle}</span>
                         </div>
                       </td>
 
-                      <td className="py-2.5 sm:py-4 px-2 sm:px-4 text-center whitespace-nowrap">
+                      <td className="px-2 py-2.5 text-center whitespace-nowrap sm:px-4 sm:py-4">
                         {matchupPill}
                       </td>
 
-                      <td className="py-2.5 sm:py-4 px-2 sm:px-4 text-center whitespace-nowrap">
+                      <td className="px-2 py-2.5 text-center whitespace-nowrap sm:px-4 sm:py-4">
                         <div className="text-center">
                           <span
-                            className={`text-xs sm:text-sm font-mono font-black ${
+                            className={`font-mono text-xs font-black sm:text-sm ${
                               effVal >= 90
                                 ? "text-emerald-400"
                                 : effVal >= 75
@@ -550,66 +548,66 @@ export const LeaderboardTab: React.FC = () => {
                           >
                             {effVal}%
                           </span>
-                          <div className="text-[10px] sm:text-xs text-slate-400 font-medium">
+                          <div className="text-[10px] font-medium text-slate-400 sm:text-xs">
                             {benchPtsVal.toFixed(1)} benched
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-2.5 sm:py-4 px-1.5 sm:px-3 text-center whitespace-nowrap">
+                      <td className="px-1.5 py-2.5 text-center whitespace-nowrap sm:px-3 sm:py-4">
                         <button
                           type="button"
                           onClick={() => toggleRowExpand(r.id)}
-                          className="p-1.5 sm:p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition text-[10px] sm:text-xs font-mono font-bold border border-slate-800 cursor-pointer flex items-center justify-center mx-auto"
+                          className="mx-auto flex cursor-pointer items-center justify-center rounded-lg border border-slate-800 bg-slate-900 p-1.5 font-mono text-[10px] font-bold text-slate-400 transition hover:bg-slate-800 hover:text-white sm:p-2 sm:text-xs"
                           title="Toggle Details"
                         >
                           {isExpanded ? (
-                            <ChevronUp className="w-3.5 h-3.5" />
+                            <ChevronUp className="h-3.5 w-3.5" />
                           ) : (
-                            <ChevronDown className="w-3.5 h-3.5" />
+                            <ChevronDown className="h-3.5 w-3.5" />
                           )}
                         </button>
                       </td>
                     </tr>
 
                     {isExpanded && (
-                      <tr className="bg-slate-950/90 border-b border-slate-800">
+                      <tr className="border-b border-slate-800 bg-slate-950/90">
                         <td colSpan={8} className="p-5">
                           {isSeason ? (
-                            <div className="glass-card rounded-xl p-5 border border-slate-800/80 space-y-3.5">
-                              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 flex-wrap gap-2">
-                                <div className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                                  <TrendingUp className="w-4 h-4 text-cyan-400" />
+                            <div className="glass-card space-y-3.5 rounded-xl border border-slate-800/80 p-5">
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                                <div className="flex items-center gap-2 text-xs font-black tracking-wider text-slate-200 uppercase sm:text-sm">
+                                  <TrendingUp className="h-4 w-4 text-cyan-400" />
                                   <span>Season Consistency & Breakdown</span>
                                 </div>
-                                <div className="text-xs sm:text-sm text-slate-400 font-semibold">
+                                <div className="text-xs font-semibold text-slate-400 sm:text-sm">
                                   Season High:{" "}
-                                  <span className="font-black text-emerald-400 font-mono">
+                                  <span className="font-mono font-black text-emerald-400">
                                     {(r.highScore || 0).toFixed(2)} pts
                                   </span>{" "}
                                   • Season Low:{" "}
-                                  <span className="font-black text-rose-400 font-mono">
+                                  <span className="font-mono font-black text-rose-400">
                                     {(r.lowScore || 0).toFixed(2)} pts
                                   </span>{" "}
                                   • Consistency (Std Dev):{" "}
-                                  <span className="font-black text-cyan-300 font-mono">
+                                  <span className="font-mono font-black text-cyan-300">
                                     ±{r.stdDev || 0}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="text-xs sm:text-sm text-slate-300">
+                              <div className="text-xs text-slate-300 sm:text-sm">
                                 <span className="font-bold text-slate-200">
                                   Weekly Score Progression:
                                 </span>
-                                <div className="flex flex-wrap gap-2 mt-2">
+                                <div className="mt-2 flex flex-wrap gap-2">
                                   {(r.weeklyScores || []).map((pt: any, idx: number) => (
                                     <span
                                       key={idx}
-                                      className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 font-mono text-xs sm:text-sm text-slate-200"
+                                      className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 font-mono text-xs text-slate-200 sm:text-sm"
                                     >
                                       W{idx + 1}:{" "}
-                                      <span className="text-emerald-400 font-black">
+                                      <span className="font-black text-emerald-400">
                                         {parseFloat(pt || 0).toFixed(1)}
                                       </span>
                                     </span>
@@ -618,45 +616,45 @@ export const LeaderboardTab: React.FC = () => {
                               </div>
                             </div>
                           ) : (
-                            <div className="glass-card rounded-xl p-5 border border-slate-800/80 space-y-3.5">
-                              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 flex-wrap gap-2">
-                                <div className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                                  <Zap className="w-4 h-4 text-amber-400" />
+                            <div className="glass-card space-y-3.5 rounded-xl border border-slate-800/80 p-5">
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                                <div className="flex items-center gap-2 text-xs font-black tracking-wider text-slate-200 uppercase sm:text-sm">
+                                  <Zap className="h-4 w-4 text-amber-400" />
                                   <span>Starting Lineup vs Bench</span>
-                                  <span className="text-slate-400 font-normal">
+                                  <span className="font-normal text-slate-400">
                                     | Matchup #{r.matchupId || "N/A"}
                                   </span>
                                 </div>
-                                <div className="text-xs sm:text-sm text-slate-400 font-semibold">
+                                <div className="text-xs font-semibold text-slate-400 sm:text-sm">
                                   Starters:{" "}
-                                  <span className="font-black text-emerald-400 font-mono">
+                                  <span className="font-mono font-black text-emerald-400">
                                     {(r.startersTotal || 0).toFixed(2)} pts
                                   </span>{" "}
                                   • Bench:{" "}
-                                  <span className="font-black text-slate-300 font-mono">
+                                  <span className="font-mono font-black text-slate-300">
                                     {(r.benchPoints || 0).toFixed(2)} pts
                                   </span>{" "}
                                   • Optimal Potential:{" "}
-                                  <span className="font-black text-amber-300 font-mono">
+                                  <span className="font-mono font-black text-amber-300">
                                     {(r.optimalPoints || 0).toFixed(2)} pts
                                   </span>{" "}
                                   ({r.efficiency || 100}% efficiency)
                                 </div>
                               </div>
 
-                              <div className="text-xs sm:text-sm text-slate-300">
+                              <div className="text-xs text-slate-300 sm:text-sm">
                                 <span className="font-bold text-slate-200">
                                   Starter Point Breakdown:
                                 </span>
-                                <div className="flex flex-wrap gap-2 mt-2">
+                                <div className="mt-2 flex flex-wrap gap-2">
                                   {r.startersPoints && r.startersPoints.length > 0 ? (
                                     r.startersPoints.map((pt: any, idx: number) => (
                                       <span
                                         key={idx}
-                                        className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 font-mono text-xs sm:text-sm text-slate-200"
+                                        className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 font-mono text-xs text-slate-200 sm:text-sm"
                                       >
                                         S{idx + 1}:{" "}
-                                        <span className="text-emerald-400 font-black">
+                                        <span className="font-black text-emerald-400">
                                           {parseFloat(pt || 0).toFixed(1)}
                                         </span>
                                       </span>
@@ -682,8 +680,8 @@ export const LeaderboardTab: React.FC = () => {
 
         {/* Empty search state */}
         {rankedRecords.length === 0 && (
-          <div id="noResultsFound" className="py-12 text-center text-slate-400 space-y-2">
-            <Search className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+          <div id="noResultsFound" className="space-y-2 py-12 text-center text-slate-400">
+            <Search className="mx-auto mb-2 h-8 w-8 text-slate-500" />
             <div className="font-bold text-slate-200">
               {selectedLeagueIds.size === 0
                 ? "No leagues selected."
@@ -700,18 +698,18 @@ export const LeaderboardTab: React.FC = () => {
         {/* Pagination Footer for Main Board */}
         <div
           id="mainPaginationFooter"
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 text-xs sm:text-sm text-slate-400"
+          className="flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-3 text-xs text-slate-400 sm:flex-row sm:text-sm"
         >
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700/80">
-              <span className="text-slate-400 font-bold text-xs">Show:</span>
+            <div className="flex items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-1.5">
+              <span className="text-xs font-bold text-slate-400">Show:</span>
               <select
                 id="mainPageSizeSelect"
                 value={mainPageSize >= 10000 ? "all" : String(mainPageSize)}
                 onChange={e =>
                   setMainPageSize(e.target.value === "all" ? Infinity : Number(e.target.value))
                 }
-                className="bg-transparent text-white font-black text-xs focus:outline-none cursor-pointer"
+                className="cursor-pointer bg-transparent text-xs font-black text-white focus:outline-none"
               >
                 <option value="25" className="bg-slate-900 text-white">
                   25
@@ -727,7 +725,7 @@ export const LeaderboardTab: React.FC = () => {
                 </option>
               </select>
             </div>
-            <span id="mainPageInfoText" className="text-slate-400 font-medium">
+            <span id="mainPageInfoText" className="font-medium text-slate-400">
               {totalCount === 0
                 ? "Showing 0 of 0"
                 : `Showing ${startIdx}–${endIdx} of ${totalCount}`}
@@ -736,16 +734,16 @@ export const LeaderboardTab: React.FC = () => {
 
           <div
             id="mainPaginationControls"
-            className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end"
+            className="flex flex-wrap items-center justify-center gap-1 sm:justify-end sm:gap-1.5"
           >
             <button
               id="btnPrevMainPage"
               type="button"
               disabled={mainPage <= 1 || totalCount === 0}
               onClick={() => setMainPage(mainPage - 1)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+              className="flex cursor-pointer items-center gap-1 rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft className="h-3.5 w-3.5" />
               <span>Prev</span>
             </button>
             <div id="mainPageNumberButtons" className="flex items-center gap-1">
@@ -757,10 +755,10 @@ export const LeaderboardTab: React.FC = () => {
                     key={p}
                     type="button"
                     onClick={() => setMainPage(p)}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center ${
+                    className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-xl text-xs font-bold transition sm:h-8 sm:w-8 ${
                       isCurrent
-                        ? "bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/20"
-                        : "bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80"
+                        ? "bg-emerald-500 font-black text-slate-950 shadow-lg shadow-emerald-500/20"
+                        : "border border-slate-700/80 bg-slate-900 text-slate-300 hover:bg-slate-800"
                     }`}
                   >
                     {p}
@@ -773,10 +771,10 @@ export const LeaderboardTab: React.FC = () => {
               type="button"
               disabled={mainPage >= totalPages || totalCount === 0}
               onClick={() => setMainPage(mainPage + 1)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+              className="flex cursor-pointer items-center gap-1 rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
               <span>Next</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>

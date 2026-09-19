@@ -113,7 +113,7 @@ export const PlayersTab: React.FC = () => {
   const playerData = useMemo(() => {
     const q = playerSearch.toLowerCase().trim();
 
-    let filtered = (allPlayers || []).filter(p => {
+    const filtered = (allPlayers || []).filter(p => {
       const pos = p.pos || p.position;
 
       // 1. Position filter
@@ -197,17 +197,17 @@ export const PlayersTab: React.FC = () => {
   const { paginatedPlayers, totalPages, totalCount, startIdx, endIdx, rankByPlayerId } = playerData;
 
   return (
-    <div id="viewPlayers" className="space-y-6 w-full">
+    <div id="viewPlayers" className="w-full space-y-6">
       {/* Positional MVP Spotlight Cards */}
       <div>
-        <div className="flex items-center justify-between mb-3.5">
-          <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-400" /> Top Positional Performers
+        <div className="mb-3.5 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-base font-black tracking-wider text-white uppercase sm:text-lg">
+            <Sparkles className="h-5 w-5 text-amber-400" /> Top Positional Performers
           </h3>
         </div>
         <div
           id="positionalMvpDeck"
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 w-full"
+          className="grid w-full grid-cols-1 gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
         >
           {positionalMvps.map(slot => {
             const p = slot.player;
@@ -215,7 +215,7 @@ export const PlayersTab: React.FC = () => {
             return (
               <div
                 key={slot.pos}
-                className={`glass-card rounded-2xl p-4 flex flex-col justify-between border ${slot.border} bg-gradient-to-b ${slot.bg} transition hover:scale-[1.02] duration-200`}
+                className={`glass-card flex flex-col justify-between rounded-2xl border p-4 ${slot.border} bg-gradient-to-b ${slot.bg} transition duration-200 hover:scale-[1.02]`}
               >
                 {p && p.points > 0 ? (
                   <>
@@ -223,28 +223,28 @@ export const PlayersTab: React.FC = () => {
                       <div className="card-info-wrapper group">
                         <button
                           type="button"
-                          className={`card-info-trigger text-xs font-black uppercase tracking-wider ${slot.color} hover:underline flex items-center gap-1 cursor-pointer`}
+                          className={`card-info-trigger text-xs font-black tracking-wider uppercase ${slot.color} flex cursor-pointer items-center gap-1 hover:underline`}
                           aria-label={`More info about ${slot.label}`}
                           aria-expanded="false"
                         >
                           <span className="flex items-center gap-1">
-                            <SlotIcon className="w-3.5 h-3.5" />
+                            <SlotIcon className="h-3.5 w-3.5" />
                             <span>{slot.label}</span>
                           </span>
-                          <Info className="w-3 h-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                          <Info className="h-3 w-3 opacity-70 transition-opacity group-hover:opacity-100" />
                         </button>
                         <div className="card-info-popover" role="tooltip">
-                          <div className="font-bold text-white text-xs mb-1 flex items-center gap-1">
-                            <SlotIcon className="w-3.5 h-3.5" />
+                          <div className="mb-1 flex items-center gap-1 text-xs font-bold text-white">
+                            <SlotIcon className="h-3.5 w-3.5" />
                             <span>{slot.label}</span>
                           </div>
-                          <div className="text-slate-300 text-[11px] leading-relaxed font-normal">
+                          <div className="text-[11px] leading-relaxed font-normal text-slate-300">
                             Highest scoring {slot.pos} across all participating leagues for this
                             matchup period.
                           </div>
                         </div>
                       </div>
-                      <span className="text-xs font-mono font-bold text-slate-400">
+                      <span className="font-mono text-xs font-bold text-slate-400">
                         {p.team || "FA"}
                       </span>
                     </div>
@@ -253,41 +253,41 @@ export const PlayersTab: React.FC = () => {
                       {p.headshotUrl && (
                         <img
                           src={p.headshotUrl}
-                          className="w-10 h-10 rounded-full object-cover border border-slate-700 bg-slate-800 flex-shrink-0"
+                          className="h-10 w-10 flex-shrink-0 rounded-full border border-slate-700 bg-slate-800 object-cover"
                           alt=""
                           onError={e => ((e.target as HTMLElement).style.display = "none")}
                         />
                       )}
                       <div className="min-w-0 flex-1">
-                        <div className="font-black text-sm text-white truncate" title={p.name}>
+                        <div className="truncate text-sm font-black text-white" title={p.name}>
                           {p.name}
                         </div>
-                        <div className="text-[11px] text-slate-400 font-semibold truncate">
+                        <div className="truncate text-[11px] font-semibold text-slate-400">
                           {p.pos || p.position} • {p.startRate || 100}% Started
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-white/10 flex items-end justify-between">
+                    <div className="flex items-end justify-between border-t border-white/10 pt-2">
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-slate-400">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase">
                           {isSeason ? "Avg PPG" : "Points"}
                         </div>
-                        <div className={`text-xl font-mono font-black ${slot.color}`}>
+                        <div className={`font-mono text-xl font-black ${slot.color}`}>
                           {(p.points || 0).toFixed(2)}
                         </div>
                       </div>
                       {p.owners && p.owners[0] && (
                         <div
-                          className="text-[10px] text-slate-400 text-right truncate max-w-[120px]"
+                          className="max-w-[120px] truncate text-right text-[10px] text-slate-400"
                           title={`Rostered by ${p.owners[0].manager} in ${p.owners[0].league || p.owners[0].leagueName}`}
                         >
-                          <span className="text-slate-500 block">Top Owner</span>
-                          <span className="font-bold text-slate-300 truncate block">
+                          <span className="block text-slate-500">Top Owner</span>
+                          <span className="block truncate font-bold text-slate-300">
                             {p.owners[0].manager}
                           </span>
-                          <span className="text-slate-400 truncate flex items-center justify-end gap-1 text-[10px]">
-                            <Trophy className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                          <span className="flex items-center justify-end gap-1 truncate text-[10px] text-slate-400">
+                            <Trophy className="h-3 w-3 flex-shrink-0 text-amber-400" />
                             <span className="truncate">
                               {p.owners[0].league || p.owners[0].leagueName}
                             </span>
@@ -300,9 +300,9 @@ export const PlayersTab: React.FC = () => {
                   <>
                     <div className="flex items-center justify-between border-b border-white/10 pb-2">
                       <span
-                        className={`text-xs font-black uppercase tracking-wider ${slot.color} flex items-center gap-1`}
+                        className={`text-xs font-black tracking-wider uppercase ${slot.color} flex items-center gap-1`}
                       >
-                        <SlotIcon className="w-3.5 h-3.5" />
+                        <SlotIcon className="h-3.5 w-3.5" />
                         <span>{slot.label}</span>
                       </span>
                     </div>
@@ -318,11 +318,11 @@ export const PlayersTab: React.FC = () => {
       </div>
 
       {/* Player Leaderboard Section */}
-      <div className="glass-card rounded-2xl p-4 sm:p-6 border border-slate-800 space-y-5 w-full">
+      <div className="glass-card w-full space-y-5 rounded-2xl border border-slate-800 p-4 sm:p-6">
         {/* Filter & Search Toolbar */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div className="flex flex-col items-stretch justify-between gap-4 border-b border-slate-800/80 pb-4 lg:flex-row lg:items-center">
           {/* Position Filter Pills */}
-          <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar touch-scroll max-w-full">
+          <div className="no-scrollbar touch-scroll flex max-w-full items-center gap-1 overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/90 p-1 sm:gap-1.5">
             {["ALL", "QB", "RB", "WR", "TE", "FLEX", "K", "DEF"].map(pos => {
               const active = playerPositionFilter === pos;
               return (
@@ -331,9 +331,9 @@ export const PlayersTab: React.FC = () => {
                   type="button"
                   id={`posFilter${pos}`}
                   onClick={() => setPlayerPositionFilter(pos)}
-                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black transition cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                  className={`flex-shrink-0 cursor-pointer rounded-lg px-2.5 py-1.5 text-xs font-black whitespace-nowrap transition sm:px-3 ${
                     active
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      ? "border border-emerald-500/30 bg-emerald-500/20 text-emerald-300"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -344,24 +344,24 @@ export const PlayersTab: React.FC = () => {
           </div>
 
           {/* Search and Roster Filter */}
-          <div className="flex flex-wrap items-center gap-3 flex-1 lg:justify-end">
-            <div className="relative min-w-[200px] flex-1 sm:flex-initial sm:w-64">
+          <div className="flex flex-1 flex-wrap items-center gap-3 lg:justify-end">
+            <div className="relative min-w-[200px] flex-1 sm:w-64 sm:flex-initial">
               <input
                 type="text"
                 id="playerSearchInput"
                 placeholder="Search player, team..."
                 value={playerSearch}
                 onChange={e => setPlayerSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                className="w-full rounded-xl border border-slate-700/80 bg-slate-900/90 py-2 pr-3 pl-9 text-sm text-slate-100 placeholder-slate-500 transition focus:border-emerald-500 focus:outline-none"
               />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+              <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-slate-400" />
             </div>
 
             <select
               id="playerStatusFilter"
               value={playerStatusFilter}
               onChange={e => setPlayerStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-xs sm:text-sm font-semibold text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer"
+              className="cursor-pointer rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-xs font-semibold text-slate-200 focus:border-emerald-500 focus:outline-none sm:text-sm"
             >
               <option value="ALL" className="bg-slate-900 text-white">
                 All Players
@@ -377,7 +377,7 @@ export const PlayersTab: React.FC = () => {
         </div>
 
         {/* Player Table Count & Meta */}
-        <div className="flex items-center justify-between text-xs sm:text-sm text-slate-400 px-1">
+        <div className="flex items-center justify-between px-1 text-xs text-slate-400 sm:text-sm">
           <span id="playerRowCount">
             Showing {totalCount} of {allPlayers.length} players across selected leagues
           </span>
@@ -388,20 +388,20 @@ export const PlayersTab: React.FC = () => {
 
         {/* Player Leaderboard Table */}
         <div className="overflow-x-auto rounded-xl border border-slate-800">
-          <table className="w-full text-left border-collapse" id="playerTable">
-            <thead className="bg-slate-900/90 text-slate-400 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider border-b border-slate-800 select-none">
+          <table className="w-full border-collapse text-left" id="playerTable">
+            <thead className="border-b border-slate-800 bg-slate-900/90 text-[11px] font-black tracking-wider text-slate-400 uppercase select-none sm:text-xs md:text-sm">
               <tr>
-                <th className="py-2.5 sm:py-3.5 px-2 sm:px-4 w-10 sm:w-12 text-center">#</th>
+                <th className="w-10 px-2 py-2.5 text-center sm:w-12 sm:px-4 sm:py-3.5">#</th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   onClick={() => setPlayerSortColumn("name")}
                 >
                   Player
                 </th>
-                <th className="py-2.5 sm:py-3.5 px-1.5 sm:px-3 text-center">Pos</th>
-                <th className="py-2.5 sm:py-3.5 px-1.5 sm:px-3 text-center">Team</th>
+                <th className="px-1.5 py-2.5 text-center sm:px-3 sm:py-3.5">Pos</th>
+                <th className="px-1.5 py-2.5 text-center sm:px-3 sm:py-3.5">Team</th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   id="thPlayerPoints"
                   onClick={() => setPlayerSortColumn("points")}
                 >
@@ -413,23 +413,23 @@ export const PlayersTab: React.FC = () => {
                     >
                       {playerSortColumn === "points" ? (
                         playerSortAsc ? (
-                          <ChevronUp className="w-3 h-3 inline" />
+                          <ChevronUp className="inline h-3 w-3" />
                         ) : (
-                          <ChevronDown className="w-3 h-3 inline" />
+                          <ChevronDown className="inline h-3 w-3" />
                         )
                       ) : null}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center cursor-pointer hover:text-emerald-400 transition"
+                  className="cursor-pointer px-2 py-2.5 text-center transition hover:text-emerald-400 sm:px-4 sm:py-3.5"
                   id="thPlayerRostered"
                   onClick={() => setPlayerSortColumn("rostered")}
                 >
                   Start Rate
                 </th>
-                <th className="py-2.5 sm:py-3.5 px-2 sm:px-4">Managers &amp; Exposure</th>
-                <th className="py-2.5 sm:py-3.5 px-1.5 sm:px-3 w-10 sm:w-12 text-center" />
+                <th className="px-2 py-2.5 sm:px-4 sm:py-3.5">Managers &amp; Exposure</th>
+                <th className="w-10 px-1.5 py-2.5 text-center sm:w-12 sm:px-3 sm:py-3.5" />
               </tr>
             </thead>
             <tbody
@@ -445,26 +445,26 @@ export const PlayersTab: React.FC = () => {
                 const remainingOwners = owners.length - visibleOwners.length;
                 const startTotal = (p.startedCount || 0) + (p.benchedCount || 0);
                 let rankBadge = (
-                  <span className="font-black text-slate-400 font-mono text-xs sm:text-base">
+                  <span className="font-mono text-xs font-black text-slate-400 sm:text-base">
                     #{rank}
                   </span>
                 );
                 if (rank === 1) {
                   rankBadge = (
-                    <span className="inline-flex items-center gap-1 font-black text-amber-300 text-xs sm:text-base">
-                      <Crown className="w-4 h-4 text-amber-300" /> #1
+                    <span className="inline-flex items-center gap-1 text-xs font-black text-amber-300 sm:text-base">
+                      <Crown className="h-4 w-4 text-amber-300" /> #1
                     </span>
                   );
                 } else if (rank === 2) {
                   rankBadge = (
-                    <span className="inline-flex items-center gap-1 font-black text-slate-200 text-xs sm:text-base">
-                      <Medal className="w-4 h-4 text-slate-200" /> #2
+                    <span className="inline-flex items-center gap-1 text-xs font-black text-slate-200 sm:text-base">
+                      <Medal className="h-4 w-4 text-slate-200" /> #2
                     </span>
                   );
                 } else if (rank === 3) {
                   rankBadge = (
-                    <span className="inline-flex items-center gap-1 font-black text-amber-500 text-xs sm:text-base">
-                      <Medal className="w-4 h-4 text-amber-500" /> #3
+                    <span className="inline-flex items-center gap-1 text-xs font-black text-amber-500 sm:text-base">
+                      <Medal className="h-4 w-4 text-amber-500" /> #3
                     </span>
                   );
                 }
@@ -484,94 +484,94 @@ export const PlayersTab: React.FC = () => {
 
                 return (
                   <React.Fragment key={p.id}>
-                    <tr className="hover:bg-slate-800/60 transition">
-                      <td className="py-2.5 sm:py-4 px-2 sm:px-4 text-center">{rankBadge}</td>
+                    <tr className="transition hover:bg-slate-800/60">
+                      <td className="px-2 py-2.5 text-center sm:px-4 sm:py-4">{rankBadge}</td>
 
-                      <td className="py-2.5 sm:py-3.5 px-2 sm:px-4">
+                      <td className="px-2 py-2.5 sm:px-4 sm:py-3.5">
                         <div className="flex items-center gap-2.5">
                           {p.headshotUrl && (
                             <img
                               src={p.headshotUrl}
-                              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-slate-700 bg-slate-800 flex-shrink-0"
+                              className="h-8 w-8 flex-shrink-0 rounded-full border border-slate-700 bg-slate-800 object-cover sm:h-9 sm:w-9"
                               alt=""
                               onError={e => ((e.target as HTMLElement).style.display = "none")}
                             />
                           )}
                           <div className="min-w-0">
-                            <span className="font-black text-slate-100 text-xs sm:text-sm truncate block">
+                            <span className="block truncate text-xs font-black text-slate-100 sm:text-sm">
                               {p.name}
                             </span>
-                            <span className="text-[10px] sm:text-xs text-slate-400 font-semibold block">
+                            <span className="block text-[10px] font-semibold text-slate-400 sm:text-xs">
                               {p.team || "FA"} • {pos}
                             </span>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-2.5 sm:py-3.5 px-1.5 sm:px-3 text-center">
+                      <td className="px-1.5 py-2.5 text-center sm:px-3 sm:py-3.5">
                         <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase font-mono border ${posBadgeClass}`}
+                          className={`inline-block rounded-full border px-2 py-0.5 font-mono text-[10px] font-black uppercase ${posBadgeClass}`}
                         >
                           {pos}
                         </span>
                       </td>
 
-                      <td className="py-2.5 sm:py-3.5 px-1.5 sm:px-3 text-center font-mono font-bold text-slate-400 text-xs">
+                      <td className="px-1.5 py-2.5 text-center font-mono text-xs font-bold text-slate-400 sm:px-3 sm:py-3.5">
                         {p.team || "FA"}
                       </td>
 
-                      <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-left">
-                        <div className="font-mono text-sm sm:text-lg font-black text-emerald-400">
+                      <td className="px-2 py-2.5 text-left sm:px-4 sm:py-3.5">
+                        <div className="font-mono text-sm font-black text-emerald-400 sm:text-lg">
                           {(p.points || 0).toFixed(2)}{" "}
-                          <span className="text-[10px] sm:text-xs font-semibold text-slate-400">
+                          <span className="text-[10px] font-semibold text-slate-400 sm:text-xs">
                             {isSeason ? "ppg" : "pts"}
                           </span>
                         </div>
                       </td>
 
-                      <td className="py-2.5 sm:py-3.5 px-2 sm:px-4 text-center">
+                      <td className="px-2 py-2.5 text-center sm:px-4 sm:py-3.5">
                         <div className="inline-block text-left">
-                          <div className="text-xs font-mono font-bold text-slate-200">
+                          <div className="font-mono text-xs font-bold text-slate-200">
                             {p.startRate || 0}%{" "}
-                            <span className="text-slate-500 font-normal">
+                            <span className="font-normal text-slate-500">
                               ({p.startedCount || 0}/{startTotal})
                             </span>
                           </div>
-                          <div className="mt-1 w-20 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="mt-1 h-1.5 w-20 overflow-hidden rounded-full bg-slate-800">
                             <div
-                              className="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full"
+                              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400"
                               style={{ width: `${Math.min(100, Math.max(0, p.startRate || 0))}%` }}
                             />
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-2.5 sm:py-3.5 px-2 sm:px-4">
+                      <td className="px-2 py-2.5 sm:px-4 sm:py-3.5">
                         {owners.length > 0 ? (
-                          <div className="flex flex-wrap items-center gap-1.5 max-w-md">
+                          <div className="flex max-w-md flex-wrap items-center gap-1.5">
                             {visibleOwners.map((owner: any, ownerIndex: number) => {
                               const isStarter = owner.isStarter || owner.starts > 0;
                               return (
                                 <span
                                   key={`${owner.manager}-${ownerIndex}`}
-                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold border ${
+                                  className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-bold ${
                                     isStarter
-                                      ? "bg-emerald-950/80 text-emerald-300 border-emerald-500/30"
-                                      : "bg-slate-900 text-slate-300 border-slate-800"
+                                      ? "border-emerald-500/30 bg-emerald-950/80 text-emerald-300"
+                                      : "border-slate-800 bg-slate-900 text-slate-300"
                                   }`}
                                   title={`${owner.manager} • ${owner.league || owner.leagueName}`}
                                 >
                                   <span
-                                    className={`w-2.5 h-2.5 rounded-full ${
+                                    className={`h-2.5 w-2.5 rounded-full ${
                                       isStarter ? "bg-green-500" : "bg-slate-500"
                                     }`}
                                   />
-                                  <span className="truncate max-w-[110px]">{owner.manager}</span>
+                                  <span className="max-w-[110px] truncate">{owner.manager}</span>
                                 </span>
                               );
                             })}
                             {remainingOwners > 0 && (
-                              <span className="text-xs font-bold text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800">
+                              <span className="rounded-md border border-slate-800 bg-slate-900 px-2 py-0.5 text-xs font-bold text-slate-400">
                                 +{remainingOwners} more
                               </span>
                             )}
@@ -583,17 +583,17 @@ export const PlayersTab: React.FC = () => {
                         )}
                       </td>
 
-                      <td className="py-2.5 sm:py-3.5 px-1.5 sm:px-3 text-center whitespace-nowrap">
+                      <td className="px-1.5 py-2.5 text-center whitespace-nowrap sm:px-3 sm:py-3.5">
                         <button
                           type="button"
                           onClick={() => togglePlayerRowExpand(p.id)}
-                          className="p-1.5 sm:p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition text-[10px] sm:text-xs font-mono font-bold border border-slate-800 cursor-pointer flex items-center justify-center mx-auto"
+                          className="mx-auto flex cursor-pointer items-center justify-center rounded-lg border border-slate-800 bg-slate-900 p-1.5 font-mono text-[10px] font-bold text-slate-400 transition hover:bg-slate-800 hover:text-white sm:p-2 sm:text-xs"
                           title="Toggle Roster Exposure Breakdown"
                         >
                           {isExpanded ? (
-                            <ChevronUp className="w-3.5 h-3.5" />
+                            <ChevronUp className="h-3.5 w-3.5" />
                           ) : (
-                            <ChevronDown className="w-3.5 h-3.5" />
+                            <ChevronDown className="h-3.5 w-3.5" />
                           )}
                         </button>
                       </td>
@@ -601,46 +601,46 @@ export const PlayersTab: React.FC = () => {
 
                     {/* Expandable ownership details */}
                     {isExpanded && (
-                      <tr className="bg-slate-950/90 border-b border-slate-800">
+                      <tr className="border-b border-slate-800 bg-slate-950/90">
                         <td colSpan={7} className="p-4 sm:p-5">
-                          <div className="glass-card rounded-xl p-4 border border-slate-800/80 space-y-3">
+                          <div className="glass-card space-y-3 rounded-xl border border-slate-800/80 p-4">
                             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                              <span className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                                <ClipboardList className="w-4 h-4 text-slate-400" />
+                              <span className="flex items-center gap-1.5 text-xs font-black tracking-wider text-slate-300 uppercase">
+                                <ClipboardList className="h-4 w-4 text-slate-400" />
                                 <span>Ownership & Roster Status ({owners.length} Teams)</span>
                               </span>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
                               {owners.map((o: any, oIdx: number) => (
                                 <div
                                   key={oIdx}
-                                  className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-2"
+                                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-800 bg-slate-900/80 p-2.5"
                                 >
                                   <div className="min-w-0 flex-1">
-                                    <div className="text-xs font-bold text-slate-100 truncate">
+                                    <div className="truncate text-xs font-bold text-slate-100">
                                       {o.manager}
                                     </div>
-                                    <div className="text-[10px] text-slate-400 font-medium truncate flex items-center gap-1 mt-0.5">
-                                      <Trophy className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                                    <div className="mt-0.5 flex items-center gap-1 truncate text-[10px] font-medium text-slate-400">
+                                      <Trophy className="h-3 w-3 flex-shrink-0 text-amber-400" />
                                       <span className="truncate">{o.league || o.leagueName}</span>
                                     </div>
                                   </div>
                                   <span
-                                    className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold flex-shrink-0 flex items-center gap-1 ${
+                                    className={`flex flex-shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] font-bold ${
                                       o.isStarter
-                                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                        : "bg-slate-800 text-slate-400 border border-slate-700"
+                                        ? "border border-emerald-500/30 bg-emerald-500/20 text-emerald-300"
+                                        : "border border-slate-700 bg-slate-800 text-slate-400"
                                     }`}
                                   >
                                     {o.isStarter ? (
                                       <>
-                                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                        <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                                         <span>Started</span>
                                       </>
                                     ) : (
                                       <>
-                                        <Armchair className="w-3 h-3 text-slate-400" />
+                                        <Armchair className="h-3 w-3 text-slate-400" />
                                         <span>Benched</span>
                                       </>
                                     )}
@@ -662,18 +662,18 @@ export const PlayersTab: React.FC = () => {
         {/* Paginator */}
         <div
           id="playerPaginationFooter"
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 text-xs sm:text-sm text-slate-400"
+          className="flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-3 text-xs text-slate-400 sm:flex-row sm:text-sm"
         >
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700/80">
-              <span className="text-slate-400 font-bold text-xs">Show:</span>
+            <div className="flex items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-1.5">
+              <span className="text-xs font-bold text-slate-400">Show:</span>
               <select
                 id="playerPageSizeSelect"
                 value={playerPageSize >= 10000 ? "all" : String(playerPageSize)}
                 onChange={e =>
                   setPlayerPageSize(e.target.value === "all" ? Infinity : Number(e.target.value))
                 }
-                className="bg-transparent text-white font-black text-xs focus:outline-none cursor-pointer"
+                className="cursor-pointer bg-transparent text-xs font-black text-white focus:outline-none"
               >
                 <option value="25" className="bg-slate-900 text-white">
                   25
@@ -689,7 +689,7 @@ export const PlayersTab: React.FC = () => {
                 </option>
               </select>
             </div>
-            <span id="playerPageInfoText" className="text-slate-400 font-medium">
+            <span id="playerPageInfoText" className="font-medium text-slate-400">
               {totalCount === 0
                 ? "Showing 0 of 0"
                 : `Showing ${startIdx}–${endIdx} of ${totalCount}`}
@@ -698,16 +698,16 @@ export const PlayersTab: React.FC = () => {
 
           <div
             id="playerPaginationControls"
-            className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center sm:justify-end"
+            className="flex flex-wrap items-center justify-center gap-1 sm:justify-end sm:gap-1.5"
           >
             <button
               id="btnPrevPlayerPage"
               type="button"
               disabled={playerPage <= 1 || totalCount === 0}
               onClick={() => setPlayerPage(playerPage - 1)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+              className="flex cursor-pointer items-center gap-1 rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft className="h-3.5 w-3.5" />
               <span>Prev</span>
             </button>
 
@@ -720,10 +720,10 @@ export const PlayersTab: React.FC = () => {
                     key={p}
                     type="button"
                     onClick={() => setPlayerPage(p)}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center ${
+                    className={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-xl text-xs font-bold transition sm:h-8 sm:w-8 ${
                       isCurrent
-                        ? "bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/20"
-                        : "bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80"
+                        ? "bg-emerald-500 font-black text-slate-950 shadow-lg shadow-emerald-500/20"
+                        : "border border-slate-700/80 bg-slate-900 text-slate-300 hover:bg-slate-800"
                     }`}
                   >
                     {p}
@@ -737,10 +737,10 @@ export const PlayersTab: React.FC = () => {
               type="button"
               disabled={playerPage >= totalPages || totalCount === 0}
               onClick={() => setPlayerPage(playerPage + 1)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 hover:text-white border border-slate-700/80 transition font-bold flex items-center gap-1 cursor-pointer text-xs"
+              className="flex cursor-pointer items-center gap-1 rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             >
               <span>Next</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>

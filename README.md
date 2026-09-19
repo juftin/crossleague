@@ -62,7 +62,7 @@ Prefill and filter a report with URL parameters. `userId` and `week` override sa
 crossleague/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml        # GitHub Actions CI pipeline
+│       ├── ci.yaml       # GitHub Actions CI pipeline
 │       └── publish.yaml  # GitHub Pages deployment workflow
 ├── src/
 │   ├── css/
@@ -105,7 +105,6 @@ This project uses [Task](https://taskfile.dev/) and [`npm`](https://nodejs.org/)
 | `task lint`    | Run formatting check (Prettier) and code linting (ESLint)     | `npm run format:check && eslint .` |
 | `task fix`     | Auto-fix formatting and linting errors                        | `npm run format && eslint . --fix` |
 | `task build`   | Build minified distribution bundles in `dist/`                | `node scripts/build.js`            |
-| `task docs`    | Build site distribution package for GitHub Pages              | `npm run docs`                     |
 | `task check`   | Complete quality check: formatting, linting, tests, and build | `task lint && task test && ...`    |
 
 ### Running Tests

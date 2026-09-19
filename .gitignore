@@ -7,7 +7,7 @@ yarn-error.log*
 .env
 .env.local
 dist/
-site/
 coverage/
 .idea/
 .vscode/
+tests/.snapshot-tmp/
