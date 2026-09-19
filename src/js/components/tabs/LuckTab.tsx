@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useCrossLeagueStore, useActiveRecords } from "../../state/useCrossLeagueStore.js";
 import { getAvatarUrl } from "../../api/sleeper.js";
+import { useStickyTableHeader } from "../common/useStickyTableHeader.ts";
 import {
   Clover,
   Scale,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 export const LuckTab: React.FC = () => {
+  const tableRef = useStickyTableHeader();
   const [isAllPlayInfoOpen, setIsAllPlayInfoOpen] = useState(false);
   const allPlayInfoRef = useRef<HTMLDivElement>(null);
   const records = useActiveRecords();
@@ -528,9 +530,9 @@ export const LuckTab: React.FC = () => {
           </span>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
-          <table className="w-full border-collapse text-left" id="luckTable">
-            <thead className="border-b border-slate-800 bg-slate-900/90 text-[11px] font-black tracking-wider text-slate-400 uppercase select-none sm:text-xs md:text-sm">
+        <div className="table-scroll-container rounded-xl border border-slate-800">
+          <table ref={tableRef} className="w-full border-collapse text-left" id="luckTable">
+            <thead className="sticky-table-header border-b border-slate-800 bg-slate-900/95 text-[11px] font-black tracking-wider text-slate-400 uppercase select-none sm:text-xs md:text-sm">
               <tr>
                 <th
                   className="cursor-pointer px-2 py-2.5 transition hover:text-emerald-400 sm:px-4 sm:py-3.5"

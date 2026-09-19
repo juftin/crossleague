@@ -62,6 +62,27 @@ export const Header: React.FC = () => {
   const [inputLeagueId, setInputLeagueId] = useState("");
   const [isLeagueFilterOpen, setIsLeagueFilterOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Dynamically synchronize header height with CSS variable for sticky headers
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const updateHeight = () => {
+      const height = el.getBoundingClientRect().height;
+      if (height > 0) {
+        document.documentElement.style.setProperty("--app-header-height", `${height}px`);
+      }
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(el);
+    window.addEventListener("resize", updateHeight);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
 
   useEffect(() => {
     setInputUser(userName || userId);
@@ -198,7 +219,10 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="app-header fixed inset-x-0 top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl">
+    <header
+      ref={headerRef}
+      className="app-header fixed inset-x-0 top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl"
+    >
       <div className="flex w-full items-center justify-between gap-3 px-3 py-3 sm:gap-4 sm:px-8 sm:py-4 lg:px-12">
         {/* Brand & Title */}
         <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-4">

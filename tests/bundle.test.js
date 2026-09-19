@@ -191,4 +191,49 @@ describe("Source & Bundle Integrity", () => {
       "React must own the menu button click handler without a legacy DOM listener"
     );
   });
+
+  it("should apply sticky table header hook and classes to all tabs containing tables", () => {
+    const leaderboardCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "tabs", "LeaderboardTab.tsx"),
+      "utf8"
+    );
+    const luckCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "tabs", "LuckTab.tsx"),
+      "utf8"
+    );
+    const playersCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "tabs", "PlayersTab.tsx"),
+      "utf8"
+    );
+    const cssCode = fs.readFileSync(path.join(rootDir, "src", "css", "styles.css"), "utf8");
+    const hookCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "common", "useStickyTableHeader.ts"),
+      "utf8"
+    );
+
+    assert.ok(
+      leaderboardCode.includes("useStickyTableHeader"),
+      "LeaderboardTab must use useStickyTableHeader hook"
+    );
+    assert.ok(
+      luckCode.includes("useStickyTableHeader"),
+      "LuckTab must use useStickyTableHeader hook"
+    );
+    assert.ok(
+      playersCode.includes("useStickyTableHeader"),
+      "PlayersTab must use useStickyTableHeader hook"
+    );
+    assert.ok(
+      cssCode.includes(".table-scroll-container"),
+      "styles.css must define .table-scroll-container rule"
+    );
+    assert.ok(
+      cssCode.includes("overflow-x: auto"),
+      "styles.css must maintain horizontal table scrolling with overflow-x: auto"
+    );
+    assert.ok(
+      hookCode.includes("translate3d"),
+      "useStickyTableHeader must perform hardware-accelerated translations"
+    );
+  });
 });
