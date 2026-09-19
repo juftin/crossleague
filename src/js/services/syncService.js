@@ -72,21 +72,25 @@ export async function syncData(forceRefresh = false) {
       if (cached.user?.name && !store.userName) {
         store.setUserName(cached.user.name);
       }
+      if (cached.espnPlayersDb && Object.keys(cached.espnPlayersDb).length > 0) {
+        store.setEspnPlayersDb(cached.espnPlayersDb);
+      }
       initPlayersDb();
       store.setError(null);
       store.setLoading(false);
+      const currentStore = useCrossLeagueStore.getState();
       updateUrlParams({
         platform,
         user: inputUser,
-        userId: store.userId,
-        userName: store.userName,
+        userId: currentStore.userId,
+        userName: currentStore.userName,
         customLeagueIds: targetIds,
-        selectedLeagueIds: store.selectedLeagueIds,
+        selectedLeagueIds: currentStore.selectedLeagueIds,
         allLeaguesData: cached.allLeaguesData || [],
         season,
         mode,
         week,
-        syncType: store.syncType,
+        syncType: currentStore.syncType,
         rawRecords: cached.records || []
       });
       return;

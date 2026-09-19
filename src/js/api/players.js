@@ -16,11 +16,6 @@ import { getItem, setItem } from "../state/storage.js";
  * @returns {Promise<Record<string, object>|null>} Sleeper player DB map
  */
 export async function initPlayersDb(onUpdateCallback = null) {
-  if (state.sleeperPlayersDb && Object.keys(state.sleeperPlayersDb).length > 0) {
-    if (typeof onUpdateCallback === "function") onUpdateCallback();
-    return state.sleeperPlayersDb;
-  }
-
   const cachedSleeper =
     getItem(STORAGE_KEYS.PLAYERS_SLEEPER, null) || getItem("sleeper_players_v3", null);
   if (cachedSleeper && Object.keys(cachedSleeper).length > 0) {

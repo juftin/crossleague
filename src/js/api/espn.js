@@ -133,6 +133,9 @@ export function parseRosterEntries(roster, targetWeekNum = 1) {
 
   setItem(STORAGE_KEYS.PLAYERS_ESPN, state.espnPlayersDb);
   setItem("crossleague_espn_players_v1", state.espnPlayersDb);
+  if (state.setEspnPlayersDb) {
+    state.setEspnPlayersDb({ ...state.espnPlayersDb });
+  }
 
   // Optimal Lineup Potential
   const sortedScores = Object.values(playersPointsMap).sort((a, b) => b - a);

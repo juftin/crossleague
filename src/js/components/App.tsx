@@ -46,6 +46,9 @@ export const App: React.FC = () => {
   const rawRecords = useCrossLeagueStore(s => s.rawRecords);
   const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
 
+  const isInitializedRef = React.useRef(false);
+  const prevParamsRef = React.useRef<{ week?: number; season?: number; mode?: string }>({});
+
   // Initialize from embedded report, URL parameters, or localStorage
   useEffect(() => {
     async function init() {
@@ -195,6 +198,11 @@ export const App: React.FC = () => {
         openSettingsModal();
       }
 
+      prevParamsRef.current = {
+        week: useCrossLeagueStore.getState().week,
+        season: useCrossLeagueStore.getState().season,
+        mode: useCrossLeagueStore.getState().mode
+      };
       isInitializedRef.current = true;
     }
 
@@ -219,11 +227,16 @@ export const App: React.FC = () => {
   ]);
 
   // Re-sync when week, season, or mode changes (only on subsequent user updates)
-  const isInitializedRef = React.useRef(false);
   useEffect(() => {
     if (!isInitializedRef.current) {
       return;
     }
+    const prev = prevParamsRef.current;
+    if (prev.week === week && prev.season === season && prev.mode === mode) {
+      return;
+    }
+    prevParamsRef.current = { week, season, mode };
+
     const s = useCrossLeagueStore.getState();
     const hasSource =
       Boolean(s.userName) ||

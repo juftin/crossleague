@@ -241,6 +241,8 @@ export function saveReportToCache({
   const isFinished = isWeekFinished(season, week, nflState);
   const ttlMs = isFinished ? TTL.REPORT_FINISHED : TTL.REPORT_ACTIVE;
 
+  const currentEspnPlayers = useCrossLeagueStore?.getState?.()?.espnPlayersDb || {};
+
   const payload = {
     version: "2.1",
     cachedAt: new Date().toISOString(),
@@ -258,7 +260,8 @@ export function saveReportToCache({
     records: records,
     leaguesMap: leaguesMap,
     allLeaguesData: allLeaguesData,
-    selectedLeagueIds: selectedLeagueIds.length > 0 ? selectedLeagueIds : Object.keys(leaguesMap)
+    selectedLeagueIds: selectedLeagueIds.length > 0 ? selectedLeagueIds : Object.keys(leaguesMap),
+    espnPlayersDb: currentEspnPlayers
   };
 
   // 1. Write modern namespaced cache key
