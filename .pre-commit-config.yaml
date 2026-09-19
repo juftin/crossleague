@@ -1,23 +1,32 @@
 # yaml-language-server: $schema=https://schemastore.org/pre-commit-config.json
 
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-json
-      - id: check-merge-conflict
-      - id: mixed-line-ending
-      - id: check-added-large-files
-        args: ["--maxkb=500"]
-
   - repo: local
     hooks:
+      - id: task-format
+        name: Code Quality & Formatting Check (Prettier)
+        entry: task check:format
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
       - id: task-lint
-        name: Code Quality & Linting (Taskfile)
-        entry: task lint
+        name: Code Quality & Linting (ESLint)
+        entry: task check:lint
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: task-typecheck
+        name: TypeScript Type Checking (tsc)
+        entry: task check:types
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: task-knip
+        name: Dead Code & Dependency Analysis (knip)
+        entry: task check:knip
         language: system
         pass_filenames: false
         stages: [pre-commit]
