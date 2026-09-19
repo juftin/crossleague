@@ -12,35 +12,35 @@ body {
   overflow-x: hidden;
 }
 
-/* Light theme overrides retain the dashboard's slate and emerald visual language. */
+/* Light theme is a cool, high-contrast counterpart to the dark dashboard. */
 html.light,
 html.light body {
-  background-color: #f8fafc;
+  background-color: #f4f9ff;
   color: #0f172a;
 }
 
 html.light body::before {
   background-image:
-    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.16) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.14) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.13) 0px, transparent 52%),
+    radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
 }
 
 html.light .glass-card {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(148, 163, 184, 0.5);
 }
 
 html.light [class*="bg-slate-950"] {
-  background-color: #f8fafc;
+  background-color: #f8fbff;
 }
 
 html.light [class*="bg-slate-900"] {
-  background-color: #f1f5f9;
+  background-color: #eff6ff;
 }
 
 html.light [class*="bg-slate-800"] {
-  background-color: #e2e8f0;
+  background-color: #dbeafe;
 }
 
 html.light [class*="border-slate-8"],
@@ -62,32 +62,48 @@ html.light [class*="text-slate-5"] {
 
 html.light [class*="text-emerald"],
 html.light [class*="text-cyan"] {
-  color: #557d55;
+  color: #0e7490;
+}
+
+html.light [class*="text-emerald"] {
+  color: #047857;
 }
 
 html.light [class*="text-amber"] {
-  color: #9a6a27;
+  color: #b45309;
 }
 
 html.light [class*="text-indigo"] {
-  color: #6d668f;
+  color: #4f46e5;
 }
 
 html.light [class*="text-rose"] {
-  color: #a84f45;
+  color: #be123c;
 }
 
 html.light h1.bg-clip-text {
-  background-image: linear-gradient(to right, #0f172a, #334155, #047857);
+  background-image: linear-gradient(to right, #0f172a, #0e7490, #047857);
 }
 
 html.light [class*="bg-emerald"],
 html.light [class*="bg-cyan"] {
-  background-color: rgba(85, 125, 85, 0.12);
+  background-color: rgba(14, 116, 144, 0.12);
+}
+
+html.light [class*="bg-emerald"] {
+  background-color: rgba(4, 120, 87, 0.12);
 }
 
 html.light [class*="bg-amber"] {
-  background-color: rgba(154, 106, 39, 0.12);
+  background-color: rgba(180, 83, 9, 0.12);
+}
+
+html.light body {
+  background-color: #f4f9ff !important;
+}
+
+html.light #root > div {
+  background-color: transparent !important;
 }
 
 html.light ::-webkit-scrollbar-track {
