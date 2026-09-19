@@ -191,4 +191,34 @@ describe("Source & Bundle Integrity", () => {
       "React must own the menu button click handler without a legacy DOM listener"
     );
   });
+
+  it("should apply sticky table header classes to all tabs containing tables", () => {
+    const leaderboardCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "tabs", "LeaderboardTab.tsx"),
+      "utf8"
+    );
+    const luckCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "tabs", "LuckTab.tsx"),
+      "utf8"
+    );
+    const playersCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "tabs", "PlayersTab.tsx"),
+      "utf8"
+    );
+    const cssCode = fs.readFileSync(path.join(rootDir, "src", "css", "styles.css"), "utf8");
+
+    assert.ok(
+      leaderboardCode.includes("sticky-table-header"),
+      "LeaderboardTab must use sticky-table-header"
+    );
+    assert.ok(luckCode.includes("sticky-table-header"), "LuckTab must use sticky-table-header");
+    assert.ok(
+      playersCode.includes("sticky-table-header"),
+      "PlayersTab must use sticky-table-header"
+    );
+    assert.ok(
+      cssCode.includes(".sticky-table-header"),
+      "styles.css must define .sticky-table-header rule"
+    );
+  });
 });

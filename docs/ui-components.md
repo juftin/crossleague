@@ -10,6 +10,7 @@ CrossLeague utilizes a dark glassmorphic styling system defined in [`src/css/sty
 
 - **Background Canvas**: Deep slate/navy gradients (`#0b0f19` to `#020617`).
 - **Glassmorphic Panels (`glass-card`)**: Translucent panels with background blur (`backdrop-blur-md bg-slate-900/60 border border-slate-800/80 shadow-2xl`).
+- **Sticky Table Headers (`sticky-table-header`)**: Viewport-sticky table headers that stay anchored underneath the fixed application header with synchronized offset (`--app-header-height`) as users scroll table rows.
 - **Iconography**: Standardized **Lucide React** icons across all buttons, indicators, and metrics.
 - **Color Coding**: Emerald greens for high scoring and lucky draws, rose for bad beats and unlucky schedules, and cyan/violet for platform identity.
 
