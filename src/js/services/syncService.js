@@ -62,6 +62,7 @@ export async function syncData(forceRefresh = false) {
       if (cached.selectedLeagueIds && cached.selectedLeagueIds.length > 0) {
         store.setSelectedLeagueIds(cached.selectedLeagueIds);
       }
+      initPlayersDb();
       store.setError(null);
       store.setLoading(false);
       return;

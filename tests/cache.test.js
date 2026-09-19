@@ -8,6 +8,8 @@ import {
   loadReportFromCache,
   clearAllAppData
 } from "../src/js/state/cache.js";
+import { initPlayersDb, getPlayerInfo } from "../src/js/api/players.js";
+import { state } from "../src/js/state/store.js";
 import {
   pruneCache,
   getPreference,
@@ -195,6 +197,34 @@ describe("CrossLeague Storage & Caching Subsystem", () => {
         week: 5
       });
       assert.equal(result, null);
+    });
+
+    it("should preserve player databases and resolve player metadata across page reloads", async () => {
+      // 1. Seed player databases in storage
+      setItem(STORAGE_KEYS.PLAYERS_SLEEPER, {
+        1001: { name: "Patrick Mahomes", pos: "QB", team: "KC" }
+      });
+      setItem(STORAGE_KEYS.PLAYERS_ESPN, {
+        espn_4040715: { name: "Bijan Robinson", pos: "RB", team: "ATL" }
+      });
+
+      // 2. Clear in-memory state (simulating page reload)
+      state.sleeperPlayersDb = null;
+      state.espnPlayersDb = {};
+
+      // 3. Initialize player databases
+      await initPlayersDb();
+
+      // 4. Verify player metadata resolution
+      const sleeperPlayer = getPlayerInfo("1001");
+      assert.equal(sleeperPlayer.name, "Patrick Mahomes");
+      assert.equal(sleeperPlayer.pos, "QB");
+      assert.equal(sleeperPlayer.team, "KC");
+
+      const espnPlayer = getPlayerInfo("espn_4040715");
+      assert.equal(espnPlayer.name, "Bijan Robinson");
+      assert.equal(espnPlayer.pos, "RB");
+      assert.equal(espnPlayer.team, "ATL");
     });
   });
 

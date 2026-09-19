@@ -17,22 +17,24 @@ import { getItem, setItem } from "../state/storage.js";
  */
 export async function initPlayersDb(onUpdateCallback = null) {
   if (state.sleeperPlayersDb && Object.keys(state.sleeperPlayersDb).length > 0) {
+    if (typeof onUpdateCallback === "function") onUpdateCallback();
     return state.sleeperPlayersDb;
   }
 
   const cachedSleeper =
     getItem(STORAGE_KEYS.PLAYERS_SLEEPER, null) || getItem("sleeper_players_v3", null);
-  if (cachedSleeper) {
+  if (cachedSleeper && Object.keys(cachedSleeper).length > 0) {
     state.sleeperPlayersDb = cachedSleeper;
   }
 
   const cachedEspn =
     getItem(STORAGE_KEYS.PLAYERS_ESPN, null) || getItem("crossleague_espn_players_v1", null);
-  if (cachedEspn) {
+  if (cachedEspn && Object.keys(cachedEspn).length > 0) {
     state.espnPlayersDb = { ...state.espnPlayersDb, ...cachedEspn };
   }
 
   if (state.sleeperPlayersDb && Object.keys(state.sleeperPlayersDb).length > 0) {
+    if (typeof onUpdateCallback === "function") onUpdateCallback();
     return state.sleeperPlayersDb;
   }
 

@@ -5,9 +5,13 @@
 import { create } from "zustand";
 import { useMemo } from "react";
 import { TAB_HASH_MAP, STORAGE_KEYS } from "./constants.js";
-import { setPreference, getAllPreferences, clearAllStorage } from "./storage.js";
+import { getItem, setPreference, getAllPreferences, clearAllStorage } from "./storage.js";
 
 const initialPreferences = getAllPreferences();
+const initialSleeperPlayers =
+  getItem(STORAGE_KEYS.PLAYERS_SLEEPER, null) || getItem("sleeper_players_v3", null);
+const initialEspnPlayers =
+  getItem(STORAGE_KEYS.PLAYERS_ESPN, {}) || getItem("crossleague_espn_players_v1", {});
 
 export const useCrossLeagueStore = create((set, get) => ({
   platform: initialPreferences.platform,
@@ -31,8 +35,8 @@ export const useCrossLeagueStore = create((set, get) => ({
     display_week: initialPreferences.week,
     season_type: "regular"
   },
-  espnPlayersDb: {},
-  sleeperPlayersDb: null,
+  espnPlayersDb: initialEspnPlayers || {},
+  sleeperPlayersDb: initialSleeperPlayers,
   lastAggregatedPlayers: [],
 
   activeTab: "awards",
@@ -168,6 +172,9 @@ export const useCrossLeagueStore = create((set, get) => ({
   setLeaguesMap: leaguesMap => set({ leaguesMap }),
   setAllLeaguesData: allLeaguesData => set({ allLeaguesData }),
   setNflState: nfl => set(s => ({ nflState: { ...s.nflState, ...nfl } })),
+  setSleeperPlayersDb: sleeperPlayersDb => set({ sleeperPlayersDb }),
+  setEspnPlayersDb: espnPlayersDb =>
+    set(s => ({ espnPlayersDb: { ...s.espnPlayersDb, ...espnPlayersDb } })),
 
   setActiveTab: (activeTab, updateUrlHash = true) => {
     set({ activeTab });
@@ -326,11 +333,11 @@ export const state = new Proxy(
       else if (prop === "allLeaguesData") s.setAllLeaguesData(value);
       else if (prop === "selectedLeagueIds") s.setSelectedLeagueIds(Array.from(value || []));
       else if (prop === "customLeagueIds") s.setCustomLeagueIds(Array.from(value || []));
-      else if (prop === "currentSyncType") s.setSyncType(value);
-      else if (prop === "nflState") s.setNflState(value);
-      else if (prop === "searchQuery") s.setSearchQuery(value);
-      else if (prop === "currentTierFilter") s.setTierFilter(value);
-      else s[prop] = value;
+      else if (prop === "sleeperPlayersDb") s.setSleeperPlayersDb(value);
+      else if (prop === "espnPlayersDb") s.setEspnPlayersDb(value);
+      else {
+        useCrossLeagueStore.setState({ [prop]: value });
+      }
       return true;
     }
   }

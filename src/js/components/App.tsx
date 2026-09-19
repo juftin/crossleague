@@ -16,6 +16,7 @@ import { getUrlParams } from "../state/urlParams.js";
 import { BASE_URL, HASH_TAB_MAP } from "../state/constants.js";
 import { cachedApiFetch } from "../state/cache.js";
 import { getMaxPlayedWeek } from "../state/preferences.js";
+import { initPlayersDb } from "../api/players.js";
 
 export const App: React.FC = () => {
   const activeTab = useCrossLeagueStore(s => s.activeTab);
@@ -66,8 +67,9 @@ export const App: React.FC = () => {
         return;
       }
 
-      // 2. Load stored preferences from storage
+      // 2. Load stored preferences from storage & initialize player databases
       useCrossLeagueStore.getState().hydratePreferences();
+      initPlayersDb();
 
       // 3. URL Query Parameter overrides
       const urlParams = getUrlParams();
