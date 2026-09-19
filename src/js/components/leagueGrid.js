@@ -20,7 +20,6 @@ export function renderLeagueGrid(records = getActiveRecords(), leagues = getActi
   if (leagueKeys.length === 0) {
     grid.innerHTML = `
       <div class="col-span-full py-16 text-center text-slate-400 glass-card rounded-2xl border border-slate-800 space-y-3">
-        <div class="text-4xl">🏟️</div>
         <div class="font-bold text-lg text-slate-200">No leagues selected.</div>
         <div class="text-sm text-slate-400">Pick one or more leagues from the filter bar above to compare them here.</div>
       </div>

@@ -27,8 +27,6 @@ describe("Modern JS Package Structure & Module Exports", () => {
     assert.ok(typeof mainPkg.aggregatePlayers === "function", "Must export aggregatePlayers");
     assert.ok(typeof mainPkg.fetchEspnLeague === "function", "Must export fetchEspnLeague");
     assert.ok(typeof mainPkg.resolveUser === "function", "Must export resolveUser");
-    assert.ok(typeof mainPkg.downloadReport === "function", "Must export downloadReport");
-    assert.ok(typeof mainPkg.shareReport === "function", "Must export shareReport");
     assert.ok(typeof mainPkg.copyChatRecap === "function", "Must export copyChatRecap");
     assert.ok(typeof mainPkg.exportCsv === "function", "Must export exportCsv");
   });
@@ -59,9 +57,6 @@ describe("Modern JS Package Structure & Module Exports", () => {
     assert.ok(typeof exportTools.exportCsv === "function");
     assert.ok(typeof exportTools.shareUrl === "function");
     assert.ok(typeof exportTools.buildShareableUrl === "function");
-    assert.ok(typeof exportTools.downloadReport === "function");
-    assert.ok(typeof exportTools.shareReport === "function");
-    assert.ok(typeof exportTools.loadEmbeddedReport === "function");
   });
 
   it("should contain properly formatted package.json exports map", () => {

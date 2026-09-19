@@ -6,7 +6,6 @@
 
 import { state } from "../state/store.js";
 import { getCurrentlyActiveTab } from "../components/tabs.js";
-import { showToast } from "../components/toast.js";
 import { showError } from "../components/dom.js";
 
 /**
@@ -60,8 +59,6 @@ export function buildShareableUrl() {
  */
 export async function shareUrl() {
   const shareableUrl = buildShareableUrl();
-  const shareUrlBtnText = document.getElementById("shareUrlBtnText");
-
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(shareableUrl);
@@ -77,16 +74,10 @@ export async function shareUrl() {
       document.execCommand("copy");
       document.body.removeChild(ta);
     }
-    showToast("Shareable link copied to clipboard!", "🔗");
-    if (shareUrlBtnText) {
-      const orig = shareUrlBtnText.textContent;
-      shareUrlBtnText.textContent = "Link Copied! 🔗";
-      setTimeout(() => {
-        shareUrlBtnText.textContent = orig;
-      }, 2500);
-    }
+    return true;
   } catch (err) {
     console.error("Failed to copy URL:", err);
     showError("Could not copy link to clipboard.");
+    return false;
   }
 }

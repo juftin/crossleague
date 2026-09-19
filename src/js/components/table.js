@@ -194,11 +194,11 @@ export function renderTable(activeRecords = getActiveRecords()) {
 
     let rankBadge = `<span class="font-black text-slate-400 font-mono text-xs sm:text-base">#${r.rank}</span>`;
     if (r.rank === 1)
-      rankBadge = `<span class="inline-flex items-center gap-1 font-black text-amber-300 text-xs sm:text-base">🥇 #1</span>`;
+      rankBadge = `<span class="inline-flex items-center gap-1 font-black text-amber-300 text-xs sm:text-base">#1</span>`;
     else if (r.rank === 2)
-      rankBadge = `<span class="inline-flex items-center gap-1 font-black text-slate-200 text-xs sm:text-base">🥈 #2</span>`;
+      rankBadge = `<span class="inline-flex items-center gap-1 font-black text-slate-200 text-xs sm:text-base">#2</span>`;
     else if (r.rank === 3)
-      rankBadge = `<span class="inline-flex items-center gap-1 font-black text-amber-500 text-xs sm:text-base">🥉 #3</span>`;
+      rankBadge = `<span class="inline-flex items-center gap-1 font-black text-amber-500 text-xs sm:text-base">#3</span>`;
 
     // Matchup Result Pill
     let matchupPill = "";
@@ -216,7 +216,7 @@ export function renderTable(activeRecords = getActiveRecords()) {
         matchupPill = `
           <div class="text-center">
             <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              🟢 W (+${Math.abs(r.margin || 0).toFixed(1)})
+              W (+${Math.abs(r.margin || 0).toFixed(1)})
             </span>
             <div class="text-[10px] sm:text-xs text-slate-400 truncate max-w-[110px] sm:max-w-[130px] mt-0.5 font-medium" title="vs ${escapeHtml(r.opponentName || "Opponent")}">
               vs ${escapeHtml(r.opponentName || "Opp")}
@@ -227,7 +227,7 @@ export function renderTable(activeRecords = getActiveRecords()) {
         matchupPill = `
           <div class="text-center">
             <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">
-              🔴 L (-${Math.abs(r.margin || 0).toFixed(1)})
+              L (-${Math.abs(r.margin || 0).toFixed(1)})
             </span>
             <div class="text-[10px] sm:text-xs text-slate-400 truncate max-w-[110px] sm:max-w-[130px] mt-0.5 font-medium" title="vs ${escapeHtml(r.opponentName || "Opponent")}">
               vs ${escapeHtml(r.opponentName || "Opp")}
@@ -238,7 +238,7 @@ export function renderTable(activeRecords = getActiveRecords()) {
         matchupPill = `
           <div class="text-center">
             <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black bg-slate-800 text-slate-300 border border-slate-700">
-              ⚪ TIE
+              TIE
             </span>
           </div>
         `;
@@ -343,7 +343,7 @@ export function renderTable(activeRecords = getActiveRecords()) {
             <div class="glass-card rounded-xl p-5 border border-slate-800/80 space-y-3.5">
               <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 flex-wrap gap-2">
                 <div class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                  <span>📈 Season Consistency & Breakdown</span>
+                  <span>Season Consistency & Breakdown</span>
                 </div>
                 <div class="text-xs sm:text-sm text-slate-400 font-semibold">
                   Season High: <span class="font-black text-emerald-400 font-mono">${(r.highScore || 0).toFixed(2)} pts</span> •
@@ -375,7 +375,7 @@ export function renderTable(activeRecords = getActiveRecords()) {
             <div class="glass-card rounded-xl p-5 border border-slate-800/80 space-y-3.5">
               <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 flex-wrap gap-2">
                 <div class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                  <span>⚡ Starting Lineup vs Bench</span>
+                  <span>Starting Lineup vs Bench</span>
                   <span class="text-slate-400 font-normal">| Matchup #${r.matchupId || "N/A"}</span>
                 </div>
                 <div class="text-xs sm:text-sm text-slate-400 font-semibold">

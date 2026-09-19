@@ -69,6 +69,19 @@ describe("Source & Bundle Integrity", () => {
       distHtml.includes("<!-- Application Logic -->"),
       "dist/index.html must contain Application Logic marker"
     );
+    assert.equal(
+      (distHtml.match(/<!doctype html>/gi) || []).length,
+      1,
+      "Inline application code must not duplicate the HTML document"
+    );
+
+    const appMarker = distHtml.indexOf("<!-- Application Logic -->");
+    const scriptClose = distHtml.indexOf("</script>", appMarker);
+    const bodyClose = distHtml.indexOf("</body>", appMarker);
+    assert.ok(
+      scriptClose > appMarker && bodyClose - scriptClose < 64,
+      "The inlined application script must remain intact through the closing body tag"
+    );
   });
 
   it("should contain settings modal and standalone week selector in src/index.html", () => {
@@ -127,10 +140,9 @@ describe("Source & Bundle Integrity", () => {
     assert.ok(srcHtml.includes('id="selectAllLeaguesBtn"'), "Must contain #selectAllLeaguesBtn");
     assert.ok(srcHtml.includes('id="clearAllLeaguesBtn"'), "Must contain #clearAllLeaguesBtn");
 
-    // Menu Action Buttons (Copy Recap, Share, Download Report, Clear Data)
+    // Menu Action Buttons (Copy Recap, Share, Clear Data)
     assert.ok(srcHtml.includes('id="copyRecapBtn"'), "Must contain #copyRecapBtn");
     assert.ok(srcHtml.includes('id="shareUrlBtn"'), "Must contain #shareUrlBtn");
-    assert.ok(srcHtml.includes('id="downloadReportBtn"'), "Must contain #downloadReportBtn");
     assert.ok(srcHtml.includes('id="clearDataBtn"'), "Must contain #clearDataBtn");
     assert.ok(srcHtml.includes('id="btnOpenLuckModal"'), "Must contain #btnOpenLuckModal");
 
@@ -171,12 +183,12 @@ describe("Source & Bundle Integrity", () => {
     assert.ok(srcHtml.includes('id="settingsBackdrop"'), "Must contain #settingsBackdrop");
   });
 
-  it("should bind click listener to btnOpenSettingsModal in src/js/index.js", () => {
+  it("should leave the React menu trigger as the sole click handler", () => {
     const code = fs.readFileSync(srcJsPath, "utf8");
-    assert.match(
+    assert.doesNotMatch(
       code,
       /btnOpenSettingsModal\.addEventListener\("click",\s*toggleSettingsDropdown\)/,
-      "Menu button #btnOpenSettingsModal must have click listener attached"
+      "React must own the menu button click handler without a legacy DOM listener"
     );
   });
 });

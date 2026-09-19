@@ -25,6 +25,7 @@
     "format:check": "prettier --check \"**/*.{js,json,html,css,md,yaml,yml}\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
     "test": "node --test tests/**/*.test.js",
     "snapshots": "node scripts/generate-snapshots.js",
     "snapshots:check": "node scripts/generate-snapshots.js --check",
@@ -43,9 +44,20 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.20.0",
+    "@types/node": "^26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^9.20.0",
     "globals": "^15.14.0",
     "prettier": "^3.5.0",
+    "typescript": "^7.0.2",
     "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "lucide-react": "^1.47.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zustand": "^5.0.15"
   }
 }

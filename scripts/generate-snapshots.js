@@ -134,13 +134,23 @@ function buildSnapshotHtmlPages() {
     let html = indexHtml;
 
     const dataScript = s.embeddedData
-      ? `<script id="embedded-report-data">\nwindow.__EMBEDDED_REPORT__ = ${JSON.stringify(s.embeddedData)};\n</script>`
+      ? `<script>\nwindow.__CROSSLEAGUE_SNAPSHOT_DATA__ = ${JSON.stringify(s.embeddedData)};\n</script>`
       : "";
 
     const runnerScript = `
       <script>
         document.addEventListener("DOMContentLoaded", () => {
-          ${s.actionScript}
+          const runSnapshotAction = () => {
+            if (!window.switchTab) {
+              window.setTimeout(runSnapshotAction, 25);
+              return;
+            }
+            window.setTimeout(() => {
+              ${s.actionScript}
+              document.documentElement.dataset.snapshotReady = "true";
+            }, 100);
+          };
+          runSnapshotAction();
         });
       </script>
     `;
@@ -221,6 +231,7 @@ function capturePageScreenshot(chromePath, page, targetDir) {
       "--hide-scrollbars",
       "--force-device-scale-factor=1",
       "--run-all-compositor-stages-before-draw",
+      "--virtual-time-budget=1500",
       `--user-data-dir=${userProfileDir}`,
       `--window-size=${windowSize}`,
       `--screenshot=${outputPath}`

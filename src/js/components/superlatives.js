@@ -26,13 +26,13 @@ export function renderSuperlatives(records = getActiveRecords()) {
 
   const { badBeat, luckyEscape, benchKing } = computeSuperlatives(records, isSeason);
 
-  // 1. The Bad Beat 💔
+  // 1. The Bad Beat
   if (badBeatCard) {
     badBeatCard.removeAttribute("title");
     if (!isSeason) {
       if (badBeat) {
         const titleComponent = createCardTitleWithInfo(
-          "The Bad Beat 💔",
+          "The Bad Beat",
           "Highest-scoring squad across all leagues that lost their matchup this week.",
           "text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 hover:border-rose-400/70"
         );
@@ -49,7 +49,6 @@ export function renderSuperlatives(records = getActiveRecords()) {
                 <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(badBeat.manager)}">${escapeHtml(badBeat.manager)}</div>
                 <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(badBeat.teamName)}">${escapeHtml(badBeat.teamName)}</div>
                 <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(badBeat.league)}">
-                  <span class="text-xs flex-shrink-0">🏆</span>
                   <span class="truncate">${escapeHtml(badBeat.league)}</span>
                 </div>
               </div>
@@ -61,7 +60,7 @@ export function renderSuperlatives(records = getActiveRecords()) {
         `;
       } else {
         const titleComponent = createCardTitleWithInfo(
-          "The Bad Beat 💔",
+          "The Bad Beat",
           "Highest-scoring squad across all leagues that lost their matchup this week.",
           "text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700"
         );
@@ -75,7 +74,7 @@ export function renderSuperlatives(records = getActiveRecords()) {
     } else {
       if (badBeat) {
         const titleComponent = createCardTitleWithInfo(
-          "Season Heartbreak 💔",
+          "Season Heartbreak",
           "Highest scoring team across all leagues with a losing head-to-head record.",
           "text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 hover:border-rose-400/70"
         );
@@ -92,7 +91,6 @@ export function renderSuperlatives(records = getActiveRecords()) {
                 <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(badBeat.manager)}">${escapeHtml(badBeat.manager)}</div>
                 <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(badBeat.teamName)}">${escapeHtml(badBeat.teamName)}</div>
                 <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(badBeat.league)}">
-                  <span class="text-xs flex-shrink-0">🏆</span>
                   <span class="truncate">${escapeHtml(badBeat.league)}</span>
                 </div>
               </div>
@@ -106,13 +104,13 @@ export function renderSuperlatives(records = getActiveRecords()) {
     }
   }
 
-  // 2. The Lucky Escape 🪄
+  // 2. The Lucky Escape
   if (luckyEscapeCard) {
     luckyEscapeCard.removeAttribute("title");
     if (!isSeason) {
       if (luckyEscape) {
         const titleComponent = createCardTitleWithInfo(
-          "The Lucky Escape 🪄",
+          "The Lucky Escape",
           "Lowest-scoring squad across all leagues that managed to win their matchup this week.",
           "text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400/70"
         );
@@ -129,7 +127,6 @@ export function renderSuperlatives(records = getActiveRecords()) {
                 <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(luckyEscape.manager)}">${escapeHtml(luckyEscape.manager)}</div>
                 <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(luckyEscape.teamName)}">${escapeHtml(luckyEscape.teamName)}</div>
                 <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(luckyEscape.league)}">
-                  <span class="text-xs flex-shrink-0">🏆</span>
                   <span class="truncate">${escapeHtml(luckyEscape.league)}</span>
                 </div>
               </div>
@@ -141,7 +138,7 @@ export function renderSuperlatives(records = getActiveRecords()) {
         `;
       } else {
         const titleComponent = createCardTitleWithInfo(
-          "The Lucky Escape 🪄",
+          "The Lucky Escape",
           "Lowest-scoring squad across all leagues that managed to win their matchup this week.",
           "text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700"
         );
@@ -155,7 +152,7 @@ export function renderSuperlatives(records = getActiveRecords()) {
     } else {
       if (luckyEscape) {
         const titleComponent = createCardTitleWithInfo(
-          "Teflon Squad 🪄",
+          "Teflon Squad",
           "Lowest scoring squad across all leagues that maintained a winning record.",
           "text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400/70"
         );
@@ -172,7 +169,6 @@ export function renderSuperlatives(records = getActiveRecords()) {
                 <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(luckyEscape.manager)}">${escapeHtml(luckyEscape.manager)}</div>
                 <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(luckyEscape.teamName)}">${escapeHtml(luckyEscape.teamName)}</div>
                 <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(luckyEscape.league)}">
-                  <span class="text-xs flex-shrink-0">🏆</span>
                   <span class="truncate">${escapeHtml(luckyEscape.league)}</span>
                 </div>
               </div>
@@ -186,12 +182,12 @@ export function renderSuperlatives(records = getActiveRecords()) {
     }
   }
 
-  // 3. Bench Heavyweight 🪑
+  // 3. Bench Heavyweight
   if (benchMvpCard) {
     benchMvpCard.removeAttribute("title");
     if (benchKing && benchKing.benchPoints > 0) {
       const titleComponent = createCardTitleWithInfo(
-        "Bench Heavyweight 🪑",
+        "Bench Heavyweight",
         "Squad with the most bench points left unstarted on their roster.",
         "text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-500/30 hover:border-amber-400/70"
       );
@@ -208,7 +204,6 @@ export function renderSuperlatives(records = getActiveRecords()) {
               <div class="text-base sm:text-lg font-black text-white truncate" title="${escapeHtml(benchKing.manager)}">${escapeHtml(benchKing.manager)}</div>
               <div class="text-xs sm:text-sm text-slate-400 truncate" title="${escapeHtml(benchKing.teamName)}">${escapeHtml(benchKing.teamName)}</div>
               <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1.5 pt-0.5" title="League: ${escapeHtml(benchKing.league)}">
-                <span class="text-xs flex-shrink-0">🏆</span>
                 <span class="truncate">${escapeHtml(benchKing.league)}</span>
               </div>
             </div>
@@ -220,7 +215,7 @@ export function renderSuperlatives(records = getActiveRecords()) {
       `;
     } else {
       const titleComponent = createCardTitleWithInfo(
-        "Bench Heavyweight 🪑",
+        "Bench Heavyweight",
         "Squad with the most bench points left unstarted on their roster.",
         "text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700"
       );

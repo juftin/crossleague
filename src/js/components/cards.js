@@ -63,7 +63,7 @@ export function renderSummaryCards(
   }
   if (document.getElementById("statHighLeague")) {
     document.getElementById("statHighLeague").innerHTML = topOverall
-      ? `<span>🏆</span> <span class="truncate">${escapeHtml(topOverall.league)}</span>`
+      ? `<span class="truncate">${escapeHtml(topOverall.league)}</span>`
       : "-";
     document.getElementById("statHighLeague").title = topOverall
       ? `League: ${topOverall.league}`
@@ -85,7 +85,7 @@ export function renderSummaryCards(
   }
   if (document.getElementById("statLowLeague")) {
     document.getElementById("statLowLeague").innerHTML = lowestOverall
-      ? `<span>🏆</span> <span class="truncate">${escapeHtml(lowestOverall.league)}</span>`
+      ? `<span class="truncate">${escapeHtml(lowestOverall.league)}</span>`
       : "-";
     document.getElementById("statLowLeague").title = lowestOverall
       ? `League: ${lowestOverall.league}`
@@ -128,9 +128,7 @@ export function renderSummaryCards(
   }
   if (document.getElementById("statTopLeagueName")) {
     document.getElementById("statTopLeagueName").innerHTML =
-      topLeagueAvg > 0
-        ? `<span>🏆</span> <span class="truncate">${escapeHtml(topLeagueName)}</span>`
-        : "-";
+      topLeagueAvg > 0 ? `<span class="truncate">${escapeHtml(topLeagueName)}</span>` : "-";
     document.getElementById("statTopLeagueName").title = topLeagueAvg > 0 ? topLeagueName : "";
   }
 }

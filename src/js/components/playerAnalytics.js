@@ -66,7 +66,7 @@ export function renderPositionalMvpDeck(allPlayers) {
     {
       pos: "QB",
       label: "Top QB",
-      icon: "🎯",
+      icon: "QB",
       color: "text-rose-400",
       bg: "from-rose-500/20 via-slate-900/90 to-transparent",
       border: "border-rose-500/30"
@@ -74,7 +74,7 @@ export function renderPositionalMvpDeck(allPlayers) {
     {
       pos: "RB",
       label: "Top RB",
-      icon: "⚡",
+      icon: "RB",
       color: "text-cyan-400",
       bg: "from-cyan-500/20 via-slate-900/90 to-transparent",
       border: "border-cyan-500/30"
@@ -82,7 +82,7 @@ export function renderPositionalMvpDeck(allPlayers) {
     {
       pos: "WR",
       label: "Top WR",
-      icon: "🔥",
+      icon: "WR",
       color: "text-emerald-400",
       bg: "from-emerald-500/20 via-slate-900/90 to-transparent",
       border: "border-emerald-500/30"
@@ -90,7 +90,7 @@ export function renderPositionalMvpDeck(allPlayers) {
     {
       pos: "TE",
       label: "Top TE",
-      icon: "🛡️",
+      icon: "TE",
       color: "text-amber-400",
       bg: "from-amber-500/20 via-slate-900/90 to-transparent",
       border: "border-amber-500/30"
@@ -98,7 +98,7 @@ export function renderPositionalMvpDeck(allPlayers) {
     {
       pos: "K",
       label: "Top K",
-      icon: "👟",
+      icon: "K",
       color: "text-purple-400",
       bg: "from-purple-500/20 via-slate-900/90 to-transparent",
       border: "border-purple-500/30"
@@ -106,7 +106,7 @@ export function renderPositionalMvpDeck(allPlayers) {
     {
       pos: "DEF",
       label: "Top DEF",
-      icon: "🏰",
+      icon: "DEF",
       color: "text-slate-300",
       bg: "from-slate-700/30 via-slate-900/90 to-transparent",
       border: "border-slate-600/40"
@@ -159,7 +159,7 @@ export function renderPositionalMvpDeck(allPlayers) {
             <div class="text-[10px] text-slate-400 text-right truncate max-w-[120px]" title="Rostered by ${escapeHtml(bestOwner.manager)} in ${escapeHtml(bestOwner.league)}">
               <span class="text-slate-500 block">Top Owner</span>
               <span class="font-bold text-slate-300 truncate block">${escapeHtml(bestOwner.manager)}</span>
-              <span class="text-slate-400 truncate block text-[10px]">🏆 ${escapeHtml(bestOwner.league)}</span>
+              <span class="text-slate-400 truncate block text-[10px]">${escapeHtml(bestOwner.league)}</span>
             </div>
           `
               : ""
@@ -261,13 +261,11 @@ export function renderPlayerLeaderboard(allPlayers = null) {
       noPlayersFound.classList.remove("hidden");
       if (playerList.length === 0) {
         noPlayersFound.innerHTML = `
-          <div class="text-3xl">🏈</div>
           <div class="font-bold text-slate-200">No player data available.</div>
           <div class="text-xs text-slate-400">Click "Fetch Cross-League Stats" above to load roster and player scores.</div>
         `;
       } else {
         noPlayersFound.innerHTML = `
-          <div class="text-3xl">🏈</div>
           <div class="font-bold text-slate-200">No players match the current filters.</div>
           <div class="text-xs text-slate-500">Try changing the position filter or search terms.</div>
         `;
@@ -332,7 +330,7 @@ export function renderPlayerLeaderboard(allPlayers = null) {
             .map(
               o => `
             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${o.isStarter || o.starts > 0 ? "bg-emerald-950/80 text-emerald-300 border border-emerald-500/30" : "bg-slate-900 text-slate-300 border border-slate-800"}">
-              <span>${o.isStarter || o.starts > 0 ? "🟢" : "🪑"}</span>
+              <span>${o.isStarter || o.starts > 0 ? "Starter" : "Bench"}</span>
               <span class="truncate max-w-[110px]" title="${escapeHtml(o.manager)} • ${escapeHtml(o.league)}">${escapeHtml(o.manager)}</span>
             </span>
           `
@@ -425,7 +423,7 @@ export function renderPlayerLeaderboard(allPlayers = null) {
           <div class="glass-card rounded-xl p-5 border border-slate-800/80 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 flex-wrap gap-2">
               <div class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                <span>🏈 ${escapeHtml(p.name)} (${escapeHtml(p.pos)} - ${escapeHtml(p.team || "FA")})</span>
+                <span>${escapeHtml(p.name)} (${escapeHtml(p.pos)} - ${escapeHtml(p.team || "FA")})</span>
                 <span class="text-slate-400 font-normal">| Cross-League Roster Exposure</span>
               </div>
               <div class="text-xs sm:text-sm text-slate-400 font-semibold font-mono">
@@ -444,13 +442,12 @@ export function renderPlayerLeaderboard(allPlayers = null) {
                     <div class="font-black text-sm text-white truncate">${escapeHtml(o.manager)}</div>
                     <div class="text-xs text-slate-400 truncate">${escapeHtml(o.teamName)}</div>
                     <div class="text-[11px] text-slate-400 font-bold mt-1 flex items-center gap-1 truncate">
-                      <span>🏆</span>
                       <span class="truncate">${escapeHtml(o.league)}</span>
                     </div>
                   </div>
                   <div class="text-right flex-shrink-0">
                     <span class="px-2 py-0.5 rounded-full text-xs font-black ${o.isStarter || o.starts > 0 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}">
-                      ${o.isStarter || o.starts > 0 ? "🟢 Starter" : "🪑 Bench"}
+                      ${o.isStarter || o.starts > 0 ? "Starter" : "Bench"}
                     </span>
                     ${
                       o.starts !== undefined && o.benches !== undefined

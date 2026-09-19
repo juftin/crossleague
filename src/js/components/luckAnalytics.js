@@ -69,7 +69,7 @@ export function renderLuckAnalytics(
       teamEl.title = `${luckiest.manager} (${luckiest.teamName})`;
     }
     if (leagueEl) {
-      leagueEl.innerHTML = `<span>🏆</span> <span class="truncate">${escapeHtml(luckiest.league)}</span>`;
+      leagueEl.innerHTML = `<span class="truncate">${escapeHtml(luckiest.league)}</span>`;
       leagueEl.title = `League: ${luckiest.league}`;
     }
     if (subEl) {
@@ -83,7 +83,7 @@ export function renderLuckAnalytics(
     if (cardLuckiest) {
       cardLuckiest.setAttribute(
         "title",
-        `Luckiest Squad 🍀: Awarded to ${luckiest.manager} in ${luckiest.league}. Gained ${luckStr} bonus wins above All-Play expectation (${actStr} vs ${expStr} expected).`
+        `Luckiest Squad: Awarded to ${luckiest.manager} in ${luckiest.league}. Gained ${luckStr} bonus wins above All-Play expectation (${actStr} vs ${expStr} expected).`
       );
     }
   }
@@ -113,7 +113,7 @@ export function renderLuckAnalytics(
       teamEl.title = `${unluckiest.manager} (${unluckiest.teamName})`;
     }
     if (leagueEl) {
-      leagueEl.innerHTML = `<span>🏆</span> <span class="truncate">${escapeHtml(unluckiest.league)}</span>`;
+      leagueEl.innerHTML = `<span class="truncate">${escapeHtml(unluckiest.league)}</span>`;
       leagueEl.title = `League: ${unluckiest.league}`;
     }
     if (subEl) {
@@ -127,7 +127,7 @@ export function renderLuckAnalytics(
     if (cardUnluckiest) {
       cardUnluckiest.setAttribute(
         "title",
-        `Unluckiest Squad 💔 (Tough Schedule): Awarded to ${unluckiest.manager} in ${unluckiest.league}. Underperformed All-Play expectation by ${Math.abs(luckVal).toFixed(2)} wins due to brutal opponent scores (${actStr} vs ${expStr} expected).`
+        `Unluckiest Squad (Tough Schedule): Awarded to ${unluckiest.manager} in ${unluckiest.league}. Underperformed All-Play expectation by ${Math.abs(luckVal).toFixed(2)} wins due to brutal opponent scores (${actStr} vs ${expStr} expected).`
       );
     }
   }
@@ -147,7 +147,7 @@ export function renderLuckAnalytics(
       teamEl.title = `${allPlayLeader.manager} (${allPlayLeader.teamName})`;
     }
     if (leagueEl) {
-      leagueEl.innerHTML = `<span>🏆</span> <span class="truncate">${escapeHtml(allPlayLeader.league)}</span>`;
+      leagueEl.innerHTML = `<span class="truncate">${escapeHtml(allPlayLeader.league)}</span>`;
       leagueEl.title = `League: ${allPlayLeader.league}`;
     }
     if (subEl) {
@@ -159,7 +159,7 @@ export function renderLuckAnalytics(
     if (cardAllPlay) {
       cardAllPlay.setAttribute(
         "title",
-        `All-Play Powerhouse 👑 (True Dominance): Awarded to ${allPlayLeader.manager} in ${allPlayLeader.league} for achieving the highest All-Play win rate (${allPlayLeader.allPlayWinPct}%).`
+        `All-Play Powerhouse (True Dominance): Awarded to ${allPlayLeader.manager} in ${allPlayLeader.league} for achieving the highest All-Play win rate (${allPlayLeader.allPlayWinPct}%).`
       );
     }
   }
@@ -180,7 +180,7 @@ export function renderLuckAnalytics(
       teamEl.title = `${toughest.manager} (${toughest.teamName})`;
     }
     if (leagueEl) {
-      leagueEl.innerHTML = `<span>🏆</span> <span class="truncate">${escapeHtml(toughest.league)}</span>`;
+      leagueEl.innerHTML = `<span class="truncate">${escapeHtml(toughest.league)}</span>`;
       leagueEl.title = `League: ${toughest.league}`;
     }
     if (subEl) {
@@ -194,7 +194,7 @@ export function renderLuckAnalytics(
     if (cardToughest) {
       cardToughest.setAttribute(
         "title",
-        `Toughest Opponents 🛡️ (Highest PA): Awarded to ${toughest.manager} in ${toughest.league} for enduring the most difficult opponent scoring schedule (${(toughest.pointsAgainst || 0).toFixed(2)} pts avg).`
+        `Toughest Opponents (Highest PA): Awarded to ${toughest.manager} in ${toughest.league} for enduring the most difficult opponent scoring schedule (${(toughest.pointsAgainst || 0).toFixed(2)} pts avg).`
       );
     }
   }
@@ -420,7 +420,7 @@ export function renderLuckTable(records = getActiveRecords()) {
       actualRecordHtml = `
         <div class="text-center" title="${escapeHtml(outcomeDesc)}">
           <span class="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-[10px] sm:text-xs font-black ${r.outcome === "win" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : r.outcome === "loss" ? "bg-rose-500/20 text-rose-300 border border-rose-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}">
-            ${r.outcome === "win" ? "🟢 1-0" : r.outcome === "loss" ? "🔴 0-1" : r.outcome === "tie" ? "⚪ 0-0-1" : "Upcoming"}
+            ${r.outcome === "win" ? "1-0" : r.outcome === "loss" ? "0-1" : r.outcome === "tie" ? "0-0-1" : "Upcoming"}
           </span>
           <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5 font-medium truncate max-w-[100px] sm:max-w-[120px]" title="vs ${escapeHtml(r.opponentName || "Opp")}">vs ${escapeHtml(r.opponentName || "Opp")}</div>
         </div>
@@ -450,20 +450,20 @@ export function renderLuckTable(records = getActiveRecords()) {
           : "0.0";
     if (luckVal >= 0.5) {
       luckBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm cursor-help" title="🍀 Lucky Schedule Draw: Gained +${luckVal.toFixed(2)} bonus wins above expected (${actWinsStr} actual vs ${expWinsStr} expected based on scoring)">
-          <span>🍀</span> +${luckVal.toFixed(2)}
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm cursor-help" title="Lucky Schedule Draw: Gained +${luckVal.toFixed(2)} bonus wins above expected (${actWinsStr} actual vs ${expWinsStr} expected based on scoring)">
+          +${luckVal.toFixed(2)}
         </span>
       `;
     } else if (luckVal <= -0.5) {
       luckBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm cursor-help" title="💔 Unlucky Schedule Draw: Lost ${Math.abs(luckVal).toFixed(2)} wins below expected (${actWinsStr} actual vs ${expWinsStr} expected due to tough opponent scores)">
-          <span>💔</span> ${luckVal.toFixed(2)}
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm cursor-help" title="Unlucky Schedule Draw: Lost ${Math.abs(luckVal).toFixed(2)} wins below expected (${actWinsStr} actual vs ${expWinsStr} expected due to tough opponent scores)">
+          ${luckVal.toFixed(2)}
         </span>
       `;
     } else {
       luckBadge = `
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-slate-800 text-slate-300 border border-slate-700 cursor-help" title="⚖️ Fair Schedule: Actual outcome closely matches scoring performance (${luckVal >= 0 ? "+" : ""}${luckVal.toFixed(2)} vs ${expWinsStr} expected)">
-          <span>⚖️</span> ${luckVal >= 0 ? "+" : ""}${luckVal.toFixed(2)}
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-sm font-mono font-black bg-slate-800 text-slate-300 border border-slate-700 cursor-help" title="Fair Schedule: Actual outcome closely matches scoring performance (${luckVal >= 0 ? "+" : ""}${luckVal.toFixed(2)} vs ${expWinsStr} expected)">
+          ${luckVal >= 0 ? "+" : ""}${luckVal.toFixed(2)}
         </span>
       `;
     }
@@ -481,7 +481,6 @@ export function renderLuckTable(records = getActiveRecords()) {
       </td>
       <td class="py-2.5 sm:py-4 px-2 sm:px-4 text-[11px] sm:text-sm text-slate-300 font-medium max-w-[150px] sm:max-w-[200px] truncate" title="League: ${escapeHtml(r.league)}">
         <div class="flex items-center gap-1.5 truncate">
-          <span class="text-slate-500">🏆</span>
           <span class="truncate">${escapeHtml(r.league)}</span>
           ${
             String(r.leagueId).startsWith("espn:") || r.platform === "espn"

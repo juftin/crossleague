@@ -257,7 +257,7 @@ export function updateSettingsButtonBadge() {
 
   if (settingsBtnUserBadge) {
     if (state.currentSyncType === "leagues" && u) {
-      settingsBtnUserBadge.textContent = `🏆 ${u}`;
+      settingsBtnUserBadge.textContent = `League: ${u}`;
       settingsBtnUserBadge.classList.remove("text-slate-400", "border-slate-700/60");
       settingsBtnUserBadge.classList.add("text-emerald-400", "border-emerald-500/30");
     } else if (u) {
@@ -299,9 +299,9 @@ export function updateModeUI() {
     if (scoreTierSelect) {
       scoreTierSelect.innerHTML = `
         <option value="ALL">All Averages</option>
-        <option value="BOOM">🔥 Elite PPG (130+)</option>
-        <option value="SOLID">⚡ Solid PPG (105 - 130)</option>
-        <option value="COLD">🧊 Sub-105 PPG</option>
+        <option value="BOOM">Elite PPG (130+)</option>
+        <option value="SOLID">Solid PPG (105 - 130)</option>
+        <option value="COLD">Sub-105 PPG</option>
       `;
     }
   } else {
@@ -310,9 +310,9 @@ export function updateModeUI() {
     if (scoreTierSelect) {
       scoreTierSelect.innerHTML = `
         <option value="ALL">All Scores</option>
-        <option value="BOOM">🔥 Nuclear (140+ pts)</option>
-        <option value="SOLID">⚡ Solid (100 - 140)</option>
-        <option value="COLD">🧊 Ice Cold (&lt; 100)</option>
+        <option value="BOOM">Nuclear (140+ pts)</option>
+        <option value="SOLID">Solid (100 - 140)</option>
+        <option value="COLD">Ice Cold (&lt; 100)</option>
       `;
     }
   }

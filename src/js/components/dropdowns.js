@@ -37,7 +37,7 @@ export function renderCustomLeagueIdChips() {
           title="Remove League ID"
           aria-label="Remove League ${escapeHtml(id)}"
         >
-          ✕
+          Remove
         </button>
       `;
       const rmBtn = chip.querySelector("button");

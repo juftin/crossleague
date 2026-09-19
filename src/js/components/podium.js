@@ -24,7 +24,7 @@ export function renderPodium(records = getActiveRecords()) {
     {
       rank: 1,
       title: "1ST PLACE",
-      medal: "🥇",
+      medal: "#1",
       glow: "gold-glow",
       color: "text-amber-400",
       orderClass: "order-1 md:order-2",
@@ -34,7 +34,7 @@ export function renderPodium(records = getActiveRecords()) {
     {
       rank: 2,
       title: "2ND PLACE",
-      medal: "🥈",
+      medal: "#2",
       glow: "silver-glow",
       color: "text-slate-300",
       orderClass: "order-2 md:order-1",
@@ -44,7 +44,7 @@ export function renderPodium(records = getActiveRecords()) {
     {
       rank: 3,
       title: "3RD PLACE",
-      medal: "🥉",
+      medal: "#3",
       glow: "bronze-glow",
       color: "text-amber-600",
       orderClass: "order-3 md:order-3",
@@ -100,7 +100,7 @@ export function renderPodium(records = getActiveRecords()) {
               ${escapeHtml(t.teamName)}
             </div>
             <div class="text-xs font-semibold text-emerald-400/90 truncate flex items-center gap-1 mt-1" title="League: ${escapeHtml(t.league)}">
-              <span>🏆</span> <span class="truncate">${escapeHtml(t.league)}</span>
+              <span class="truncate">${escapeHtml(t.league)}</span>
             </div>
           </div>
         </div>
