@@ -119,15 +119,15 @@ tasks:
     cmds:
       - node scripts/build.js {{.CLI_ARGS}}
     deps: [sync]
-  ########################
-  # DOCUMENTATION AND DEVELOPMENT
-  ########################
-  docs:
-    desc: Build Site Distribution for GitHub Pages
-    cmds:
-      - npm run docs
-    deps: [sync]
   #######################################
+  site:
+    desc: Build Web Application Distribution for GitHub Pages
+    cmds:
+      - npm run site
+    deps: [sync]
+  ########################
+  # DEVELOPMENT
+  ########################
   dev:
     desc: Start Local Development Preview Server
     cmds:

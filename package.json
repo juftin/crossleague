@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "build:check": "node scripts/build.js --check",
-    "docs": "node scripts/build.js && mkdir -p site && cp -r dist/* site/ && touch site/.nojekyll",
+    "site": "node scripts/build.js && mkdir -p site && cp -r dist/* site/ && touch site/.nojekyll",
     "format": "prettier --write \"**/*.{js,json,html,css,md,yaml,yml,ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{js,json,html,css,md,yaml,yml,ts,tsx}\"",
     "lint": "eslint .",

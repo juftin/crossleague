@@ -44,10 +44,10 @@ jobs:
           path: node_modules
           key: node-modules-${{ runner.os }}-node-22-${{ hashFiles('package-lock.json') }}
 
-      - name: build-docs
+      - name: build-site
         uses: juftin/actions/taskfile@v1
         with:
-          task: docs
+          task: site
           checkout: false
           install: ${{ steps.node-modules-cache.outputs.cache-hit != 'true' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

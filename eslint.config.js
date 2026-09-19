@@ -6,7 +6,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 
 export default tseslint.config(
   {
-    ignores: ["node_modules/", "dist/", "coverage/", "app.js", "tests/.snapshot-tmp/"]
+    ignores: ["node_modules/", "dist/", "site/", "coverage/", "app.js", "tests/.snapshot-tmp/"]
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
