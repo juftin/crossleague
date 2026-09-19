@@ -66,6 +66,12 @@ tasks:
       - npm run typecheck
     deps: [sync]
   #######################################
+  check:knip:
+    desc: Code Quality Check - Unused Code and Dependencies
+    cmds:
+      - npm run knip
+    deps: [sync]
+  #######################################
   check:build:
     desc: Code Quality Check - Bundle Synchronization
     cmds:
@@ -73,10 +79,11 @@ tasks:
     deps: [sync]
   #######################################
   check:
-    desc: Code Quality Check - Formatting + Linting + Type Checking + Build Check + Test
+    desc: Code Quality Check - Formatting + Linting + Type Checking + Knip + Build Check + Test
     cmds:
       - task: check:style
       - task: check:types
+      - task: check:knip
       - task: test
       - task: check:build
   #######################################

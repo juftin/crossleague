@@ -4,22 +4,18 @@ import { getMaxPlayedWeek } from "../../state/preferences.js";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const WeekNavigator: React.FC = () => {
-  const week = useCrossLeagueStore((s) => s.week);
-  const mode = useCrossLeagueStore((s) => s.mode);
-  const season = useCrossLeagueStore((s) => s.season);
-  const nflState = useCrossLeagueStore((s) => s.nflState);
-  const setWeek = useCrossLeagueStore((s) => s.setWeek);
+  const week = useCrossLeagueStore(s => s.week);
+  const mode = useCrossLeagueStore(s => s.mode);
+  const season = useCrossLeagueStore(s => s.season);
+  const nflState = useCrossLeagueStore(s => s.nflState);
+  const setWeek = useCrossLeagueStore(s => s.setWeek);
 
   const maxPlayed = getMaxPlayedWeek();
   const canGoPrev = week > 1;
   const canGoNext = week < maxPlayed;
 
   const weekLabel =
-    mode === "SEASON_ROLLUP"
-      ? week === 1
-        ? "Week 1 Rollup"
-        : `Weeks 1–${week}`
-      : `Week ${week}`;
+    mode === "SEASON_ROLLUP" ? (week === 1 ? "Week 1 Rollup" : `Weeks 1–${week}`) : `Week ${week}`;
 
   let statusText = "Week 1";
   let statusBadgeClass =
@@ -42,13 +38,13 @@ export const WeekNavigator: React.FC = () => {
   return (
     <div
       id="weekSelectorComponent"
-      className="flex items-center gap-1 bg-slate-900/90 border border-slate-700/80 rounded-xl px-2 py-1 shadow-inner"
+      className="flex items-center gap-1 rounded-xl border border-slate-700/80 bg-slate-900/90 px-2 py-1 shadow-inner"
     >
       <input
         id="weekInput"
         type="hidden"
         value={week}
-        onChange={(e) => setWeek(parseInt(e.target.value, 10) || 1)}
+        onChange={e => setWeek(parseInt(e.target.value, 10) || 1)}
       />
 
       <button
@@ -59,17 +55,20 @@ export const WeekNavigator: React.FC = () => {
           if (canGoPrev) setWeek(week - 1);
         }}
         title={canGoPrev ? `Previous Week (Week ${week - 1}) • Press ←` : "At first week (Week 1)"}
-        className={`w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 text-sm font-black transition ${
+        className={`flex h-7 w-7 items-center justify-center rounded-lg text-sm font-black text-slate-300 transition ${
           canGoPrev
-            ? "hover:bg-slate-800 cursor-pointer active:scale-95"
-            : "opacity-40 cursor-not-allowed"
+            ? "cursor-pointer hover:bg-slate-800 active:scale-95"
+            : "cursor-not-allowed opacity-40"
         }`}
       >
-        <ChevronLeft className="w-3.5 h-3.5" />
+        <ChevronLeft className="h-3.5 w-3.5" />
       </button>
 
-      <div className="px-2 flex items-center gap-2 select-none min-w-[110px] justify-center text-center">
-        <span id="weekDisplayValue" className="text-xs sm:text-sm font-black text-slate-100 whitespace-nowrap">
+      <div className="flex min-w-[110px] items-center justify-center gap-2 px-2 text-center select-none">
+        <span
+          id="weekDisplayValue"
+          className="text-xs font-black whitespace-nowrap text-slate-100 sm:text-sm"
+        >
           {weekLabel}
         </span>
         <span id="weekStatusBadge" className={statusBadgeClass}>
@@ -84,14 +83,16 @@ export const WeekNavigator: React.FC = () => {
         onClick={() => {
           if (canGoNext) setWeek(week + 1);
         }}
-        title={canGoNext ? `Next Week (Week ${week + 1}) • Press →` : `At current week (Week ${week})`}
-        className={`w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 text-sm font-black transition ${
+        title={
+          canGoNext ? `Next Week (Week ${week + 1}) • Press →` : `At current week (Week ${week})`
+        }
+        className={`flex h-7 w-7 items-center justify-center rounded-lg text-sm font-black text-slate-300 transition ${
           canGoNext
-            ? "hover:bg-slate-800 cursor-pointer active:scale-95"
-            : "opacity-40 cursor-not-allowed"
+            ? "cursor-pointer hover:bg-slate-800 active:scale-95"
+            : "cursor-not-allowed opacity-40"
         }`}
       >
-        <ChevronRight className="w-3.5 h-3.5" />
+        <ChevronRight className="h-3.5 w-3.5" />
       </button>
     </div>
   );

@@ -163,84 +163,84 @@ export const Header: React.FC = () => {
       id: "awards",
       elementId: "tabAwards",
       label: "Awards",
-      icon: <Trophy className="w-4 h-4 text-amber-400" />
+      icon: <Trophy className="h-4 w-4 text-amber-400" />
     },
     {
       id: "leaderboard",
       elementId: "tabLeaderboard",
       label: "Leaderboard",
-      icon: <BarChart3 className="w-4 h-4 text-emerald-400" />
+      icon: <BarChart3 className="h-4 w-4 text-emerald-400" />
     },
     {
       id: "visuals",
       elementId: "tabVisuals",
       label: "Analytics",
-      icon: <TrendingUp className="w-4 h-4 text-cyan-400" />
+      icon: <TrendingUp className="h-4 w-4 text-cyan-400" />
     },
     {
       id: "leagueGrid",
       elementId: "tabLeagueGrid",
       label: "Leagues",
-      icon: <Grid className="w-4 h-4 text-indigo-400" />
+      icon: <Grid className="h-4 w-4 text-indigo-400" />
     },
     {
       id: "luck",
       elementId: "tabLuck",
       label: "Luck Index",
-      icon: <Clover className="w-4 h-4 text-emerald-400" />
+      icon: <Clover className="h-4 w-4 text-emerald-400" />
     },
     {
       id: "players",
       elementId: "tabPlayers",
       label: "Player Analytics",
-      icon: <Star className="w-4 h-4 text-amber-300" />
+      icon: <Star className="h-4 w-4 text-amber-300" />
     }
   ];
 
   return (
-    <header className="app-header fixed inset-x-0 top-0 border-b border-slate-800/80 bg-slate-950/90 z-40 backdrop-blur-xl w-full">
-      <div className="w-full px-3 sm:px-8 lg:px-12 py-3 sm:py-4 flex items-center justify-between gap-3 sm:gap-4">
+    <header className="app-header fixed inset-x-0 top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl">
+      <div className="flex w-full items-center justify-between gap-3 px-3 py-3 sm:gap-4 sm:px-8 sm:py-4 lg:px-12">
         {/* Brand & Title */}
-        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
-          <div className="relative group flex-shrink-0">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-60 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none transform-gpu" />
-            <div className="relative w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-slate-900 flex items-center justify-center shadow-xl border border-white/10">
-              <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-4">
+          <div className="group relative flex-shrink-0">
+            <div className="pointer-events-none absolute -inset-0.5 transform-gpu rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-60 blur transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-slate-900 shadow-xl sm:h-12 sm:w-12">
+              <Zap className="h-5 w-5 text-emerald-400 sm:h-6 sm:w-6" />
             </div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 sm:gap-2.5">
-              <h1 className="text-base sm:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-emerald-400 truncate">
+              <h1 className="truncate bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-base font-black tracking-tight text-transparent sm:text-2xl">
                 CrossLeague
               </h1>
             </div>
-            <p className="text-[11px] sm:text-sm text-slate-400 font-semibold mt-0.5 truncate">
+            <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400 sm:text-sm">
               Every league. Every squad. One board.
             </p>
             <p
               id="snapshotSubtitle"
-              className="hidden text-[10px] sm:text-xs text-cyan-400 font-semibold mt-0.5 truncate"
+              className="mt-0.5 hidden truncate text-[10px] font-semibold text-cyan-400 sm:text-xs"
             />
           </div>
         </div>
 
         {/* Right Side: Year/Week Badges, Snapshot Indicator & Hamburger Menu Button */}
-        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3">
           <div
             id="headerBottomRow"
-            className="flex flex-col items-end justify-center gap-1 flex-shrink-0"
+            className="flex flex-shrink-0 flex-col items-end justify-center gap-1"
           >
             <div className="flex items-center gap-1">
               <span
                 id="headerPlatformBadge"
                 title="Active fantasy platform. Change it in Menu & Controls."
-                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] sm:text-xs font-semibold shadow-sm leading-tight ${
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] leading-tight font-semibold shadow-sm sm:text-xs ${
                   platform === "espn"
-                    ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
-                    : "bg-cyan-500/10 border-cyan-400/30 text-cyan-300"
+                    ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                    : "border-cyan-400/30 bg-cyan-500/10 text-cyan-300"
                 }`}
               >
-                {platform === "espn" ? <Shield className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
+                {platform === "espn" ? <Shield className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
                 {platform === "espn" ? "ESPN" : "Sleeper"}
               </span>
 
@@ -248,9 +248,9 @@ export const Header: React.FC = () => {
               <span
                 id="headerSeasonBadge"
                 title="Active Season"
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-800 text-[10px] sm:text-xs font-semibold text-cyan-300 shadow-sm font-mono leading-tight"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-cyan-300 shadow-sm sm:text-xs"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
                 <span id="headerSeasonValue">{season}</span>
               </span>
             </div>
@@ -259,24 +259,24 @@ export const Header: React.FC = () => {
             <span
               id="headerWeekBadge"
               title="Active Matchup Week"
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-800 text-[10px] sm:text-xs font-semibold text-emerald-300 shadow-sm font-mono leading-tight"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-emerald-300 shadow-sm sm:text-xs"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
               <span id="headerWeekValue">{weekLabel}</span>
             </span>
           </div>
 
           <span
             id="snapshotIndicator"
-            className="hidden inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-cyan-950/80 border border-cyan-500/30 text-[10px] sm:text-sm font-semibold text-cyan-300 flex-shrink-0"
+            className="hidden inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-950/80 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-sm"
           >
-            <span className="w-1.5 sm:w-2.5 h-1.5 sm:h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] sm:h-2.5 sm:w-2.5" />
             Snapshot
           </span>
 
           {/* MENU DROPDOWN CONTAINER */}
           <div
-            className="relative inline-block text-left z-50"
+            className="relative z-50 inline-block text-left"
             id="settingsDropdownContainer"
             ref={dropdownRef}
           >
@@ -288,7 +288,7 @@ export const Header: React.FC = () => {
                 if (isSettingsOpen) closeSettingsModal();
                 else openSettingsModal();
               }}
-              className="p-2 sm:p-2.5 rounded-xl glass-card border border-slate-700/80 hover:border-emerald-500/50 text-slate-300 hover:text-white transition flex items-center justify-center shadow-sm active:scale-95 cursor-pointer group"
+              className="glass-card group flex cursor-pointer items-center justify-center rounded-xl border border-slate-700/80 p-2 text-slate-300 shadow-sm transition hover:border-emerald-500/50 hover:text-white active:scale-95 sm:p-2.5"
               aria-expanded={isSettingsOpen}
               aria-haspopup="true"
               aria-label="Menu"
@@ -296,7 +296,7 @@ export const Header: React.FC = () => {
             >
               <svg
                 id="settingsDropdownChevron"
-                className={`w-5 h-5 text-emerald-400 group-hover:text-emerald-300 transition-colors ${
+                className={`h-5 w-5 text-emerald-400 transition-colors group-hover:text-emerald-300 ${
                   isSettingsOpen ? "rotate-180" : ""
                 }`}
                 fill="none"
@@ -317,7 +317,7 @@ export const Header: React.FC = () => {
               <div
                 id="settingsBackdrop"
                 onClick={closeSettingsModal}
-                className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-40 sm:hidden"
+                className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm sm:hidden"
                 aria-hidden="true"
               />
             )}
@@ -327,13 +327,13 @@ export const Header: React.FC = () => {
               id="settingsModal"
               className={`${
                 isSettingsOpen ? "" : "hidden"
-              } fixed inset-x-3 top-16 max-h-[calc(100dvh-6.5rem-env(safe-area-inset-bottom,0px))] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[420px] sm:max-w-md sm:max-h-[85vh] overflow-y-auto overscroll-contain rounded-2xl glass-card border border-slate-700/80 shadow-2xl p-4 pb-16 sm:p-5 sm:pb-5 z-50 space-y-4 backdrop-blur-xl bg-slate-950/95 ring-1 ring-white/10 text-left touch-scroll`}
+              } glass-card touch-scroll fixed inset-x-3 top-16 z-50 max-h-[calc(100dvh-6.5rem-env(safe-area-inset-bottom,0px))] space-y-4 overflow-y-auto overscroll-contain rounded-2xl border border-slate-700/80 bg-slate-950/95 p-4 pb-16 text-left shadow-2xl ring-1 ring-white/10 backdrop-blur-xl sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:max-h-[85vh] sm:w-[420px] sm:max-w-md sm:p-5 sm:pb-5`}
             >
               {/* Menu Header */}
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <div className="flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-200">
+                  <Sliders className="h-4 w-4 text-emerald-400" />
+                  <span className="text-xs font-black tracking-wider text-slate-200 uppercase">
                     Menu & Controls
                   </span>
                 </div>
@@ -341,21 +341,21 @@ export const Header: React.FC = () => {
                   type="button"
                   id="btnCloseSettingsModal"
                   onClick={closeSettingsModal}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition cursor-pointer text-xs"
+                  className="cursor-pointer rounded-lg bg-slate-800/60 p-1 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
                   aria-label="Close menu"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
               {/* 1. Matchup Week Stepper inside Menu */}
               <div className="space-y-1.5">
-                <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 px-1">
+                <span className="block px-1 text-[10px] font-black tracking-wider text-slate-400 uppercase">
                   Matchup Week
                 </span>
                 <div
                   id="weekSelectorComponent"
-                  className="flex items-center justify-between p-1 bg-slate-900 rounded-xl border border-slate-800"
+                  className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-1"
                 >
                   <button
                     type="button"
@@ -365,21 +365,21 @@ export const Header: React.FC = () => {
                       if (canGoPrev) setWeek(week - 1);
                     }}
                     title={canGoPrev ? "Previous Week (← Left Arrow)" : "At first week"}
-                    className={`w-8 h-8 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center font-bold text-xs shadow-sm ${
-                      canGoPrev ? "cursor-pointer" : "opacity-40 cursor-not-allowed"
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700/60 bg-slate-950 text-xs font-bold text-slate-300 shadow-sm transition hover:border-slate-600 hover:bg-slate-800 hover:text-white active:scale-95 ${
+                      canGoPrev ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                     }`}
                     aria-label="Previous Week"
                   >
-                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <ChevronLeft className="h-3.5 w-3.5" />
                   </button>
 
                   <div
                     id="weekDisplayContainer"
-                    className="flex items-center gap-2 px-3 select-none justify-center"
+                    className="flex items-center justify-center gap-2 px-3 select-none"
                   >
                     <span
                       id="weekDisplayValue"
-                      className="text-sm font-extrabold text-white whitespace-nowrap font-mono tracking-tight"
+                      className="font-mono text-sm font-extrabold tracking-tight whitespace-nowrap text-white"
                     >
                       {weekLabel}
                     </span>
@@ -396,12 +396,12 @@ export const Header: React.FC = () => {
                       if (canGoNext) setWeek(week + 1);
                     }}
                     title={canGoNext ? "Next Week (→ Right Arrow)" : "At current week"}
-                    className={`w-8 h-8 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center font-bold text-xs shadow-sm ${
-                      canGoNext ? "cursor-pointer" : "opacity-40 cursor-not-allowed"
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700/60 bg-slate-950 text-xs font-bold text-slate-300 shadow-sm transition hover:border-slate-600 hover:bg-slate-800 hover:text-white active:scale-95 ${
+                      canGoNext ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                     }`}
                     aria-label="Next Week"
                   >
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
@@ -410,34 +410,34 @@ export const Header: React.FC = () => {
               <form id="filterForm" onSubmit={handleApplySettings} className="space-y-3.5">
                 {/* Platform Selector */}
                 <div className="space-y-1.5">
-                  <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 px-1">
+                  <span className="block px-1 text-[10px] font-black tracking-wider text-slate-400 uppercase">
                     Fantasy Platform
                   </span>
-                  <div className="flex items-center p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs font-bold">
+                  <div className="flex items-center rounded-xl border border-slate-800 bg-slate-900 p-1 text-xs font-bold">
                     <button
                       type="button"
                       id="platformSleeperBtn"
                       onClick={() => setPlatform("sleeper")}
-                      className={`flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold ${
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
                         platform === "sleeper"
-                          ? "text-slate-200 bg-slate-800 shadow-sm"
+                          ? "bg-slate-800 text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                      <Zap className="h-3.5 w-3.5 text-emerald-400" />
                       <span>Sleeper</span>
                     </button>
                     <button
                       type="button"
                       id="platformEspnBtn"
                       onClick={() => setPlatform("espn")}
-                      className={`flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer flex items-center justify-center gap-1.5 text-xs ${
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs transition ${
                         platform === "espn"
-                          ? "text-white bg-rose-900/80 border border-rose-500/40 shadow-sm font-bold"
+                          ? "border border-rose-500/40 bg-rose-900/80 font-bold text-white shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      <Shield className="w-3.5 h-3.5 text-rose-400" />
+                      <Shield className="h-3.5 w-3.5 text-rose-400" />
                       <span>ESPN</span>
                     </button>
                   </div>
@@ -447,7 +447,7 @@ export const Header: React.FC = () => {
                 <div className="space-y-2">
                   <div
                     id="syncTypeButtonsContainer"
-                    className={`flex items-center p-1 bg-slate-900 rounded-xl border border-slate-800 text-xs font-bold ${
+                    className={`flex items-center rounded-xl border border-slate-800 bg-slate-900 p-1 text-xs font-bold ${
                       platform === "espn" ? "hidden" : ""
                     }`}
                   >
@@ -455,26 +455,26 @@ export const Header: React.FC = () => {
                       type="button"
                       id="syncTypeUserBtn"
                       onClick={() => setSyncType("user")}
-                      className={`flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center transition ${
                         syncType === "user"
-                          ? "text-slate-200 bg-slate-800 shadow-sm font-bold"
+                          ? "bg-slate-800 font-bold text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      <User className="w-3.5 h-3.5 text-cyan-400" />
+                      <User className="h-3.5 w-3.5 text-cyan-400" />
                       <span>Username</span>
                     </button>
                     <button
                       type="button"
                       id="syncTypeLeaguesBtn"
                       onClick={() => setSyncType("leagues")}
-                      className={`flex-1 py-1.5 px-2 rounded-lg text-center transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center transition ${
                         syncType === "leagues"
-                          ? "text-slate-200 bg-slate-800 shadow-sm font-bold"
+                          ? "bg-slate-800 font-bold text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                      <Trophy className="h-3.5 w-3.5 text-amber-400" />
                       <span>League IDs</span>
                     </button>
                   </div>
@@ -486,10 +486,10 @@ export const Header: React.FC = () => {
                   >
                     <label
                       htmlFor="userIdInput"
-                      className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between"
+                      className="mb-1.5 block flex items-center justify-between text-xs font-black tracking-wider text-slate-400 uppercase"
                     >
                       <span id="userIdInputLabel">Sleeper Username or ID</span>
-                      <span className="text-[10px] text-emerald-400 font-bold lowercase">
+                      <span className="text-[10px] font-bold text-emerald-400 lowercase">
                         remembered
                       </span>
                     </label>
@@ -500,9 +500,9 @@ export const Header: React.FC = () => {
                         value={inputUser}
                         onChange={e => setInputUser(e.target.value)}
                         placeholder="e.g. username or numeric ID"
-                        className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all placeholder-slate-500 pl-9 font-medium"
+                        className="w-full rounded-xl border border-slate-700/80 bg-slate-900 px-3.5 py-2 pl-9 text-sm font-medium text-white placeholder-slate-500 transition-all focus:border-transparent focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
-                      <User className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                      <User className="absolute top-2.5 left-3 h-4 w-4 text-slate-500" />
                     </div>
                   </div>
 
@@ -511,11 +511,11 @@ export const Header: React.FC = () => {
                     id="leaguesSyncPanel"
                     className={`space-y-2.5 ${syncType === "leagues" || platform === "espn" ? "" : "hidden"}`}
                   >
-                    <label className="block text-xs font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                    <label className="block flex items-center justify-between text-xs font-black tracking-wider text-slate-400 uppercase">
                       <span id="customLeaguesLabel">
                         {platform === "espn" ? "ESPN League IDs (Public)" : "League IDs"}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-medium">multi-league</span>
+                      <span className="text-[10px] font-medium text-slate-500">multi-league</span>
                     </label>
 
                     <div className="flex items-center gap-1.5">
@@ -532,9 +532,9 @@ export const Header: React.FC = () => {
                             }
                           }}
                           placeholder={platform === "espn" ? "e.g. espn:12345678" : "e.g. 12345678"}
-                          className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all placeholder-slate-500 pl-8 font-mono"
+                          className="w-full rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-2 pl-8 font-mono text-xs text-white placeholder-slate-500 transition-all focus:border-transparent focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
-                        <span className="absolute left-2.5 top-2 text-xs text-slate-500 font-mono">
+                        <span className="absolute top-2 left-2.5 font-mono text-xs text-slate-500">
                           #
                         </span>
                       </div>
@@ -542,7 +542,7 @@ export const Header: React.FC = () => {
                         type="button"
                         id="btnAddCustomLeagueId"
                         onClick={handleAddLeagueId}
-                        className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition border border-slate-700 cursor-pointer shadow-sm"
+                        className="cursor-pointer rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-bold text-slate-200 shadow-sm transition hover:bg-slate-700 hover:text-white"
                       >
                         Add
                       </button>
@@ -551,20 +551,20 @@ export const Header: React.FC = () => {
                     {/* Chips */}
                     <div
                       id="customLeagueIdsChips"
-                      className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto"
+                      className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto"
                     >
                       {customLeagueIds.map(id => (
                         <span
                           key={id}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono text-slate-200"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 font-mono text-xs text-slate-200"
                         >
                           <span>{id}</span>
                           <button
                             type="button"
                             onClick={() => removeCustomLeagueId(id)}
-                            className="text-slate-400 hover:text-rose-400 font-bold ml-1 cursor-pointer"
+                            className="ml-1 cursor-pointer font-bold text-slate-400 hover:text-rose-400"
                           >
-                            <X className="w-3.5 h-3.5" />
+                            <X className="h-3.5 w-3.5" />
                           </button>
                         </span>
                       ))}
@@ -577,7 +577,7 @@ export const Header: React.FC = () => {
                   <div>
                     <label
                       htmlFor="modeSelect"
-                      className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5"
+                      className="mb-1.5 block text-xs font-black tracking-wider text-slate-400 uppercase"
                     >
                       Scope
                     </label>
@@ -585,7 +585,7 @@ export const Header: React.FC = () => {
                       id="modeSelect"
                       value={mode}
                       onChange={e => setMode(e.target.value as SyncMode)}
-                      className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-semibold cursor-pointer"
+                      className="w-full cursor-pointer rounded-xl border border-slate-700/80 bg-slate-900 px-2.5 py-2 text-xs font-semibold text-white transition-all focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:text-sm"
                     >
                       <option value="WEEKLY">Weekly Matchup</option>
                       <option value="SEASON_ROLLUP">Season-to-Date</option>
@@ -595,7 +595,7 @@ export const Header: React.FC = () => {
                   <div>
                     <label
                       htmlFor="seasonInput"
-                      className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5"
+                      className="mb-1.5 block text-xs font-black tracking-wider text-slate-400 uppercase"
                     >
                       Season
                     </label>
@@ -603,7 +603,7 @@ export const Header: React.FC = () => {
                       id="seasonInput"
                       value={season}
                       onChange={e => setSeason(Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-semibold cursor-pointer"
+                      className="w-full cursor-pointer rounded-xl border border-slate-700/80 bg-slate-900 px-2.5 py-2 text-xs font-semibold text-white transition-all focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:text-sm"
                     >
                       {[2026, 2025, 2024, 2023, 2022, 2021].map(yr => (
                         <option key={yr} value={yr}>
@@ -622,14 +622,14 @@ export const Header: React.FC = () => {
                     type="button"
                     id="btnCancelSettingsModal"
                     onClick={closeSettingsModal}
-                    className="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 transition cursor-pointer border border-slate-800"
+                    className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-400 transition hover:bg-slate-800 hover:text-white"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     id="btnSaveSettingsModal"
-                    className="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2 text-xs font-black tracking-wider text-slate-950 uppercase shadow-lg shadow-emerald-500/20 transition hover:from-emerald-400 hover:to-teal-500 active:scale-98"
                   >
                     <span>Apply & Sync</span>
                   </button>
@@ -639,9 +639,9 @@ export const Header: React.FC = () => {
               {/* 3. Active Leagues Multi-Select Dropdown */}
               <div
                 id="leagueDropdownContainer"
-                className="border-t border-slate-800/80 pt-3 space-y-1.5"
+                className="space-y-1.5 border-t border-slate-800/80 pt-3"
               >
-                <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 px-1">
+                <span className="block px-1 text-[10px] font-black tracking-wider text-slate-400 uppercase">
                   Active Leagues
                 </span>
                 <div className="relative">
@@ -649,13 +649,13 @@ export const Header: React.FC = () => {
                     type="button"
                     id="leagueDropdownBtn"
                     onClick={() => setIsLeagueFilterOpen(!isLeagueFilterOpen)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-emerald-500/50 text-slate-200 hover:text-white transition flex items-center justify-between text-xs font-semibold cursor-pointer shadow-sm active:scale-98 group"
+                    className="group flex w-full cursor-pointer items-center justify-between rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-200 shadow-sm transition hover:border-emerald-500/50 hover:text-white active:scale-98"
                     aria-expanded={isLeagueFilterOpen}
                     aria-haspopup="true"
                     title="Filter Active Leagues"
                   >
-                    <div className="flex items-center gap-2 truncate min-w-0 pr-2">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <div className="flex min-w-0 items-center gap-2 truncate pr-2">
+                      <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" />
                       <span id="leagueDropdownLabel" className="truncate text-slate-200">
                         {totalLeaguesCount === 0
                           ? "No Leagues Loaded"
@@ -664,16 +664,16 @@ export const Header: React.FC = () => {
                             : `${selectedCount} of ${totalLeaguesCount} Selected`}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <div className="flex flex-shrink-0 items-center gap-1.5">
                       <span
                         id="leagueDropdownBadge"
-                        className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded-full border border-emerald-500/30 font-mono"
+                        className="rounded-full border border-emerald-500/30 bg-emerald-950/80 px-1.5 py-0.5 font-mono text-[10px] font-bold text-emerald-400"
                       >
                         {selectedCount} / {totalLeaguesCount}
                       </span>
                       <ChevronDown
                         id="leagueDropdownChevron"
-                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 flex-shrink-0 ${
+                        className={`h-3.5 w-3.5 flex-shrink-0 text-slate-400 transition-transform duration-200 ${
                           isLeagueFilterOpen ? "rotate-180" : ""
                         }`}
                       />
@@ -684,10 +684,10 @@ export const Header: React.FC = () => {
                   {isLeagueFilterOpen && (
                     <div
                       id="leagueDropdownMenu"
-                      className="mt-1.5 w-full rounded-xl bg-slate-900 border border-slate-700/80 shadow-xl p-2.5 space-y-2 z-10"
+                      className="z-10 mt-1.5 w-full space-y-2 rounded-xl border border-slate-700/80 bg-slate-900 p-2.5 shadow-xl"
                     >
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 px-1">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <div className="flex items-center justify-between border-b border-slate-800 px-1 pb-1.5">
+                        <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase">
                           Select Leagues
                         </span>
                         <div className="flex items-center gap-1.5">
@@ -695,7 +695,7 @@ export const Header: React.FC = () => {
                             type="button"
                             id="selectAllLeaguesBtn"
                             onClick={selectAllLeagues}
-                            className="px-2 py-0.5 rounded-md bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-emerald-300 text-[10px] font-bold transition border border-slate-800 cursor-pointer"
+                            className="cursor-pointer rounded-md border border-slate-800 bg-slate-950 px-2 py-0.5 text-[10px] font-bold text-slate-300 transition hover:bg-slate-800 hover:text-emerald-300"
                           >
                             All
                           </button>
@@ -703,7 +703,7 @@ export const Header: React.FC = () => {
                             type="button"
                             id="clearAllLeaguesBtn"
                             onClick={clearAllLeagues}
-                            className="px-2 py-0.5 rounded-md bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-rose-300 text-[10px] font-bold transition border border-slate-800 cursor-pointer"
+                            className="cursor-pointer rounded-md border border-slate-800 bg-slate-950 px-2 py-0.5 text-[10px] font-bold text-slate-400 transition hover:bg-slate-800 hover:text-rose-300"
                           >
                             Clear
                           </button>
@@ -711,7 +711,7 @@ export const Header: React.FC = () => {
                       </div>
                       <div
                         id="leagueDropdownList"
-                        className="max-h-48 overflow-y-auto overscroll-contain touch-scroll space-y-1 pr-1"
+                        className="touch-scroll max-h-48 space-y-1 overflow-y-auto overscroll-contain pr-1"
                       >
                         {leagueEntries.map(([id, info]) => {
                           const isChecked =
@@ -719,16 +719,16 @@ export const Header: React.FC = () => {
                           return (
                             <label
                               key={id}
-                              className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-slate-800/80 cursor-pointer text-xs text-slate-200 transition select-none"
+                              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-xs text-slate-200 transition select-none hover:bg-slate-800/80"
                             >
                               <input
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => toggleSelectedLeagueId(id)}
-                                className="rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-0 cursor-pointer"
+                                className="cursor-pointer rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-0"
                               />
-                              <span className="truncate flex-1 font-medium">{info.name || id}</span>
-                              <span className="text-[10px] text-slate-400 font-mono">
+                              <span className="flex-1 truncate font-medium">{info.name || id}</span>
+                              <span className="font-mono text-[10px] text-slate-400">
                                 {info.totalRosters}T
                               </span>
                             </label>
@@ -741,17 +741,17 @@ export const Header: React.FC = () => {
               </div>
 
               {/* Quick Actions Section */}
-              <div className="border-t border-slate-800/80 pt-3 space-y-1.5">
-                <span className="block text-[10px] font-black uppercase tracking-wider text-slate-500 px-1">
+              <div className="space-y-1.5 border-t border-slate-800/80 pt-3">
+                <span className="block px-1 text-[10px] font-black tracking-wider text-slate-500 uppercase">
                   Quick Actions
                 </span>
                 <button
                   type="button"
                   id="copyRecapBtn"
                   onClick={handleCopyRecap}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-200 hover:text-white transition flex items-center gap-2.5 text-xs font-bold border border-slate-800 cursor-pointer"
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white"
                 >
-                  <Copy className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                  <Copy className="h-3.5 w-3.5 flex-shrink-0 text-cyan-400" />
                   <span id="copyRecapBtnText">Copy Recap</span>
                 </button>
 
@@ -759,20 +759,20 @@ export const Header: React.FC = () => {
                   type="button"
                   id="shareUrlBtn"
                   onClick={handleShare}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-200 hover:text-white transition flex items-center gap-2.5 text-xs font-bold border border-slate-800 cursor-pointer"
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white"
                 >
-                  <Share2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <Share2 className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400" />
                   <span id="shareUrlBtnText">Share</span>
                 </button>
 
-                <div className="pt-1 mt-1 border-t border-slate-800">
+                <div className="mt-1 border-t border-slate-800 pt-1">
                   <button
                     type="button"
                     id="clearDataBtn"
                     onClick={handleClearData}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900/40 hover:bg-rose-950/40 text-rose-400 transition flex items-center gap-2.5 text-xs font-bold border border-slate-800/80 cursor-pointer"
+                    className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-slate-800/80 bg-slate-900/40 px-3 py-2 text-xs font-bold text-rose-400 transition hover:bg-rose-950/40"
                   >
-                    <Trash2 className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                    <Trash2 className="h-3.5 w-3.5 flex-shrink-0 text-rose-400" />
                     <span id="clearDataBtnText">Clear Data</span>
                   </button>
                 </div>
@@ -783,7 +783,7 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Desktop Navigation Bar directly below the header */}
-      <div className="hidden md:block border-t border-slate-800/80 bg-slate-950/60 px-3 sm:px-8 lg:px-12 py-2">
+      <div className="hidden border-t border-slate-800/80 bg-slate-950/60 px-3 py-2 sm:px-8 md:block lg:px-12">
         <nav
           className="grid grid-cols-2 gap-1.5 md:grid-cols-3 lg:flex lg:items-center"
           aria-label="Dashboard views"
@@ -796,10 +796,10 @@ export const Header: React.FC = () => {
                 id={t.elementId}
                 type="button"
                 onClick={() => setActiveTab(t.id)}
-                className={`w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center text-xs sm:text-sm font-bold lg:flex-1 ${
+                className={`flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border px-2 py-1.5 text-center text-xs font-bold whitespace-nowrap transition-all active:scale-95 sm:gap-2 sm:px-3 sm:py-2 sm:text-sm lg:flex-1 ${
                   isActive
-                    ? "bg-slate-800 text-white shadow-sm border-slate-700 font-black"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/60 border-transparent"
+                    ? "border-slate-700 bg-slate-800 font-black text-white shadow-sm"
+                    : "border-transparent text-slate-400 hover:bg-slate-800/60 hover:text-white"
                 }`}
               >
                 <span>{t.icon}</span>

@@ -1,18 +1,15 @@
 import React from "react";
+import { Building2, Flame, Snowflake, BarChart3, Crown, Trophy } from "lucide-react";
 import {
-  Building2,
-  Flame,
-  Snowflake,
-  BarChart3,
-  Crown,
-  Trophy
-} from "lucide-react";
-import { useCrossLeagueStore, useActiveRecords, useActiveLeaguesMap } from "../../state/useCrossLeagueStore.js";
+  useCrossLeagueStore,
+  useActiveRecords,
+  useActiveLeaguesMap
+} from "../../state/useCrossLeagueStore.js";
 
 export const SummaryCards: React.FC = () => {
   const records = useActiveRecords();
   const activeLeagues = useActiveLeaguesMap();
-  const mode = useCrossLeagueStore((s) => s.mode);
+  const mode = useCrossLeagueStore(s => s.mode);
 
   const totalSquads = records.length;
   const totalActiveLeagues = Object.keys(activeLeagues || {}).length;
@@ -35,8 +32,8 @@ export const SummaryCards: React.FC = () => {
   // Power League Benchmark
   let topLeagueAvg = 0;
   let topLeagueName = "-";
-  Object.keys(activeLeagues || {}).forEach((lid) => {
-    const leagueTeams = records.filter((r) => r.leagueId === lid);
+  Object.keys(activeLeagues || {}).forEach(lid => {
+    const leagueTeams = records.filter(r => r.leagueId === lid);
     if (leagueTeams.length > 0) {
       const lSum = leagueTeams.reduce((a, b) => a + (b.points || 0), 0);
       const lAvg = lSum / leagueTeams.length;
@@ -48,64 +45,75 @@ export const SummaryCards: React.FC = () => {
   });
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
       {/* 1. Leagues & Squads */}
-      <div className="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between">
+      <div className="glass-card glass-card-hover relative flex flex-col justify-between rounded-2xl border border-slate-800/80 p-5">
         <div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-black uppercase tracking-wider">
+            <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
               Leagues &amp; Squads
             </span>
-            <Building2 className="w-4 h-4 text-slate-400" />
+            <Building2 className="h-4 w-4 text-slate-400" />
           </div>
-          <div className="flex items-baseline gap-2 mt-2">
+          <div className="mt-2 flex items-baseline gap-2">
             <div className="flex items-baseline gap-1">
-              <span id="statTotalLeagues" className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-mono">
+              <span
+                id="statTotalLeagues"
+                className="font-mono text-2xl font-black text-white sm:text-3xl lg:text-4xl"
+              >
                 {totalActiveLeagues}
               </span>
               <span className="text-xs font-bold text-slate-400 uppercase">Leagues</span>
             </div>
-            <span className="text-slate-600 font-black">•</span>
+            <span className="font-black text-slate-600">•</span>
             <div className="flex items-baseline gap-1">
-              <span id="statTotalTeams" className="text-2xl sm:text-3xl lg:text-4xl font-black text-cyan-300 font-mono">
+              <span
+                id="statTotalTeams"
+                className="font-mono text-2xl font-black text-cyan-300 sm:text-3xl lg:text-4xl"
+              >
                 {totalSquads}
               </span>
               <span className="text-xs font-bold text-cyan-400/80 uppercase">Teams</span>
             </div>
           </div>
         </div>
-        <div className="mt-2 pt-2 border-t border-slate-800/60">
-          <div className="text-xs text-slate-500 font-semibold">Active in filter</div>
+        <div className="mt-2 border-t border-slate-800/60 pt-2">
+          <div className="text-xs font-semibold text-slate-500">Active in filter</div>
         </div>
       </div>
 
       {/* 2. Peak Score */}
-      <div className="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between">
+      <div className="glass-card glass-card-hover relative flex flex-col justify-between rounded-2xl border border-slate-800/80 p-5">
         <div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-black uppercase tracking-wider">
+            <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
               {mode === "SEASON_ROLLUP" ? "Peak PPG" : "Peak Score"}
             </span>
-            <Flame className="w-4 h-4 text-emerald-400" />
+            <Flame className="h-4 w-4 text-emerald-400" />
           </div>
-          <div id="statHighScore" className="text-3xl sm:text-4xl font-black text-emerald-400 mt-2 font-mono">
+          <div
+            id="statHighScore"
+            className="mt-2 font-mono text-3xl font-black text-emerald-400 sm:text-4xl"
+          >
             {topOverall ? topOverall.points.toFixed(2) : "0.00"}
           </div>
         </div>
-        <div className="mt-2 pt-2 border-t border-slate-800/60">
+        <div className="mt-2 border-t border-slate-800/60 pt-2">
           <div
             id="statHighTeam"
-            className="text-xs sm:text-sm text-slate-200 font-bold truncate"
+            className="truncate text-xs font-bold text-slate-200 sm:text-sm"
             title={topOverall ? `${topOverall.manager} (${topOverall.teamName})` : ""}
           >
             {topOverall ? `${topOverall.manager} - ${topOverall.teamName}` : "-"}
           </div>
           <div
             id="statHighLeague"
-            className="text-xs text-emerald-400/90 font-semibold truncate flex items-center gap-1 mt-0.5"
-            title={topOverall ? `League: ${(topOverall as any).league || topOverall.leagueName}` : ""}
+            className="mt-0.5 flex items-center gap-1 truncate text-xs font-semibold text-emerald-400/90"
+            title={
+              topOverall ? `League: ${(topOverall as any).league || topOverall.leagueName}` : ""
+            }
           >
-            <Trophy className="w-3.5 h-3.5 flex-shrink-0" />
+            <Trophy className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="truncate">
               {topOverall ? (topOverall as any).league || topOverall.leagueName : "-"}
             </span>
@@ -114,32 +122,39 @@ export const SummaryCards: React.FC = () => {
       </div>
 
       {/* 3. Lowest Score */}
-      <div className="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between">
+      <div className="glass-card glass-card-hover relative flex flex-col justify-between rounded-2xl border border-slate-800/80 p-5">
         <div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-black uppercase tracking-wider">
+            <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
               {mode === "SEASON_ROLLUP" ? "Lowest PPG" : "Lowest Score"}
             </span>
-            <Snowflake className="w-4 h-4 text-rose-400" />
+            <Snowflake className="h-4 w-4 text-rose-400" />
           </div>
-          <div id="statLowScore" className="text-3xl sm:text-4xl font-black text-rose-400 mt-2 font-mono">
+          <div
+            id="statLowScore"
+            className="mt-2 font-mono text-3xl font-black text-rose-400 sm:text-4xl"
+          >
             {lowestOverall ? lowestOverall.points.toFixed(2) : "0.00"}
           </div>
         </div>
-        <div className="mt-2 pt-2 border-t border-slate-800/60">
+        <div className="mt-2 border-t border-slate-800/60 pt-2">
           <div
             id="statLowTeam"
-            className="text-xs sm:text-sm text-slate-200 font-bold truncate"
+            className="truncate text-xs font-bold text-slate-200 sm:text-sm"
             title={lowestOverall ? `${lowestOverall.manager} (${lowestOverall.teamName})` : ""}
           >
             {lowestOverall ? `${lowestOverall.manager} - ${lowestOverall.teamName}` : "-"}
           </div>
           <div
             id="statLowLeague"
-            className="text-xs text-rose-400/90 font-semibold truncate flex items-center gap-1 mt-0.5"
-            title={lowestOverall ? `League: ${(lowestOverall as any).league || lowestOverall.leagueName}` : ""}
+            className="mt-0.5 flex items-center gap-1 truncate text-xs font-semibold text-rose-400/90"
+            title={
+              lowestOverall
+                ? `League: ${(lowestOverall as any).league || lowestOverall.leagueName}`
+                : ""
+            }
           >
-            <Trophy className="w-3.5 h-3.5 flex-shrink-0" />
+            <Trophy className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="truncate">
               {lowestOverall ? (lowestOverall as any).league || lowestOverall.leagueName : "-"}
             </span>
@@ -148,57 +163,63 @@ export const SummaryCards: React.FC = () => {
       </div>
 
       {/* 4. Benchmark */}
-      <div className="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between">
+      <div className="glass-card glass-card-hover relative flex flex-col justify-between rounded-2xl border border-slate-800/80 p-5">
         <div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-black uppercase tracking-wider">
+            <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
               Benchmark
             </span>
-            <BarChart3 className="w-4 h-4 text-indigo-400" />
+            <BarChart3 className="h-4 w-4 text-indigo-400" />
           </div>
-          <div id="statAvgScore" className="text-3xl sm:text-4xl font-black text-indigo-300 mt-2 font-mono">
+          <div
+            id="statAvgScore"
+            className="mt-2 font-mono text-3xl font-black text-indigo-300 sm:text-4xl"
+          >
             {avgPts.toFixed(2)}
           </div>
         </div>
-        <div className="mt-2 pt-2 border-t border-slate-800/60">
-          <div id="statMedianScore" className="text-xs sm:text-sm text-slate-300 font-semibold">
+        <div className="mt-2 border-t border-slate-800/60 pt-2">
+          <div id="statMedianScore" className="text-xs font-semibold text-slate-300 sm:text-sm">
             Median: {medianPts.toFixed(2)} pts
           </div>
-          <div className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+          <div className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
             Cross-league average
           </div>
         </div>
       </div>
 
       {/* 5. Power League */}
-      <div className="glass-card rounded-2xl p-5 glass-card-hover border border-slate-800/80 relative flex flex-col justify-between">
+      <div className="glass-card glass-card-hover relative flex flex-col justify-between rounded-2xl border border-slate-800/80 p-5">
         <div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-black uppercase tracking-wider">
+            <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
               Power League
             </span>
-            <Crown className="w-4 h-4 text-amber-400" />
+            <Crown className="h-4 w-4 text-amber-400" />
           </div>
-          <div id="statTopLeagueAvg" className="text-3xl sm:text-4xl font-black text-amber-400 mt-2 font-mono">
+          <div
+            id="statTopLeagueAvg"
+            className="mt-2 font-mono text-3xl font-black text-amber-400 sm:text-4xl"
+          >
             {topLeagueAvg > 0 ? topLeagueAvg.toFixed(2) : "0.00"}
           </div>
         </div>
-        <div className="mt-2 pt-2 border-t border-slate-800/60">
+        <div className="mt-2 border-t border-slate-800/60 pt-2">
           <div
             id="statTopLeagueName"
-            className="text-xs sm:text-sm text-slate-200 font-bold truncate flex items-center gap-1"
+            className="flex items-center gap-1 truncate text-xs font-bold text-slate-200 sm:text-sm"
             title={topLeagueAvg > 0 ? topLeagueName : ""}
           >
             {topLeagueAvg > 0 ? (
               <>
-                <Trophy className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                <Trophy className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
                 <span className="truncate">{topLeagueName}</span>
               </>
             ) : (
               "-"
             )}
           </div>
-          <div className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+          <div className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
             Highest league average
           </div>
         </div>

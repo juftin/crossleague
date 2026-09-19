@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/knip@5/overview.json",
+  "entry": [
+    "src/index.html",
+    "src/js/index.js",
+    "src/js/analytics/index.js",
+    "src/js/api/index.js",
+    "src/js/export/index.js",
+    "tests/**/*.test.js"
+  ],
+  "project": ["src/**/*.{js,ts,tsx}", "scripts/**/*.js", "tests/**/*.js"],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "exports": "warn",
+    "types": "off",
+    "files": "warn"
+  }
+}

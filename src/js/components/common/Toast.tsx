@@ -3,14 +3,17 @@ import { useCrossLeagueStore } from "../../state/useCrossLeagueStore.js";
 import { CheckCircle2, XCircle, AlertTriangle, Zap, X } from "lucide-react";
 
 export const ToastContainer: React.FC = () => {
-  const toasts = useCrossLeagueStore((s) => s.toasts);
-  const removeToast = useCrossLeagueStore((s) => s.removeToast);
+  const toasts = useCrossLeagueStore(s => s.toasts);
+  const removeToast = useCrossLeagueStore(s => s.removeToast);
 
   if (toasts.length === 0) return null;
 
   return (
-    <div id="toastContainer" className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full">
-      {toasts.map((toast) => {
+    <div
+      id="toastContainer"
+      className="pointer-events-none fixed right-4 bottom-20 z-50 flex w-full max-w-sm flex-col gap-2 sm:right-6 sm:bottom-6"
+    >
+      {toasts.map(toast => {
         let borderClass = "border-slate-700 bg-slate-900/95 text-slate-200";
         let IconComponent = Zap;
         let iconClass = "text-cyan-400";
@@ -31,18 +34,18 @@ export const ToastContainer: React.FC = () => {
         return (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl border shadow-2xl backdrop-blur-xl transition-all duration-300 transform-gpu translate-y-0 opacity-100 ${borderClass}`}
+            className={`pointer-events-auto flex translate-y-0 transform-gpu items-center justify-between gap-3 rounded-xl border px-4 py-3 opacity-100 shadow-2xl backdrop-blur-xl transition-all duration-300 ${borderClass}`}
           >
             <div className="flex items-center gap-2.5 text-xs font-semibold">
-              <IconComponent className={`w-4 h-4 flex-shrink-0 ${iconClass}`} />
+              <IconComponent className={`h-4 w-4 flex-shrink-0 ${iconClass}`} />
               <span>{toast.text}</span>
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-slate-400 hover:text-white p-1 rounded transition cursor-pointer"
+              className="cursor-pointer rounded p-1 text-slate-400 transition hover:text-white"
               aria-label="Dismiss toast"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
         );

@@ -33,6 +33,9 @@ jobs:
           - name: check - types
             task: check:types
             install: true
+          - name: check - knip
+            task: check:knip
+            install: true
           - name: check - build
             task: check:build
             install: true
