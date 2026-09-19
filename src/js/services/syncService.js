@@ -8,6 +8,7 @@ import { fetchEspnLeague } from "../api/espn.js";
 import { initPlayersDb } from "../api/players.js";
 import { calculateStdDev } from "../analytics/statistics.js";
 import { saveReportToCache, loadReportFromCache } from "../state/cache.js";
+import { updateUrlParams } from "../state/urlParams.js";
 
 export async function syncData(forceRefresh = false) {
   const store = useCrossLeagueStore.getState();
@@ -74,6 +75,20 @@ export async function syncData(forceRefresh = false) {
       initPlayersDb();
       store.setError(null);
       store.setLoading(false);
+      updateUrlParams({
+        platform,
+        user: inputUser,
+        userId: store.userId,
+        userName: store.userName,
+        customLeagueIds: targetIds,
+        selectedLeagueIds: store.selectedLeagueIds,
+        allLeaguesData: cached.allLeaguesData || [],
+        season,
+        mode,
+        week,
+        syncType: store.syncType,
+        rawRecords: cached.records || []
+      });
       return;
     }
   }
@@ -427,6 +442,21 @@ export async function syncData(forceRefresh = false) {
       allLeaguesData: combinedLeaguesData,
       selectedLeagueIds: store.selectedLeagueIds,
       nflState: store.nflState
+    });
+
+    updateUrlParams({
+      platform,
+      user: inputUser,
+      userId: store.userId,
+      userName: store.userName,
+      customLeagueIds: targetIds,
+      selectedLeagueIds: store.selectedLeagueIds,
+      allLeaguesData: combinedLeaguesData,
+      season,
+      mode,
+      week,
+      syncType: store.syncType,
+      rawRecords: combinedRecords
     });
 
     store.setError(null);

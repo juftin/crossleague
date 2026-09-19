@@ -294,4 +294,97 @@ describe("Shareable URL & Parameter Extraction", () => {
     clearUrlParams();
     assert.equal(replacedUrl, "/dashboard#luck");
   });
+
+  it("should update browser URL search params with updateUrlParams for ESPN leagues sync", async () => {
+    const { updateUrlParams } = await import("../src/js/state/urlParams.js");
+    let replacedUrl = "";
+    globalThis.window = {
+      location: {
+        pathname: "/",
+        search: "",
+        hash: "#awards"
+      },
+      history: {
+        replaceState: (_state, _title, url) => {
+          replacedUrl = url;
+        }
+      }
+    };
+
+    updateUrlParams({
+      platform: "espn",
+      season: 2026,
+      week: 1,
+      mode: "WEEKLY",
+      customLeagueIds: ["espn:1664455"],
+      rawRecords: [{ id: "espn_1", points: 100 }]
+    });
+
+    assert.equal(
+      replacedUrl,
+      "/?platform=espn&season=2026&week=1&mode=WEEKLY&leagues=1664455#awards"
+    );
+  });
+
+  it("should update browser URL search params with updateUrlParams for Sleeper user sync", async () => {
+    const { updateUrlParams } = await import("../src/js/state/urlParams.js");
+    let replacedUrl = "";
+    globalThis.window = {
+      location: {
+        pathname: "/app",
+        search: "",
+        hash: "#leaderboard"
+      },
+      history: {
+        replaceState: (_state, _title, url) => {
+          replacedUrl = url;
+        }
+      }
+    };
+
+    updateUrlParams({
+      platform: "sleeper",
+      user: "juftin",
+      season: 2024,
+      week: 4,
+      mode: "WEEKLY",
+      syncType: "user",
+      allLeaguesData: [{ league_id: "101" }, { league_id: "102" }],
+      selectedLeagueIds: ["101", "102"],
+      rawRecords: [{ id: "1", points: 110 }]
+    });
+
+    assert.equal(replacedUrl, "/app?user=juftin&season=2024&week=4&mode=WEEKLY#leaderboard");
+  });
+
+  it("should include leagues param when filtering a subset of user leagues with updateUrlParams", async () => {
+    const { updateUrlParams } = await import("../src/js/state/urlParams.js");
+    let replacedUrl = "";
+    globalThis.window = {
+      location: {
+        pathname: "/",
+        search: "",
+        hash: ""
+      },
+      history: {
+        replaceState: (_state, _title, url) => {
+          replacedUrl = url;
+        }
+      }
+    };
+
+    updateUrlParams({
+      platform: "sleeper",
+      user: "juftin",
+      season: 2024,
+      week: 4,
+      mode: "WEEKLY",
+      syncType: "user",
+      allLeaguesData: [{ league_id: "101" }, { league_id: "102" }],
+      selectedLeagueIds: ["101"],
+      rawRecords: [{ id: "1", points: 110 }]
+    });
+
+    assert.equal(replacedUrl, "/?user=juftin&season=2024&week=4&mode=WEEKLY&leagues=101");
+  });
 });

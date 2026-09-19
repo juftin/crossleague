@@ -179,10 +179,11 @@ export const useCrossLeagueStore = create((set, get) => ({
 
   setActiveTab: (activeTab, updateUrlHash = true) => {
     set({ activeTab });
-    if (updateUrlHash && typeof window !== "undefined") {
+    if (updateUrlHash && typeof window !== "undefined" && window.location) {
       const hash = TAB_HASH_MAP[activeTab] || activeTab;
       if (window.location.hash !== `#${hash}`) {
-        window.history.replaceState(null, "", `#${hash}${window.location.search}`);
+        const search = window.location.search || "";
+        window.history.replaceState(null, "", `${window.location.pathname}${search}#${hash}`);
       }
     }
   },

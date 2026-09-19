@@ -62,3 +62,107 @@ export function clearUrlParams() {
     window.history.replaceState(null, "", cleanUrl);
   }
 }
+
+/**
+ * Updates the browser's URL search parameters to reflect current data, platform, and league filters.
+ *
+ * @param {Object} [state] State object containing platform, user, season, week, mode, leagues, etc.
+ * @returns {string} The updated relative URL path
+ */
+export function updateUrlParams(state = {}) {
+  if (typeof window === "undefined" || !window.history?.replaceState || !window.location) {
+    return "";
+  }
+
+  const {
+    platform,
+    user,
+    userName,
+    userId,
+    season,
+    week,
+    mode,
+    leagues,
+    customLeagueIds = [],
+    selectedLeagueIds = [],
+    allLeaguesData = [],
+    syncType,
+    rawRecords = []
+  } = state;
+
+  const hasData = rawRecords && rawRecords.length > 0;
+  const isLeaguesSync = syncType === "leagues" || platform === "espn";
+  const currentUser = isLeaguesSync ? "" : (user || userName || userId || "").trim();
+
+  let targetLeagueIds = [];
+  if (Array.isArray(leagues) && leagues.length > 0) {
+    targetLeagueIds = leagues;
+  } else if (typeof leagues === "string" && leagues.trim()) {
+    targetLeagueIds = extractCustomLeagueIds(leagues);
+  } else if (selectedLeagueIds && selectedLeagueIds.length > 0) {
+    targetLeagueIds = selectedLeagueIds;
+  } else if (allLeaguesData && allLeaguesData.length > 0) {
+    targetLeagueIds = allLeaguesData.map(l => l.league_id);
+  } else if (customLeagueIds && customLeagueIds.length > 0) {
+    targetLeagueIds = customLeagueIds;
+  }
+
+  const cleanLeagueIds = Array.from(
+    new Set(
+      targetLeagueIds
+        .map(id =>
+          String(id)
+            .replace(/^(espn|sleeper):/i, "")
+            .trim()
+        )
+        .filter(Boolean)
+    )
+  );
+
+  if (!hasData && !currentUser && cleanLeagueIds.length === 0) {
+    clearUrlParams();
+    return window.location.pathname + (window.location.hash || "");
+  }
+
+  const params = new URLSearchParams();
+
+  if (platform === "espn") {
+    params.set("platform", "espn");
+  }
+
+  if (currentUser && !isLeaguesSync) {
+    params.set("user", currentUser);
+  }
+
+  if (season) {
+    params.set("season", String(season));
+  }
+
+  if (week) {
+    params.set("week", String(week));
+  }
+
+  if (mode) {
+    params.set("mode", String(mode));
+  }
+
+  const isSubset =
+    allLeaguesData &&
+    allLeaguesData.length > 0 &&
+    selectedLeagueIds &&
+    selectedLeagueIds.length > 0 &&
+    selectedLeagueIds.length < allLeaguesData.length;
+
+  if (isLeaguesSync || isSubset || (!currentUser && cleanLeagueIds.length > 0)) {
+    if (cleanLeagueIds.length > 0) {
+      params.set("leagues", cleanLeagueIds.join(","));
+    }
+  }
+
+  const qs = params.toString();
+  const currentHash = window.location.hash || "";
+  const newUrl = `${window.location.pathname}${qs ? `?${qs}` : ""}${currentHash}`;
+
+  window.history.replaceState(null, "", newUrl);
+  return newUrl;
+}

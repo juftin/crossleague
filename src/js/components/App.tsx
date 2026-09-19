@@ -12,7 +12,7 @@ import { LuckModal } from "./modals/LuckModal.tsx";
 import { ToastContainer } from "./common/Toast.tsx";
 import { MobileBottomNav } from "./common/MobileBottomNav.tsx";
 import { syncData } from "../services/syncService.js";
-import { getUrlParams, extractCustomLeagueIds } from "../state/urlParams.js";
+import { getUrlParams, extractCustomLeagueIds, updateUrlParams } from "../state/urlParams.js";
 import { BASE_URL, HASH_TAB_MAP } from "../state/constants.js";
 import { cachedApiFetch } from "../state/cache.js";
 import { getMaxPlayedWeek } from "../state/preferences.js";
@@ -44,6 +44,7 @@ export const App: React.FC = () => {
   const setNflState = useCrossLeagueStore(s => s.setNflState);
   const openSettingsModal = useCrossLeagueStore(s => s.openSettingsModal);
   const rawRecords = useCrossLeagueStore(s => s.rawRecords);
+  const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
 
   // Initialize from embedded report, URL parameters, or localStorage
   useEffect(() => {
@@ -233,6 +234,14 @@ export const App: React.FC = () => {
       syncData(false);
     }
   }, [week, season, mode]);
+
+  // Sync URL query parameters when active league selection changes
+  useEffect(() => {
+    if (!isInitializedRef.current || (window as any).__CROSSLEAGUE_SNAPSHOT_DATA__) {
+      return;
+    }
+    updateUrlParams(useCrossLeagueStore.getState());
+  }, [selectedLeagueIds]);
 
   // Arrow Keybindings (Left / Right arrow for weeks)
   useEffect(() => {
