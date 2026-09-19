@@ -238,11 +238,11 @@ export const App: React.FC = () => {
   }, [setActiveTab]);
 
   return (
-    <div className="text-slate-100 min-h-screen antialiased flex flex-col pt-16 sm:pt-36 selection:bg-emerald-500 selection:text-slate-950">
+    <div className="text-slate-100 min-h-screen antialiased flex flex-col pt-16 sm:pt-24 md:pt-44 lg:pt-36 selection:bg-emerald-500 selection:text-slate-950">
       <Header />
 
       {/* Main Content Container (Full-Width Fluid) */}
-      <main className="flex-1 w-full px-3 sm:px-8 lg:px-12 pt-1 pb-24 sm:pt-0 sm:pb-8 space-y-4 sm:space-y-6">
+      <main className="flex-1 w-full px-3 sm:px-8 lg:px-12 pt-2 pb-24 sm:pt-2 sm:pb-8 space-y-4 sm:space-y-6">
         {/* Live Loading Bar */}
         {loading && (
           <div id="statusContainer" className="space-y-2 pb-2">

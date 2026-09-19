@@ -243,7 +243,7 @@ export const LuckTab: React.FC = () => {
                 <HeartCrack className="w-3.5 h-3.5" /> &lt; -0.50 (Unlucky):
               </strong>{" "}
               <span className="text-slate-400">
-                Lost matchups despite strong point totals (high Points Against)
+                Lost matchups despite strong point totals
               </span>
             </div>
           </div>

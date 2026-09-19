@@ -783,9 +783,9 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Desktop Navigation Bar directly below the header */}
-      <div className="hidden sm:block border-t border-slate-800/80 bg-slate-950/60 px-3 sm:px-8 lg:px-12 py-2">
+      <div className="hidden md:block border-t border-slate-800/80 bg-slate-950/60 px-3 sm:px-8 lg:px-12 py-2">
         <nav
-          className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar"
+          className="grid grid-cols-2 gap-1.5 md:grid-cols-3 lg:flex lg:items-center"
           aria-label="Dashboard views"
         >
           {tabs.map(t => {
@@ -796,7 +796,7 @@ export const Header: React.FC = () => {
                 id={t.elementId}
                 type="button"
                 onClick={() => setActiveTab(t.id)}
-                className={`flex-1 w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center text-xs sm:text-sm font-bold ${
+                className={`w-full justify-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer active:scale-95 text-center text-xs sm:text-sm font-bold lg:flex-1 ${
                   isActive
                     ? "bg-slate-800 text-white shadow-sm border-slate-700 font-black"
                     : "text-slate-400 hover:text-white hover:bg-slate-800/60 border-transparent"

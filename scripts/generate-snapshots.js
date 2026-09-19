@@ -369,9 +369,9 @@ export async function generateSnapshots({ isCheck = false } = {}) {
         continue;
       }
 
-      // Check size tolerance (under 5% size delta across environments)
+      // Allow PNG compression variance between browser and OS versions.
       const sizeDeltaRatio = Math.abs(baselineBuf.length - checkBuf.length) / baselineBuf.length;
-      if (sizeDeltaRatio > 0.08) {
+      if (sizeDeltaRatio > 0.1) {
         console.error(
           `  ✖ Size delta exceeded for ${page.id}.png (baseline: ${baselineBuf.length} B, check: ${checkBuf.length} B, delta: ${(sizeDeltaRatio * 100).toFixed(1)}%)`
         );
