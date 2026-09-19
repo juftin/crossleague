@@ -103,34 +103,33 @@ export const App: React.FC = () => {
       const isUserDifferent =
         urlUser !== null && urlUser.toLowerCase() !== (currentStore.userName || "").toLowerCase();
 
+      const targetPlatform = urlPlatform || currentStore.platform || "sleeper";
+
       if (urlPlatform) {
         setPlatform(urlPlatform);
       }
 
-      if (urlUser) {
-        setSyncType("user");
-        setUserName(urlUser);
-        if (!urlLeagues) {
-          setCustomLeagueIds([]);
+      if (targetPlatform === "espn") {
+        if (urlLeagues && urlLeagues.length > 0) {
+          useCrossLeagueStore.getState().setEspnCustomLeagueIds(urlLeagues);
         }
-        if (isUserDifferent) {
-          setUserId("");
-          setUserAvatar("");
-          if (!urlLeagues) {
-            setSelectedLeagueIds([]);
-          }
-        }
-      }
-
-      if (urlLeagues && urlLeagues.length > 0) {
+      } else {
         if (urlUser) {
-          useCrossLeagueStore.setState({ pendingLeagueIdsFilter: urlLeagues });
-        } else {
-          setCustomLeagueIds(urlLeagues);
-          setSyncType("leagues");
-          setUserName("");
-          setUserId("");
-          setUserAvatar("");
+          useCrossLeagueStore.getState().setSleeperSyncType("user");
+          useCrossLeagueStore.getState().setSleeperUser(urlUser);
+          if (urlLeagues && urlLeagues.length > 0) {
+            useCrossLeagueStore.setState({ pendingLeagueIdsFilter: urlLeagues });
+          }
+          if (isUserDifferent) {
+            setUserId("");
+            setUserAvatar("");
+            if (!urlLeagues) {
+              setSelectedLeagueIds([]);
+            }
+          }
+        } else if (urlLeagues && urlLeagues.length > 0) {
+          useCrossLeagueStore.getState().setSleeperSyncType("leagues");
+          useCrossLeagueStore.getState().setSleeperCustomLeagueIds(urlLeagues);
         }
       }
 

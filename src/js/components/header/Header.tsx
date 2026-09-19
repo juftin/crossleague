@@ -40,8 +40,13 @@ export const Header: React.FC = () => {
   const setUserId = useCrossLeagueStore(s => s.setUserId);
   const setUserAvatar = useCrossLeagueStore(s => s.setUserAvatar);
   const sleeperUserName = useCrossLeagueStore(s => s.sleeperUserName);
+  const sleeperSyncType = useCrossLeagueStore(s => s.sleeperSyncType);
   const sleeperCustomLeagueIds = useCrossLeagueStore(s => s.sleeperCustomLeagueIds);
   const espnCustomLeagueIds = useCrossLeagueStore(s => s.espnCustomLeagueIds);
+  const setSleeperSyncType = useCrossLeagueStore(s => s.setSleeperSyncType);
+  const setSleeperUser = useCrossLeagueStore(s => s.setSleeperUser);
+  const setSleeperCustomLeagueIds = useCrossLeagueStore(s => s.setSleeperCustomLeagueIds);
+  const setEspnCustomLeagueIds = useCrossLeagueStore(s => s.setEspnCustomLeagueIds);
   const customLeagueIds = useCrossLeagueStore(s => s.customLeagueIds);
   const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
   const leaguesMap = useCrossLeagueStore(s => s.leaguesMap);
@@ -65,22 +70,12 @@ export const Header: React.FC = () => {
   const hasData = rawRecords && rawRecords.length > 0;
 
   const [draftPlatform, setDraftPlatform] = useState(platform);
-  const [draftSyncType, setDraftSyncType] = useState(syncType);
-  const [draftSleeperUser, setDraftSleeperUser] = useState(sleeperUserName || userName || userId);
+  const [draftSyncType, setDraftSyncType] = useState(sleeperSyncType || "user");
+  const [draftSleeperUser, setDraftSleeperUser] = useState(sleeperUserName || "");
   const [draftSleeperLeagues, setDraftSleeperLeagues] = useState<string[]>(
-    sleeperCustomLeagueIds?.length > 0
-      ? sleeperCustomLeagueIds
-      : platform === "sleeper"
-        ? customLeagueIds
-        : []
+    sleeperCustomLeagueIds || []
   );
-  const [draftEspnLeagues, setDraftEspnLeagues] = useState<string[]>(
-    espnCustomLeagueIds?.length > 0
-      ? espnCustomLeagueIds
-      : platform === "espn"
-        ? customLeagueIds
-        : []
-  );
+  const [draftEspnLeagues, setDraftEspnLeagues] = useState<string[]>(espnCustomLeagueIds || []);
   const [draftSeason, setDraftSeason] = useState(season);
   const [draftMode, setDraftMode] = useState(mode);
   const [inputLeagueId, setInputLeagueId] = useState("");
@@ -91,22 +86,10 @@ export const Header: React.FC = () => {
   useEffect(() => {
     if (isSettingsOpen) {
       setDraftPlatform(platform);
-      setDraftSyncType(syncType);
-      setDraftSleeperUser(sleeperUserName || userName || userId);
-      setDraftSleeperLeagues(
-        sleeperCustomLeagueIds?.length > 0
-          ? sleeperCustomLeagueIds
-          : platform === "sleeper"
-            ? customLeagueIds
-            : []
-      );
-      setDraftEspnLeagues(
-        espnCustomLeagueIds?.length > 0
-          ? espnCustomLeagueIds
-          : platform === "espn"
-            ? customLeagueIds
-            : []
-      );
+      setDraftSyncType(sleeperSyncType || "user");
+      setDraftSleeperUser(sleeperUserName || "");
+      setDraftSleeperLeagues(sleeperCustomLeagueIds || []);
+      setDraftEspnLeagues(espnCustomLeagueIds || []);
       setDraftSeason(season);
       setDraftMode(mode);
       setInputLeagueId("");
@@ -114,10 +97,7 @@ export const Header: React.FC = () => {
   }, [
     isSettingsOpen,
     platform,
-    syncType,
-    userName,
-    userId,
-    customLeagueIds,
+    sleeperSyncType,
     sleeperUserName,
     sleeperCustomLeagueIds,
     espnCustomLeagueIds,
@@ -217,27 +197,17 @@ export const Header: React.FC = () => {
     }
 
     useCrossLeagueStore.setState({ pendingLeagueIdsFilter: null });
-    setPlatform(draftPlatform);
     setSeason(draftSeason);
     setMode(draftMode);
 
     if (draftPlatform === "espn") {
-      setSyncType("leagues");
-      setCustomLeagueIds(finalEspnLeagues);
-      setUserName("");
-      setUserId("");
-      setUserAvatar("");
+      setEspnCustomLeagueIds(finalEspnLeagues);
+      setPlatform("espn");
     } else {
-      setSyncType(draftSyncType);
-      if (draftSyncType === "user") {
-        setUserName(draftSleeperUser.trim());
-        useCrossLeagueStore.setState({ customLeagueIds: [] });
-      } else {
-        setCustomLeagueIds(finalSleeperLeagues);
-        setUserName("");
-        setUserId("");
-        setUserAvatar("");
-      }
+      setSleeperSyncType(draftSyncType);
+      setSleeperUser(draftSleeperUser.trim());
+      setSleeperCustomLeagueIds(finalSleeperLeagues);
+      setPlatform("sleeper");
     }
 
     closeSettingsModal();

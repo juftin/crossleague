@@ -90,83 +90,26 @@ export const useCrossLeagueStore = create((set, get) => ({
   expandedPlayerIds: [],
 
   setPlatform: platform => {
-    const currentPlatform = get().platform;
-    if (currentPlatform !== platform) {
-      const isEspn = platform === "espn";
-      const currentState = get();
+    const isEspn = platform === "espn";
+    const s = get();
+    const nextSyncType = isEspn ? "leagues" : s.sleeperSyncType || "user";
+    const nextUserName = isEspn ? "" : s.sleeperUserName || "";
+    const nextUserId = isEspn ? "" : s.sleeperUserId || "";
+    const nextCustomLeagueIds = isEspn
+      ? s.espnCustomLeagueIds || []
+      : s.sleeperCustomLeagueIds || [];
 
-      // Persist current platform state before switching
-      let espnCustomLeagueIds = currentState.espnCustomLeagueIds || [];
-      let sleeperCustomLeagueIds = currentState.sleeperCustomLeagueIds || [];
-      let sleeperUserName = currentState.sleeperUserName || "";
-      let sleeperUserId = currentState.sleeperUserId || "";
-      let sleeperSyncType = currentState.sleeperSyncType || "user";
+    set({
+      platform,
+      syncType: nextSyncType,
+      userName: nextUserName,
+      userId: nextUserId,
+      userAvatar: "",
+      customLeagueIds: nextCustomLeagueIds,
+      pendingLeagueIdsFilter: null
+    });
 
-      if (currentPlatform === "espn") {
-        if (currentState.customLeagueIds && currentState.customLeagueIds.length > 0) {
-          espnCustomLeagueIds = currentState.customLeagueIds;
-        }
-        setPreference(STORAGE_KEYS.PREF_ESPN_CUSTOM_LEAGUES, espnCustomLeagueIds);
-      } else {
-        sleeperUserName = currentState.userName || currentState.sleeperUserName || "";
-        sleeperUserId = currentState.userId || currentState.sleeperUserId || "";
-        sleeperSyncType = currentState.syncType || currentState.sleeperSyncType || "user";
-        if (
-          currentState.syncType === "leagues" &&
-          currentState.customLeagueIds &&
-          currentState.customLeagueIds.length > 0
-        ) {
-          sleeperCustomLeagueIds = currentState.customLeagueIds;
-        }
-        setPreference(STORAGE_KEYS.PREF_SLEEPER_USER_NAME, sleeperUserName);
-        setPreference(STORAGE_KEYS.PREF_SLEEPER_USER_ID, sleeperUserId);
-        setPreference(STORAGE_KEYS.PREF_SLEEPER_SYNC_TYPE, sleeperSyncType);
-        setPreference(STORAGE_KEYS.PREF_SLEEPER_CUSTOM_LEAGUES, sleeperCustomLeagueIds);
-      }
-
-      // Check stored preference fallback if in-memory list was empty
-      if (espnCustomLeagueIds.length === 0) {
-        const storedEspn = getPreference(STORAGE_KEYS.PREF_ESPN_CUSTOM_LEAGUES, []);
-        if (Array.isArray(storedEspn) && storedEspn.length > 0) {
-          espnCustomLeagueIds = storedEspn;
-        }
-      }
-      if (sleeperCustomLeagueIds.length === 0) {
-        const storedSleeper = getPreference(STORAGE_KEYS.PREF_SLEEPER_CUSTOM_LEAGUES, []);
-        if (Array.isArray(storedSleeper) && storedSleeper.length > 0) {
-          sleeperCustomLeagueIds = storedSleeper;
-        }
-      }
-      if (!sleeperUserName) {
-        sleeperUserName = getPreference(STORAGE_KEYS.PREF_SLEEPER_USER_NAME, "");
-      }
-
-      // Restore target platform state
-      const nextCustomLeagueIds = isEspn ? espnCustomLeagueIds : sleeperCustomLeagueIds;
-      const nextUserName = isEspn ? "" : sleeperUserName;
-      const nextUserId = isEspn ? "" : sleeperUserId;
-      const nextSyncType = isEspn ? "leagues" : sleeperSyncType;
-
-      set({
-        platform,
-        syncType: nextSyncType,
-        customLeagueIds: nextCustomLeagueIds,
-        espnCustomLeagueIds,
-        sleeperCustomLeagueIds,
-        sleeperUserName,
-        sleeperUserId,
-        sleeperSyncType,
-        userName: nextUserName,
-        userId: nextUserId,
-        userAvatar: "",
-        pendingLeagueIdsFilter: null
-      });
-
-      setPreference(STORAGE_KEYS.PREF_PLATFORM, platform);
-      setPreference(STORAGE_KEYS.PREF_SYNC_TYPE, nextSyncType);
-      setPreference(STORAGE_KEYS.PREF_USER_NAME, nextUserName);
-      setPreference(STORAGE_KEYS.PREF_USER_ID, nextUserId);
-    }
+    setPreference(STORAGE_KEYS.PREF_PLATFORM, platform);
   },
 
   setMode: mode => {
@@ -184,69 +127,96 @@ export const useCrossLeagueStore = create((set, get) => ({
     setPreference(STORAGE_KEYS.PREF_WEEK, week);
   },
 
-  setSyncType: syncType => {
+  setSleeperSyncType: syncType => {
     const isSleeper = get().platform !== "espn";
     set({
-      syncType,
-      ...(isSleeper ? { sleeperSyncType: syncType } : {})
+      sleeperSyncType: syncType,
+      ...(isSleeper ? { syncType } : {})
     });
+    setPreference(STORAGE_KEYS.PREF_SLEEPER_SYNC_TYPE, syncType);
     setPreference(STORAGE_KEYS.PREF_SYNC_TYPE, syncType);
-    if (isSleeper) {
-      setPreference(STORAGE_KEYS.PREF_SLEEPER_SYNC_TYPE, syncType);
+  },
+
+  setSleeperUser: (userName, userId = "") => {
+    const isSleeper = get().platform !== "espn";
+    set({
+      sleeperUserName: userName,
+      sleeperUserId: userId,
+      ...(isSleeper ? { userName, userId } : {})
+    });
+    setPreference(STORAGE_KEYS.PREF_SLEEPER_USER_NAME, userName);
+    setPreference(STORAGE_KEYS.PREF_USER_NAME, userName);
+    if (userId) {
+      setPreference(STORAGE_KEYS.PREF_SLEEPER_USER_ID, userId);
+      setPreference(STORAGE_KEYS.PREF_USER_ID, userId);
     }
+  },
+
+  setSleeperCustomLeagueIds: customLeagueIds => {
+    const isSleeper = get().platform !== "espn";
+    set({
+      sleeperCustomLeagueIds: customLeagueIds,
+      ...(isSleeper ? { customLeagueIds } : {})
+    });
+    setPreference(STORAGE_KEYS.PREF_SLEEPER_CUSTOM_LEAGUES, customLeagueIds);
+    setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, customLeagueIds);
+  },
+
+  setEspnCustomLeagueIds: customLeagueIds => {
+    const isEspn = get().platform === "espn";
+    set({
+      espnCustomLeagueIds: customLeagueIds,
+      ...(isEspn ? { customLeagueIds } : {})
+    });
+    setPreference(STORAGE_KEYS.PREF_ESPN_CUSTOM_LEAGUES, customLeagueIds);
+  },
+
+  setSyncType: syncType => {
+    get().setSleeperSyncType(syncType);
   },
 
   setUserId: userId => {
-    const isSleeper = get().platform !== "espn";
-    set({
-      userId,
-      ...(isSleeper ? { sleeperUserId: userId } : {})
-    });
-    setPreference(STORAGE_KEYS.PREF_USER_ID, userId);
-    if (isSleeper) {
-      setPreference(STORAGE_KEYS.PREF_SLEEPER_USER_ID, userId);
-    }
+    get().setSleeperUser(get().sleeperUserName, userId);
   },
 
   setUserName: userName => {
-    const isSleeper = get().platform !== "espn";
-    set({
-      userName,
-      ...(isSleeper ? { sleeperUserName: userName } : {})
-    });
-    setPreference(STORAGE_KEYS.PREF_USER_NAME, userName);
-    if (isSleeper) {
-      setPreference(STORAGE_KEYS.PREF_SLEEPER_USER_NAME, userName);
-    }
+    get().setSleeperUser(userName, get().sleeperUserId);
   },
 
   setUserAvatar: userAvatar => set({ userAvatar }),
 
   setCustomLeagueIds: customLeagueIds => {
-    const platform = get().platform;
-    if (platform === "espn") {
-      set({ customLeagueIds, espnCustomLeagueIds: customLeagueIds });
-      setPreference(STORAGE_KEYS.PREF_ESPN_CUSTOM_LEAGUES, customLeagueIds);
+    if (get().platform === "espn") {
+      get().setEspnCustomLeagueIds(customLeagueIds);
     } else {
-      set({ customLeagueIds, sleeperCustomLeagueIds: customLeagueIds });
-      setPreference(STORAGE_KEYS.PREF_SLEEPER_CUSTOM_LEAGUES, customLeagueIds);
-      setPreference(STORAGE_KEYS.PREF_CUSTOM_LEAGUES, customLeagueIds);
+      get().setSleeperCustomLeagueIds(customLeagueIds);
     }
   },
 
   addCustomLeagueId: id => {
     const trimmed = (id || "").trim();
     if (!trimmed) return;
-    const current = get().customLeagueIds;
-    if (!current.includes(trimmed)) {
-      const next = [...current, trimmed];
-      get().setCustomLeagueIds(next);
+    if (get().platform === "espn") {
+      const current = get().espnCustomLeagueIds || [];
+      if (!current.includes(trimmed)) {
+        get().setEspnCustomLeagueIds([...current, trimmed]);
+      }
+    } else {
+      const current = get().sleeperCustomLeagueIds || [];
+      if (!current.includes(trimmed)) {
+        get().setSleeperCustomLeagueIds([...current, trimmed]);
+      }
     }
   },
 
   removeCustomLeagueId: id => {
-    const next = get().customLeagueIds.filter(x => x !== id);
-    get().setCustomLeagueIds(next);
+    if (get().platform === "espn") {
+      const next = (get().espnCustomLeagueIds || []).filter(x => x !== id);
+      get().setEspnCustomLeagueIds(next);
+    } else {
+      const next = (get().sleeperCustomLeagueIds || []).filter(x => x !== id);
+      get().setSleeperCustomLeagueIds(next);
+    }
   },
 
   hydratePreferences: () => {
