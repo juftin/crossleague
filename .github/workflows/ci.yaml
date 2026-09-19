@@ -18,7 +18,7 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ubuntu-24.04
     concurrency:
-      group: ${{ github.workflow }}-${{ matrix.name }}-${{ github.event.pull_request.number }}
+      group: ${{ github.workflow }}-${{ matrix.name }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     strategy:
       fail-fast: false
@@ -55,19 +55,30 @@ jobs:
             task: install
             install: true
     steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ matrix.name == 'pre-commit' && '0' || '1' }}
       - name: setup-node
-        if: matrix.node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: ${{ matrix.node || '22' }}
+          cache: "npm"
+      - name: cache-pre-commit
+        if: matrix.name == 'pre-commit'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
       - name: ${{ matrix.name }}
         if: github.event_name == 'pull_request' || matrix.run_on_push
         uses: juftin/actions/taskfile@v1
         with:
           task: ${{ matrix.task }}
-          checkout: true
+          checkout: false
           install: ${{ matrix.install || false }}
-          fetch-depth: ${{ matrix.name == 'pre-commit' && '0' || '1' }}
           setup-uv: ${{ matrix.name == 'pre-commit' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: upload-snapshots

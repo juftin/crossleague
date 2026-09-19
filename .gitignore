@@ -11,3 +11,4 @@ site/
 coverage/
 .idea/
 .vscode/
+tests/.snapshot-tmp/
