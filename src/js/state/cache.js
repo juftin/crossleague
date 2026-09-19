@@ -68,7 +68,7 @@ export function getReportCacheKey({
   mode = "WEEKLY",
   week
 }) {
-  const normUser = normalizeUser(user);
+  const normUser = platform === "espn" ? "" : normalizeUser(user);
   const normLids = normalizeLeagueIds(customLeagueIds);
   const target = normUser ? `user:${normUser}` : `leagues:${normLids}`;
   return `${CACHE_PREFIXES.REPORT}${platform}:${target}:${season}:${mode}:${week}`;

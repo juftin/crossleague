@@ -122,7 +122,6 @@ export const App: React.FC = () => {
 
       if (urlLeagues && urlLeagues.length > 0) {
         setCustomLeagueIds(urlLeagues);
-        setSelectedLeagueIds(urlLeagues);
         if (!urlUser) {
           setSyncType("leagues");
           if (isLeaguesDifferent || currentStore.syncType !== "leagues") {
@@ -190,10 +189,12 @@ export const App: React.FC = () => {
         Boolean(urlParams.leagues);
 
       if (hasUser) {
-        syncData(false);
+        await syncData(false);
       } else {
         openSettingsModal();
       }
+
+      isInitializedRef.current = true;
     }
 
     init();
@@ -216,11 +217,10 @@ export const App: React.FC = () => {
     openSettingsModal
   ]);
 
-  // Re-sync when week, season, or mode changes (only on subsequent updates)
-  const isInitialMount = React.useRef(true);
+  // Re-sync when week, season, or mode changes (only on subsequent user updates)
+  const isInitializedRef = React.useRef(false);
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
+    if (!isInitializedRef.current) {
       return;
     }
     const s = useCrossLeagueStore.getState();

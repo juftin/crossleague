@@ -345,14 +345,30 @@ export const state = new Proxy(
   }
 );
 
+function buildLeagueIdSet(selectedLeagueIds) {
+  if (!selectedLeagueIds || selectedLeagueIds.length === 0) return null;
+  const set = new Set();
+  selectedLeagueIds.forEach(id => {
+    const raw = String(id)
+      .replace(/^(espn|sleeper):/i, "")
+      .trim();
+    if (raw) {
+      set.add(raw);
+      set.add(`espn:${raw}`);
+      set.add(`sleeper:${raw}`);
+    }
+  });
+  return set;
+}
+
 export function useActiveRecords() {
   const rawRecords = useCrossLeagueStore(s => s.rawRecords);
   const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
   return useMemo(() => {
     if (!rawRecords || rawRecords.length === 0) return [];
-    if (!selectedLeagueIds || selectedLeagueIds.length === 0) return rawRecords;
-    const setIds = new Set(selectedLeagueIds);
-    return rawRecords.filter(r => setIds.has(r.leagueId));
+    const setIds = buildLeagueIdSet(selectedLeagueIds);
+    if (!setIds) return rawRecords;
+    return rawRecords.filter(r => setIds.has(String(r.leagueId)));
   }, [rawRecords, selectedLeagueIds]);
 }
 
@@ -360,10 +376,14 @@ export function useActiveLeaguesMap() {
   const leaguesMap = useCrossLeagueStore(s => s.leaguesMap);
   const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
   return useMemo(() => {
-    if (!selectedLeagueIds || selectedLeagueIds.length === 0) return leaguesMap;
+    if (!leaguesMap) return {};
+    const setIds = buildLeagueIdSet(selectedLeagueIds);
+    if (!setIds) return leaguesMap;
     const filtered = {};
-    selectedLeagueIds.forEach(id => {
-      if (leaguesMap[id]) filtered[id] = leaguesMap[id];
+    Object.entries(leaguesMap).forEach(([k, v]) => {
+      if (setIds.has(String(k)) || (v && setIds.has(String(v.id)))) {
+        filtered[k] = v;
+      }
     });
     return filtered;
   }, [leaguesMap, selectedLeagueIds]);
@@ -372,17 +392,21 @@ export function useActiveLeaguesMap() {
 export function getActiveRecords() {
   const s = useCrossLeagueStore.getState();
   if (!s.rawRecords || s.rawRecords.length === 0) return [];
-  if (!s.selectedLeagueIds || s.selectedLeagueIds.length === 0) return s.rawRecords;
-  const setIds = new Set(s.selectedLeagueIds);
-  return s.rawRecords.filter(r => setIds.has(r.leagueId));
+  const setIds = buildLeagueIdSet(s.selectedLeagueIds);
+  if (!setIds) return s.rawRecords;
+  return s.rawRecords.filter(r => setIds.has(String(r.leagueId)));
 }
 
 export function getActiveLeaguesMap() {
   const s = useCrossLeagueStore.getState();
-  if (!s.selectedLeagueIds || s.selectedLeagueIds.length === 0) return s.leaguesMap;
+  if (!s.leaguesMap) return {};
+  const setIds = buildLeagueIdSet(s.selectedLeagueIds);
+  if (!setIds) return s.leaguesMap;
   const filtered = {};
-  s.selectedLeagueIds.forEach(id => {
-    if (s.leaguesMap[id]) filtered[id] = s.leaguesMap[id];
+  Object.entries(s.leaguesMap).forEach(([k, v]) => {
+    if (setIds.has(String(k)) || (v && setIds.has(String(v.id)))) {
+      filtered[k] = v;
+    }
   });
   return filtered;
 }

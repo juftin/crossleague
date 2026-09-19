@@ -24,7 +24,7 @@ export async function syncData(forceRefresh = false) {
   } = store;
 
   const isLeaguesSync = syncType === "leagues" || platform === "espn";
-  const inputUser = userName || userId;
+  const inputUser = isLeaguesSync ? "" : userName || userId;
 
   let targetIds =
     pendingLeagueIdsFilter && pendingLeagueIdsFilter.length > 0
