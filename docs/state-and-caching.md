@@ -1,6 +1,6 @@
 # 💾 State Management & Caching
 
-This document covers CrossLeague's state management model with **Zustand**, browser `localStorage` caching policies, TTL API request caching, and week status evaluation.
+This document covers CrossLeague's reactive state management with **Zustand**, namespaced browser storage policies with automatic LRU cache pruning, multi-tier API and report caching, and week status evaluation.
 
 ---
 
@@ -13,51 +13,37 @@ CrossLeague manages reactive application state through a centralized Zustand sto
 ```typescript
 interface CrossLeagueState {
   // Platform & View Mode
-  currentPlatform: "sleeper" | "espn";
-  currentMode: "WEEKLY" | "SEASON_ROLLUP";
-  currentSyncType: "user" | "leagues";
-  currentTab: "board" | "luck" | "players" | "awards" | "visuals" | "leagues";
+  platform: "sleeper" | "espn";
+  mode: "WEEKLY" | "SEASON_ROLLUP";
+  syncType: "user" | "leagues";
+  activeTab: "awards" | "leaderboard" | "visuals" | "leagueGrid" | "luck" | "players";
 
   // Identity & Target League IDs
-  currentUserId: string;
-  currentUserName: string;
-  currentUserAvatar: string;
-  customLeagueIds: Set<string>;
-  selectedLeagueIds: Set<string>;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  customLeagueIds: string[];
+  selectedLeagueIds: string[];
+  pendingLeagueIdsFilter: string[] | null;
 
   // Datasets
   rawRecords: TeamRecord[];
   leaguesMap: Record<string, LeagueInfo>;
-  allLeaguesData: RawLeague[];
+  allLeaguesData: any[];
   espnPlayersDb: Record<string, PlayerMetadata>;
+  sleeperPlayersDb: Record<string, PlayerMetadata> | null;
 
-  // Leaderboard UI State
-  currentSortColumn: string;
-  currentSortAsc: boolean;
-  currentTierFilter: "ALL" | "PLAYOFF" | "BUBBLE" | "ELIMINATED";
+  // UI State & Filters
+  loading: boolean;
+  progress: number;
+  error: string | null;
   searchQuery: string;
-  expandedRowIds: Set<string>;
-  currentMainPage: number;
-  currentMainPageSize: number;
-
-  // Player Analytics UI State
-  currentPlayerPositionFilter: string;
-  currentPlayerSearch: string;
-  currentPlayerStatusFilter: string;
-  currentPlayerSortColumn: string;
-  currentPlayerSortAsc: boolean;
-  expandedPlayerIds: Set<string>;
-  currentPlayerPage: number;
-  currentPlayerPageSize: number;
-
-  // Luck Table UI State
-  currentLuckPage: number;
-  currentLuckPageSize: number;
-  currentLuckSearch: string;
-  currentLuckCategory: "ALL" | "LUCKY" | "UNLUCKY" | "FAIR";
-  currentLuckSortColumn: string;
-  currentLuckSortAsc: boolean;
-  isLuckModalOpen: boolean;
+  sortColumn: string;
+  sortAsc: boolean;
+  tierFilter: "ALL" | "PLAYOFF" | "BUBBLE" | "ELIMINATED";
+  mainPage: number;
+  mainPageSize: number;
+  expandedRowIds: string[];
 
   // NFL Calendar State
   nflState: {
@@ -73,53 +59,73 @@ interface CrossLeagueState {
 
 - **`useActiveRecords()`**: Returns `rawRecords` filtered by `selectedLeagueIds`.
 - **`useActiveLeaguesMap()`**: Returns a subset of `leaguesMap` for selected leagues.
-- **`useCrossLeagueStore(s => s.actionName)`**: Access store mutators (e.g. `setRawRecords`, `setSelectedLeagueIds`, `setCurrentTab`, `toggleExpandedRow`).
+- **`useCrossLeagueStore(s => s.actionName)`**: Access store mutators (e.g. `setPlatform`, `setMode`, `setSeason`, `setWeek`, `hydratePreferences`).
 
 ---
 
 ## ⚡ Multi-Tier Caching Architecture
 
-To prevent redundant network requests and avoid API rate limits, CrossLeague implements a two-tier caching strategy:
+To prevent redundant network requests and avoid API rate limits, CrossLeague implements a multi-tier caching strategy:
 
 ```mermaid
 flowchart TD
-    Req["HTTP GET Request"] --> MemCheck{"In-Memory Map hit?"}
+    Req["HTTP GET Request"] --> MemCheck{"In-Memory LRU hit & valid TTL?"}
     MemCheck -- Yes --> ReturnMem["Return memory cache"]
-    MemCheck -- No --> LSCheck{"LocalStorage hit & valid TTL?"}
-    LSCheck -- Yes --> ReturnLS["Populate memory cache & return"]
-    LSCheck -- No --> NetworkReq["Fetch Upstream API (Sleeper / ESPN)"]
-    NetworkReq --> CacheStore["Save to memory & LocalStorage"]
+    MemCheck -- No --> SSCheck{"SessionStorage hit & valid TTL?"}
+    SSCheck -- Yes --> ReturnSS["Populate memory cache & return"]
+    SSCheck -- No --> NetworkReq["Fetch Upstream API (Sleeper / ESPN)"]
+    NetworkReq --> CacheStore["Save to memory & SessionStorage"]
     CacheStore --> ReturnNet["Return fresh JSON"]
 ```
 
-### 1. In-Memory Request Cache
+### 1. In-Memory LRU Cache
 
-An active JavaScript `Map` holds in-flight and recent API responses for sub-millisecond retrieval.
+A bounded in-memory `Map` (max 120 entries) caches active API responses with sub-millisecond retrieval.
 
-### 2. Storage-Backed TTL Cache (`src/js/state/cache.js`)
+### 2. SessionStorage API Cache (`src/js/state/cache.js`)
 
-Persistent API responses are serialized to `localStorage` under `crossleague_api_cache_*` with expiration timestamps:
+Session-level API responses are serialized under `crossleague:cache:api:*` with expiration timestamps (`ttlMs`).
 
-```json
-{
-  "_ts": 1726728000000,
-  "ttlMs": 900000,
-  "data": { ... }
-}
-```
+### 3. Persistent Report Cache & LocalStorage (`src/js/state/storage.js`)
+
+Weekly team records, leagues, and matchup data are stored with structured TTLs and automatic LRU eviction:
+
+- **Active / Current Weeks**: 10 minutes TTL (`TTL.REPORT_ACTIVE`).
+- **Finalized / Historical Weeks**: 7 days TTL (`TTL.REPORT_FINISHED`).
+- **Player Databases**: 24 hours TTL (`TTL.PLAYERS_DB`).
 
 ---
 
-## 🔑 Cache Key Schemas
+## 🔑 Key Schemas & Namespaces
 
-CrossLeague partitions cached reports by platform, normalized username, season, mode, and week:
+CrossLeague standardizes all persistent keys under the `crossleague:` namespace:
 
-```
-crossleague_cache_{platform}_{normalizedUsername}_{season}_{mode}_{week}
-```
+| Domain              | Key Pattern                                                           | Description                             |
+| :------------------ | :-------------------------------------------------------------------- | :-------------------------------------- |
+| **Preferences**     | `crossleague:pref:platform`                                           | Active platform (`sleeper` \| `espn`)   |
+| **Preferences**     | `crossleague:pref:username`                                           | Saved Sleeper username                  |
+| **Preferences**     | `crossleague:pref:user_id`                                            | Saved Sleeper numeric user ID           |
+| **Preferences**     | `crossleague:pref:custom_leagues`                                     | Saved custom league ID array            |
+| **Preferences**     | `crossleague:pref:season`                                             | Active season year                      |
+| **Preferences**     | `crossleague:pref:week`                                               | Active matchup week                     |
+| **Preferences**     | `crossleague:pref:mode`                                               | Sync mode (`WEEKLY` \| `SEASON_ROLLUP`) |
+| **Report Cache**    | `crossleague:cache:report:{platform}:{target}:{season}:{mode}:{week}` | Weekly normalized matchup report        |
+| **API Cache**       | `crossleague:cache:api:{url}`                                         | Upstream HTTP endpoint response         |
+| **Player Database** | `crossleague:cache:players:sleeper`                                   | Normalized Sleeper fantasy players DB   |
+| **Player Database** | `crossleague:cache:players:espn`                                      | Cached ESPN player metadata             |
 
-**Example**:
-`crossleague_cache_sleeper_juftin_2024_WEEKLY_4`
+### Backward Compatibility Migration
+
+The storage layer (`storage.js`) automatically reads from legacy key names (e.g. `sleeper_username`, `sleeper_season`, `crossleague_platform`, `crossleague_cache_*`) if modern keys are not yet set, guaranteeing seamless upgrades for existing users.
+
+---
+
+## 🧹 Quota Protection & LRU Cache Eviction
+
+Browser `localStorage` typically enforces a strict 5MB quota. CrossLeague prevents quota exhaustion through:
+
+1. **Deduplicated Payloads**: Full player databases are stored once in dedicated caches, keeping weekly report payloads lightweight.
+2. **`pruneCache` Eviction Engine**: If a write fails due to `QuotaExceededError`, CrossLeague automatically removes expired cache entries first, followed by the oldest active week caches.
 
 ---
 
@@ -128,21 +134,21 @@ crossleague_cache_{platform}_{normalizedUsername}_{season}_{mode}_{week}
 Historical matchups that have finalized are immutable and cached with extended TTL:
 
 ```javascript
-export function isWeekFinished(weekNum, seasonYear, nflState) {
-  const currentSeason = nflState.season;
-  const currentWeek = nflState.week || nflState.display_week;
-  const seasonType = nflState.season_type;
+export function isWeekFinished(season, week, nflState) {
+  const s = parseInt(season, 10);
+  const w = parseInt(week, 10);
+  if (!nflState || !nflState.season) return false;
 
   // 1. Past calendar seasons are permanently finished
-  if (seasonYear < currentSeason) return true;
+  if (s < nflState.season) return true;
 
-  // 2. Future calendar seasons are not finished
-  if (seasonYear > currentSeason) return false;
+  // 2. In post-season / off-season, all regular season weeks (1-18) are complete
+  if (s === nflState.season) {
+    if (nflState.season_type === "post" || nflState.season_type === "off") return true;
+    const currentNflWeek = nflState.week || nflState.display_week || 1;
+    return w < currentNflWeek;
+  }
 
-  // 3. In post-season / off-season, all regular season weeks (1-18) are complete
-  if (seasonType === "post" || seasonType === "off") return true;
-
-  // 4. In active regular season, strictly prior weeks are finished
-  return weekNum < currentWeek;
+  return false;
 }
 ```

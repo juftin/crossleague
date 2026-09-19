@@ -7,7 +7,7 @@ import { apiFetch, resolveUser, processWeeklyMatchups } from "../api/sleeper.js"
 import { fetchEspnLeague } from "../api/espn.js";
 import { initPlayersDb } from "../api/players.js";
 import { calculateStdDev } from "../analytics/statistics.js";
-import { saveDataToCache, tryLoadFromCache } from "../state/cache.js";
+import { saveReportToCache, loadReportFromCache } from "../state/cache.js";
 
 export async function syncData(forceRefresh = false) {
   const store = useCrossLeagueStore.getState();
@@ -47,11 +47,22 @@ export async function syncData(forceRefresh = false) {
 
   // Check cache first if not forced
   if (!forceRefresh) {
-    const cached = tryLoadFromCache(inputUser, season, mode, week);
+    const cached = loadReportFromCache({
+      platform,
+      user: inputUser,
+      customLeagueIds: targetIds,
+      season,
+      mode,
+      week
+    });
     if (cached) {
       store.setRawRecords(cached.records || []);
       store.setLeaguesMap(cached.leaguesMap || {});
       store.setAllLeaguesData(cached.allLeaguesData || []);
+      if (cached.selectedLeagueIds && cached.selectedLeagueIds.length > 0) {
+        store.setSelectedLeagueIds(cached.selectedLeagueIds);
+      }
+      initPlayersDb();
       store.setError(null);
       store.setLoading(false);
       return;
@@ -393,10 +404,18 @@ export async function syncData(forceRefresh = false) {
     }
 
     // Cache results
-    saveDataToCache(inputUser, season, mode, week, {
+    saveReportToCache({
+      platform,
+      user: inputUser,
+      customLeagueIds: targetIds,
+      season,
+      mode,
+      week,
       records: combinedRecords,
       leaguesMap,
-      allLeaguesData: combinedLeaguesData
+      allLeaguesData: combinedLeaguesData,
+      selectedLeagueIds: store.selectedLeagueIds,
+      nflState: store.nflState
     });
 
     store.setError(null);

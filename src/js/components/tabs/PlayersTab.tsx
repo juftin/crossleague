@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useCrossLeagueStore, useActiveRecords } from "../../state/useCrossLeagueStore.js";
 import { aggregatePlayers } from "../../analytics/aggregation.js";
-import { getPlayerInfo } from "../../api/players.js";
+import { getPlayerInfo, initPlayersDb } from "../../api/players.js";
 import {
   Sparkles,
   Crown,
@@ -28,6 +28,8 @@ export const PlayersTab: React.FC = () => {
   const records = useActiveRecords();
   const mode = useCrossLeagueStore(s => s.mode);
   const week = useCrossLeagueStore(s => s.week);
+  const sleeperPlayersDb = useCrossLeagueStore(s => s.sleeperPlayersDb);
+  const espnPlayersDb = useCrossLeagueStore(s => s.espnPlayersDb);
   const playerPositionFilter = useCrossLeagueStore(s => s.playerPositionFilter);
   const setPlayerPositionFilter = useCrossLeagueStore(s => s.setPlayerPositionFilter);
   const playerStatusFilter = useCrossLeagueStore(s => s.playerStatusFilter);
@@ -44,11 +46,15 @@ export const PlayersTab: React.FC = () => {
   const expandedPlayerIds = useCrossLeagueStore(s => s.expandedPlayerIds);
   const togglePlayerRowExpand = useCrossLeagueStore(s => s.togglePlayerRowExpand);
 
+  useEffect(() => {
+    initPlayersDb();
+  }, []);
+
   const isSeason = mode === "SEASON_ROLLUP";
 
   const allPlayers = useMemo<any[]>(() => {
     return aggregatePlayers(records, isSeason, week, getPlayerInfo);
-  }, [records, isSeason, week]);
+  }, [records, isSeason, week, sleeperPlayersDb, espnPlayersDb]);
 
   // Positional MVPs
   const mvpSlots = [
