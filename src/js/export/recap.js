@@ -4,8 +4,21 @@
  * Formats weekly and season recap summaries for Slack/Discord/chat.
  */
 
-import { state, getActiveRecords, getActiveLeaguesMap } from "../state/store.js";
-import { escapeHtml, showError } from "../components/dom.js";
+import {
+  getActiveLeaguesMap,
+  getActiveRecords,
+  useCrossLeagueStore
+} from "../state/useCrossLeagueStore.js";
+
+/** Escapes interpolated values in clipboard HTML. */
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 /**
  * Formats weekly and season fantasy recaps for Slack/Discord/HTML.
@@ -16,7 +29,7 @@ import { escapeHtml, showError } from "../components/dom.js";
  * @returns {{ plainText: string, htmlText: string }}
  */
 export function formatRecapText(records, activeLeagues, options = {}) {
-  const isSeason = options.isSeason ?? state.currentMode === "SEASON_ROLLUP";
+  const isSeason = options.isSeason ?? useCrossLeagueStore.getState().mode === "SEASON_ROLLUP";
   const week = options.week ?? 1;
   const season = options.season ?? "2026";
 
@@ -274,7 +287,7 @@ export function fallbackCopyText(text) {
     copied = true;
   } catch (err) {
     console.error("Fallback copy failed:", err);
-    showError("Could not copy to clipboard. Please copy manually from the table.");
+    console.error("Could not copy to clipboard. Please copy manually from the table.");
   }
   document.body.removeChild(textArea);
   return copied;
@@ -286,22 +299,18 @@ export function fallbackCopyText(text) {
 export async function copyChatRecap() {
   const activeRecords = getActiveRecords();
   if (!activeRecords || activeRecords.length === 0) {
-    showError("No data available to generate chat recap.");
+    console.warn("No data available to generate chat recap.");
     return false;
   }
 
-  const isSeason = state.currentMode === "SEASON_ROLLUP";
-  const weekInput = document.getElementById("weekInput");
-  const seasonInput = document.getElementById("seasonInput");
-
-  const week = weekInput ? parseInt(weekInput.value, 10) : 1;
-  const season = seasonInput ? seasonInput.value : "2026";
+  const { mode, week, season } = useCrossLeagueStore.getState();
+  const isSeason = mode === "SEASON_ROLLUP";
   const activeLeagues = getActiveLeaguesMap();
 
   const { plainText, htmlText } = formatRecapText(activeRecords, activeLeagues, {
     isSeason,
     week,
-    season
+    season: String(season)
   });
 
   try {

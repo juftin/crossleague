@@ -2,20 +2,7 @@
   "name": "crossleague",
   "version": "2.0.0",
   "description": "Universal power rankings and multi-league analytics dashboard for Sleeper and ESPN fantasy football leagues",
-  "main": "./src/js/index.js",
-  "module": "./src/js/index.js",
-  "exports": {
-    ".": "./src/js/index.js",
-    "./analytics": "./src/js/analytics/index.js",
-    "./api": "./src/js/api/index.js",
-    "./styles.css": "./src/css/styles.css",
-    "./dist/app.min.js": "./dist/app.min.js",
-    "./dist/styles.min.css": "./dist/styles.min.css"
-  },
-  "files": [
-    "dist",
-    "src"
-  ],
+  "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",

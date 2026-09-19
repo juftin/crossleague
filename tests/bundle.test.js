@@ -28,15 +28,15 @@ describe("Source & Bundle Integrity", () => {
     }, "dist/app.min.js should compile without syntax errors");
   });
 
-  it("should save preferences before a page refresh or navigation", () => {
+  it("should persist dashboard preferences through the React store", () => {
     const code = fs.readFileSync(
-      path.join(rootDir, "src", "js", "state", "preferences.js"),
+      path.join(rootDir, "src", "js", "state", "useCrossLeagueStore.js"),
       "utf8"
     );
     assert.match(
       code,
-      /window\.addEventListener\("pagehide",\s*savePreferences\)/,
-      "The current username and settings must be saved when leaving the page"
+      /localStorage\.setItem\("sleeper_username", userName\)/,
+      "The username setter must persist the active dashboard preference"
     );
   });
 

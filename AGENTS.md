@@ -12,7 +12,7 @@ CrossLeague is a static, client-side dashboard for comparing fantasy-football le
 - `src/js/services/syncService.js` coordinates data loading; `src/js/api/` contains Sleeper and ESPN adapters.
 - `src/js/analytics/` owns calculations and player aggregation.
 - `src/js/types/index.ts` holds the shared TypeScript data model.
-- `src/js/components/*.js` includes legacy imperative renderers retained for compatibility/tests. Do not wire new UI into them; make product UI changes in the React components.
+- `src/js/components/charts.js` is the sole imperative renderer retained for Chart.js canvas integration. Make all other product UI changes in React components.
 - `scripts/build.js` produces the committed `dist/` bundles and standalone production HTML.
 - `tests/` contains Node tests and visual snapshot fixtures. `tests/.snapshot-tmp/` is generated and should not be committed.
 
@@ -22,12 +22,12 @@ CrossLeague is a static, client-side dashboard for comparing fantasy-football le
 - Use Lucide React icons for UI icons. Do not add hardcoded emoji to the interface; the chat recap is the intentional exception.
 - Keep accessibility intact: buttons need an accessible name/title where the visible affordance is icon-only, and controls need appropriate `type`, labels, and keyboard behavior.
 - Use the established dark slate/emerald/cyan visual language and existing responsive Tailwind patterns. Prefer the existing `glass-card` treatment for dashboard panels.
-- Format changed files with Prettier. Do not perform unrelated formatting/refactors, especially in older legacy files.
+- Format changed files with Prettier. Do not perform unrelated formatting/refactors.
 - Do not reintroduce the removed report/export feature or its generated-template machinery.
 
 ## Header and navigation
 
-- The header is intentionally viewport-fixed (`Header.tsx`). `App.tsx` supplies responsive top padding (`pt-20 sm:pt-32`) so content is not obscured. Change them together if header height changes.
+- The header is intentionally viewport-fixed (`Header.tsx`). `App.tsx` supplies responsive top padding that accounts for the mobile dock, tablet tab grid, and desktop tab row. Change them together if header height changes.
 - The current platform is shown once in `#headerPlatformBadge`, next to the season badge. Do not repeat Sleeper/ESPN badges in dashboard table rows.
 - Keep the platform selector in the settings menu: it is the functional mechanism for changing platforms.
 - The settings menu is an existing functional surface. Preserve its current labels/actions and its mobile close behavior unless the requested change explicitly alters them.

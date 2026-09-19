@@ -4,9 +4,7 @@
  * Builds clean, anonymous share links containing filters, active tab, and leagues.
  */
 
-import { state } from "../state/store.js";
-import { getCurrentlyActiveTab } from "../components/tabs.js";
-import { showError } from "../components/dom.js";
+import { useCrossLeagueStore } from "../state/useCrossLeagueStore.js";
 
 /**
  * Builds a shareable CrossLeague URL containing season, week, mode, league IDs, and active tab
@@ -15,29 +13,31 @@ import { showError } from "../components/dom.js";
  * @returns {string} Shareable URL
  */
 export function buildShareableUrl() {
-  const seasonInput = document.getElementById("seasonInput");
-  const weekInput = document.getElementById("weekInput");
-  const modeSelect = document.getElementById("modeSelect");
-
-  const season = seasonInput ? seasonInput.value : "2024";
-  const week = weekInput ? weekInput.value : "1";
-  const mode = state.currentMode || (modeSelect ? modeSelect.value : "WEEKLY");
-  const currentTab = getCurrentlyActiveTab();
+  const {
+    activeTab,
+    allLeaguesData,
+    customLeagueIds,
+    mode,
+    platform,
+    season,
+    selectedLeagueIds,
+    week
+  } = useCrossLeagueStore.getState();
 
   const url = new URL(window.location.href);
   url.search = "";
-  if (state.currentPlatform === "espn") url.searchParams.set("platform", "espn");
+  if (platform === "espn") url.searchParams.set("platform", "espn");
   if (season) url.searchParams.set("season", season);
   if (week) url.searchParams.set("week", week);
   if (mode) url.searchParams.set("mode", mode);
 
   let leagueIds = [];
-  if (state.selectedLeagueIds && state.selectedLeagueIds.size > 0) {
-    leagueIds = Array.from(state.selectedLeagueIds);
-  } else if (state.allLeaguesData && state.allLeaguesData.length > 0) {
-    leagueIds = state.allLeaguesData.map(l => l.league_id);
-  } else if (state.customLeagueIds && state.customLeagueIds.size > 0) {
-    leagueIds = Array.from(state.customLeagueIds);
+  if (selectedLeagueIds.length > 0) {
+    leagueIds = selectedLeagueIds;
+  } else if (allLeaguesData.length > 0) {
+    leagueIds = allLeaguesData.map(l => l.league_id);
+  } else if (customLeagueIds.length > 0) {
+    leagueIds = customLeagueIds;
   }
   const cleanLeagueIds = leagueIds
     .map(id =>
@@ -50,7 +50,7 @@ export function buildShareableUrl() {
     url.searchParams.set("leagues", cleanLeagueIds.join(","));
   }
 
-  url.hash = `#${currentTab}`;
+  url.hash = `#${activeTab}`;
   return url.toString();
 }
 
@@ -77,7 +77,7 @@ export async function shareUrl() {
     return true;
   } catch (err) {
     console.error("Failed to copy URL:", err);
-    showError("Could not copy link to clipboard.");
+    console.error("Could not copy link to clipboard.");
     return false;
   }
 }
