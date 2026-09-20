@@ -77,6 +77,11 @@ export const Header: React.FC = () => {
   const [isLeagueFilterOpen, setIsLeagueFilterOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const favicon = document.getElementById("favicon") as HTMLLinkElement | null;
+    if (favicon) favicon.href = theme === "light" ? "/favicon-light.svg" : "/favicon.svg";
+  }, [theme]);
+
   // Sync draft state with store whenever settings modal opens
   useEffect(() => {
     if (isSettingsOpen) {
@@ -278,7 +283,11 @@ export const Header: React.FC = () => {
           <div className="group relative flex-shrink-0">
             <div className="pointer-events-none absolute -inset-0.5 transform-gpu rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-60 blur transition-opacity duration-300 group-hover:opacity-100" />
             <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-slate-900 shadow-xl sm:h-12 sm:w-12">
-              <img src="/favicon.svg" alt="CrossLeague" className="h-7 w-7 sm:h-9 sm:w-9" />
+              <img
+                src={theme === "light" ? "/favicon-light.svg" : "/favicon.svg"}
+                alt="CrossLeague"
+                className="h-7 w-7 sm:h-9 sm:w-9"
+              />
             </div>
           </div>
           <div className="min-w-0 flex-1">

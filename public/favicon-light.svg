@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="CrossLeague">
+  <defs>
+    <linearGradient id="boltGradient" x1="9" y1="7" x2="23" y2="26" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f766e" />
+      <stop offset="0.52" stop-color="#059669" />
+      <stop offset="1" stop-color="#0284c7" />
+    </linearGradient>
+    <filter id="boltGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.1" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="#f8fbff" />
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" stroke="#cbd5e1" />
+  <path d="M18.5 4 8.75 17.25h6.5L13.5 28l9.75-13.25h-6.5L18.5 4Z" fill="url(#boltGradient)" filter="url(#boltGlow)" />
+</svg>
