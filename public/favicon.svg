@@ -1,13 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="CrossLeague">
   <defs>
-    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981" />
-      <stop offset="100%" stop-color="#06b6d4" />
+    <linearGradient id="boltGradient" x1="9" y1="7" x2="23" y2="26" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6ee7b7" />
+      <stop offset="0.52" stop-color="#10b981" />
+      <stop offset="1" stop-color="#22d3ee" />
     </linearGradient>
+    <filter id="boltGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.25" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
   </defs>
   <rect width="32" height="32" rx="8" fill="#0f172a" />
-  <path d="M10 9h12v3a6 6 0 0 1-12 0V9z" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <path d="M10 11H7a2 2 0 0 1-2-2V8a1 1 0 0 1 1-1h4" stroke="url(#brandGrad)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M22 11h3a2 2 0 0 0 2-2V8a1 1 0 0 0-1-1h-4" stroke="url(#brandGrad)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M16 18v5M12 23h8" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M18.5 4 8.75 17.25h6.5L13.5 28l9.75-13.25h-6.5L18.5 4Z" fill="url(#boltGradient)" filter="url(#boltGlow)" />
 </svg>
