@@ -73,9 +73,9 @@ tasks:
     deps: [sync]
   #######################################
   check:build:
-    desc: Code Quality Check - Bundle Synchronization
+    desc: Code Quality Check - Production Build
     cmds:
-      - node scripts/build.js --check
+      - npm run build
     deps: [sync]
   #######################################
   check:
@@ -115,9 +115,9 @@ tasks:
   # BUILD AND DISTRIBUTION
   ########################
   build:
-    desc: Build Production Bundles and Standalone HTML
+    desc: Build Production Assets with Vite
     cmds:
-      - node scripts/build.js {{.CLI_ARGS}}
+      - npm run build
     deps: [sync]
   ########################
   # DEVELOPMENT

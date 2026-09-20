@@ -1,7 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@5/overview.json",
   "entry": [
-    "src/index.html",
+    "index.html",
     "src/js/index.js",
     "src/js/analytics/index.js",
     "src/js/api/index.js",
@@ -10,6 +10,7 @@
   ],
   "project": ["src/**/*.{js,ts,tsx}", "scripts/**/*.js", "tests/**/*.js"],
   "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": ["tailwindcss"],
   "rules": {
     "exports": "warn",
     "types": "off",

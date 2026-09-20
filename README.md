@@ -142,11 +142,8 @@ crossleague/
 ├── docs/                 # Specialized technical documentation guides
 ├── snapshots/            # Visual regression PNG snapshots
 ├── scripts/
-│   ├── build.js          # Vite production bundler & minifier
 │   └── generate-snapshots.js # Automated Chrome headless visual snapshot engine
 ├── src/
-│   ├── css/
-│   │   └── styles.css    # Glassmorphic Tailwind CSS stylesheet
 │   ├── js/
 │   │   ├── analytics/    # All-Play, Luck Index, Efficiency, Statistics, Superlatives
 │   │   ├── api/          # Sleeper REST client, ESPN adapter, Player DB client
@@ -156,12 +153,16 @@ crossleague/
 │   │   ├── state/        # Zustand store, TTL caching, URL parameter syncing
 │   │   ├── types/        # TypeScript interfaces & type definitions
 │   │   └── index.js      # Main JavaScript module & browser bootstrap entry point
-│   └── index.html        # Vite development HTML template
-├── dist/                 # Minified production bundles & standalone inlined app
+│   └── css/
+│       └── styles.css    # Tailwind CSS v4 design system stylesheet
+├── dist/                 # Production build assets & HTML
+├── public/               # Static assets (favicon.svg, .nojekyll)
 ├── tests/                # Native Node.js test suite (`node:test`)
+├── index.html            # Application HTML entry point
 ├── eslint.config.js      # ESLint flat configuration
 ├── knip.json             # Unused code & dependency analyzer configuration
 ├── tsconfig.json         # TypeScript configuration
+├── vite.config.js        # Standard Vite configuration
 ├── wrangler.jsonc        # Cloudflare Pages deployment configuration
 ├── package.json          # Package manifest & scripts
 ├── Taskfile.yaml         # Task runner entry points

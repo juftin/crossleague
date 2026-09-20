@@ -286,14 +286,10 @@ export const Header: React.FC = () => {
             <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400 sm:text-sm">
               Every league. Every squad. One board.
             </p>
-            <p
-              id="snapshotSubtitle"
-              className="mt-0.5 hidden truncate text-[10px] font-semibold text-cyan-400 sm:text-xs"
-            />
           </div>
         </div>
 
-        {/* Right Side: Year/Week Badges, Snapshot Indicator & Hamburger Menu Button */}
+        {/* Right Side: Year/Week Badges & Hamburger Menu Button */}
         <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3">
           {hasData && (
             <div
@@ -340,14 +336,6 @@ export const Header: React.FC = () => {
               </span>
             </div>
           )}
-
-          <span
-            id="snapshotIndicator"
-            className="hidden inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-950/80 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-sm"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] sm:h-2.5 sm:w-2.5" />
-            Snapshot
-          </span>
 
           {/* MENU DROPDOWN CONTAINER */}
           <div
