@@ -53,10 +53,6 @@ body {
   overflow-x: hidden;
 }
 
-.hidden {
-  display: none;
-}
-
 body::before {
   content: "";
   position: fixed;
