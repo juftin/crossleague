@@ -7,7 +7,6 @@ import {
   Crown,
   Medal,
   Target,
-  Zap,
   Flame,
   Shield,
   Footprints,
@@ -23,6 +22,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import { BrandBoltIcon } from "../common/BrandBoltIcon.tsx";
 
 export const PlayersTab: React.FC = () => {
   const records = useActiveRecords();
@@ -70,7 +70,7 @@ export const PlayersTab: React.FC = () => {
     {
       pos: "RB",
       label: "Top RB",
-      icon: Zap,
+      icon: BrandBoltIcon,
       color: "text-cyan-400",
       bg: "from-cyan-500/20 via-slate-900/90 to-transparent",
       border: "border-cyan-500/30"

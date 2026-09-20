@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Zap, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useCrossLeagueStore } from "../state/useCrossLeagueStore.js";
 import { Header } from "./header/Header.tsx";
 import { AwardsTab } from "./tabs/AwardsTab.tsx";
@@ -11,6 +11,7 @@ import { PlayersTab } from "./tabs/PlayersTab.tsx";
 import { LuckModal } from "./modals/LuckModal.tsx";
 import { ToastContainer } from "./common/Toast.tsx";
 import { MobileBottomNav } from "./common/MobileBottomNav.tsx";
+import { BrandBoltIcon } from "./common/BrandBoltIcon.tsx";
 import { syncData } from "../services/syncService.js";
 import { getUrlParams, extractCustomLeagueIds, updateUrlParams } from "../state/urlParams.js";
 import { BASE_URL, HASH_TAB_MAP } from "../state/constants.js";
@@ -360,7 +361,7 @@ export const App: React.FC = () => {
             className="glass-card mx-auto my-12 max-w-3xl space-y-5 rounded-2xl border border-slate-800 p-16 text-center text-slate-400"
           >
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 shadow-xl">
-              <Zap className="h-10 w-10 text-emerald-400" />
+              <BrandBoltIcon className="h-10 w-10 text-emerald-400" />
             </div>
             <h3 className="text-2xl font-black text-white sm:text-3xl">
               Who Actually Ran the League?
@@ -389,7 +390,7 @@ export const App: React.FC = () => {
       <footer className="mt-auto w-full border-t border-slate-900 bg-slate-950/80 py-7 text-center text-sm text-slate-500">
         <div className="flex w-full flex-col items-center justify-center gap-3 px-4 text-center sm:flex-row sm:px-8 lg:px-12">
           <div className="inline-flex items-center gap-1.5 font-semibold text-slate-400">
-            <Zap className="h-4 w-4 text-emerald-400" />
+            <BrandBoltIcon className="h-4 w-4 text-emerald-400" />
             <span>CrossLeague • Fantasy Football Power Rankings</span>
           </div>
         </div>

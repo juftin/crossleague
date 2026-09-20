@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
 import {
-  Zap,
   Sliders,
   Shield,
   User,
@@ -27,6 +26,7 @@ import { shareUrl } from "../../export/share.js";
 import { syncData } from "../../services/syncService.js";
 import { getMaxPlayedWeek } from "../../state/preferences.js";
 import { extractCustomLeagueIds } from "../../state/urlParams.js";
+import { BrandBoltIcon } from "../common/BrandBoltIcon.tsx";
 import type { TabId, SyncMode } from "../../types/index.js";
 
 export const Header: React.FC = () => {
@@ -322,7 +322,7 @@ export const Header: React.FC = () => {
                   {platform === "espn" ? (
                     <Shield className="h-3 w-3" />
                   ) : (
-                    <Zap className="h-3 w-3" />
+                    <BrandBoltIcon className="h-3 w-3" />
                   )}
                   {platform === "espn" ? "ESPN" : "Sleeper"}
                 </span>
@@ -517,7 +517,7 @@ export const Header: React.FC = () => {
                           : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      <Zap className="h-3.5 w-3.5 text-emerald-400" />
+                      <BrandBoltIcon className="h-3.5 w-3.5 text-emerald-400" />
                       <span>Sleeper</span>
                     </button>
                     <button
