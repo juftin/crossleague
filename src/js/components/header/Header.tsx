@@ -32,14 +32,14 @@ export const Header: React.FC = () => {
   const setActiveTab = useCrossLeagueStore(s => s.setActiveTab);
   const platform = useCrossLeagueStore(s => s.platform);
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
-  const syncType = useCrossLeagueStore(s => s.syncType);
-  const setSyncType = useCrossLeagueStore(s => s.setSyncType);
-  const userName = useCrossLeagueStore(s => s.userName);
-  const setUserName = useCrossLeagueStore(s => s.setUserName);
-  const userId = useCrossLeagueStore(s => s.userId);
-  const customLeagueIds = useCrossLeagueStore(s => s.customLeagueIds);
-  const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
-  const removeCustomLeagueId = useCrossLeagueStore(s => s.removeCustomLeagueId);
+  const sleeperUserName = useCrossLeagueStore(s => s.sleeperUserName);
+  const sleeperSyncType = useCrossLeagueStore(s => s.sleeperSyncType);
+  const sleeperCustomLeagueIds = useCrossLeagueStore(s => s.sleeperCustomLeagueIds);
+  const espnCustomLeagueIds = useCrossLeagueStore(s => s.espnCustomLeagueIds);
+  const setSleeperSyncType = useCrossLeagueStore(s => s.setSleeperSyncType);
+  const setSleeperUser = useCrossLeagueStore(s => s.setSleeperUser);
+  const setSleeperCustomLeagueIds = useCrossLeagueStore(s => s.setSleeperCustomLeagueIds);
+  const setEspnCustomLeagueIds = useCrossLeagueStore(s => s.setEspnCustomLeagueIds);
   const leaguesMap = useCrossLeagueStore(s => s.leaguesMap);
   const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
   const toggleSelectedLeagueId = useCrossLeagueStore(s => s.toggleSelectedLeagueId);
@@ -57,15 +57,44 @@ export const Header: React.FC = () => {
   const closeSettingsModal = useCrossLeagueStore(s => s.closeSettingsModal);
   const resetData = useCrossLeagueStore(s => s.resetData);
   const addToast = useCrossLeagueStore(s => s.addToast);
+  const rawRecords = useCrossLeagueStore(s => s.rawRecords);
+  const hasData = rawRecords && rawRecords.length > 0;
 
-  const [inputUser, setInputUser] = useState(userName || userId);
+  const [draftPlatform, setDraftPlatform] = useState(platform);
+  const [draftSyncType, setDraftSyncType] = useState(sleeperSyncType || "user");
+  const [draftSleeperUser, setDraftSleeperUser] = useState(sleeperUserName || "");
+  const [draftSleeperLeagues, setDraftSleeperLeagues] = useState<string[]>(
+    sleeperCustomLeagueIds || []
+  );
+  const [draftEspnLeagues, setDraftEspnLeagues] = useState<string[]>(espnCustomLeagueIds || []);
+  const [draftSeason, setDraftSeason] = useState(season);
+  const [draftMode, setDraftMode] = useState(mode);
   const [inputLeagueId, setInputLeagueId] = useState("");
   const [isLeagueFilterOpen, setIsLeagueFilterOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Sync draft state with store whenever settings modal opens
   useEffect(() => {
-    setInputUser(userName || userId);
-  }, [userName, userId, isSettingsOpen]);
+    if (isSettingsOpen) {
+      setDraftPlatform(platform);
+      setDraftSyncType(sleeperSyncType || "user");
+      setDraftSleeperUser(sleeperUserName || "");
+      setDraftSleeperLeagues(sleeperCustomLeagueIds || []);
+      setDraftEspnLeagues(espnCustomLeagueIds || []);
+      setDraftSeason(season);
+      setDraftMode(mode);
+      setInputLeagueId("");
+    }
+  }, [
+    isSettingsOpen,
+    platform,
+    sleeperSyncType,
+    sleeperUserName,
+    sleeperCustomLeagueIds,
+    espnCustomLeagueIds,
+    season,
+    mode
+  ]);
 
   // Handle click outside settings dropdown
   useEffect(() => {
@@ -115,21 +144,63 @@ export const Header: React.FC = () => {
   const selectedCount =
     selectedLeagueIds.length === 0 ? totalLeaguesCount : selectedLeagueIds.length;
 
+  const activeDraftLeagues = draftPlatform === "espn" ? draftEspnLeagues : draftSleeperLeagues;
+
   const handleAddLeagueId = () => {
     if (!inputLeagueId.trim()) return;
     const parsed = extractCustomLeagueIds(inputLeagueId);
     if (parsed.length > 0) {
-      const merged = Array.from(new Set([...customLeagueIds, ...parsed]));
-      setCustomLeagueIds(merged);
+      if (draftPlatform === "espn") {
+        setDraftEspnLeagues(Array.from(new Set([...draftEspnLeagues, ...parsed])));
+      } else {
+        setDraftSleeperLeagues(Array.from(new Set([...draftSleeperLeagues, ...parsed])));
+      }
     }
     setInputLeagueId("");
   };
 
+  const handleRemoveLeagueId = (idToRemove: string) => {
+    if (draftPlatform === "espn") {
+      setDraftEspnLeagues(draftEspnLeagues.filter(id => id !== idToRemove));
+    } else {
+      setDraftSleeperLeagues(draftSleeperLeagues.filter(id => id !== idToRemove));
+    }
+  };
+
   const handleApplySettings = (e: React.FormEvent) => {
     e.preventDefault();
-    if (syncType === "user" && platform !== "espn") {
-      setUserName(inputUser.trim());
+
+    let finalEspnLeagues = [...draftEspnLeagues];
+    let finalSleeperLeagues = [...draftSleeperLeagues];
+
+    if (inputLeagueId.trim()) {
+      const parsed = extractCustomLeagueIds(inputLeagueId);
+      if (parsed.length > 0) {
+        if (draftPlatform === "espn") {
+          finalEspnLeagues = Array.from(new Set([...finalEspnLeagues, ...parsed]));
+          setDraftEspnLeagues(finalEspnLeagues);
+        } else {
+          finalSleeperLeagues = Array.from(new Set([...finalSleeperLeagues, ...parsed]));
+          setDraftSleeperLeagues(finalSleeperLeagues);
+        }
+      }
+      setInputLeagueId("");
     }
+
+    useCrossLeagueStore.setState({ pendingLeagueIdsFilter: null });
+    setSeason(draftSeason);
+    setMode(draftMode);
+
+    if (draftPlatform === "espn") {
+      setEspnCustomLeagueIds(finalEspnLeagues);
+      setPlatform("espn");
+    } else {
+      setSleeperSyncType(draftSyncType);
+      setSleeperUser(draftSleeperUser.trim());
+      setSleeperCustomLeagueIds(finalSleeperLeagues);
+      setPlatform("sleeper");
+    }
+
     closeSettingsModal();
     syncData(true);
   };
@@ -151,11 +222,9 @@ export const Header: React.FC = () => {
   };
 
   const handleClearData = () => {
-    if (window.confirm("Clear all stored data, cached leagues, credentials, and settings?")) {
-      resetData();
-      addToast("Data cleared successfully", "info");
-      closeSettingsModal();
-    }
+    resetData();
+    addToast("Data cleared successfully", "info");
+    closeSettingsModal();
   };
 
   const tabs: Array<{ id: TabId; elementId: string; label: string; icon: React.ReactNode }> = [
@@ -226,45 +295,51 @@ export const Header: React.FC = () => {
 
         {/* Right Side: Year/Week Badges, Snapshot Indicator & Hamburger Menu Button */}
         <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3">
-          <div
-            id="headerBottomRow"
-            className="flex flex-shrink-0 flex-col items-end justify-center gap-1"
-          >
-            <div className="flex items-center gap-1">
-              <span
-                id="headerPlatformBadge"
-                title="Active fantasy platform. Change it in Menu & Controls."
-                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] leading-tight font-semibold shadow-sm sm:text-xs ${
-                  platform === "espn"
-                    ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
-                    : "border-cyan-400/30 bg-cyan-500/10 text-cyan-300"
-                }`}
-              >
-                {platform === "espn" ? <Shield className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                {platform === "espn" ? "ESPN" : "Sleeper"}
-              </span>
+          {hasData && (
+            <div
+              id="headerBottomRow"
+              className="flex flex-shrink-0 flex-col items-end justify-center gap-1"
+            >
+              <div className="flex items-center gap-1">
+                <span
+                  id="headerPlatformBadge"
+                  title="Active fantasy platform. Change it in Menu & Controls."
+                  className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] leading-tight font-semibold shadow-sm sm:text-xs ${
+                    platform === "espn"
+                      ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                      : "border-cyan-400/30 bg-cyan-500/10 text-cyan-300"
+                  }`}
+                >
+                  {platform === "espn" ? (
+                    <Shield className="h-3 w-3" />
+                  ) : (
+                    <Zap className="h-3 w-3" />
+                  )}
+                  {platform === "espn" ? "ESPN" : "Sleeper"}
+                </span>
 
-              {/* Year / Season Bubble Badge */}
+                {/* Year / Season Bubble Badge */}
+                <span
+                  id="headerSeasonBadge"
+                  title="Active Season"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-cyan-300 shadow-sm sm:text-xs"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                  <span id="headerSeasonValue">{season}</span>
+                </span>
+              </div>
+
+              {/* Week Bubble Badge */}
               <span
-                id="headerSeasonBadge"
-                title="Active Season"
-                className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-cyan-300 shadow-sm sm:text-xs"
+                id="headerWeekBadge"
+                title="Active Matchup Week"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-emerald-300 shadow-sm sm:text-xs"
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                <span id="headerSeasonValue">{season}</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                <span id="headerWeekValue">{weekLabel}</span>
               </span>
             </div>
-
-            {/* Week Bubble Badge */}
-            <span
-              id="headerWeekBadge"
-              title="Active Matchup Week"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] leading-tight font-semibold text-emerald-300 shadow-sm sm:text-xs"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-              <span id="headerWeekValue">{weekLabel}</span>
-            </span>
-          </div>
+          )}
 
           <span
             id="snapshotIndicator"
@@ -417,9 +492,9 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="platformSleeperBtn"
-                      onClick={() => setPlatform("sleeper")}
+                      onClick={() => setDraftPlatform("sleeper")}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
-                        platform === "sleeper"
+                        draftPlatform === "sleeper"
                           ? "bg-slate-800 text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
@@ -430,9 +505,9 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="platformEspnBtn"
-                      onClick={() => setPlatform("espn")}
+                      onClick={() => setDraftPlatform("espn")}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs transition ${
-                        platform === "espn"
+                        draftPlatform === "espn"
                           ? "border border-rose-500/40 bg-rose-900/80 font-bold text-white shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
@@ -448,15 +523,15 @@ export const Header: React.FC = () => {
                   <div
                     id="syncTypeButtonsContainer"
                     className={`flex items-center rounded-xl border border-slate-800 bg-slate-900 p-1 text-xs font-bold ${
-                      platform === "espn" ? "hidden" : ""
+                      draftPlatform === "espn" ? "hidden" : ""
                     }`}
                   >
                     <button
                       type="button"
                       id="syncTypeUserBtn"
-                      onClick={() => setSyncType("user")}
+                      onClick={() => setDraftSyncType("user")}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center transition ${
-                        syncType === "user"
+                        draftSyncType === "user"
                           ? "bg-slate-800 font-bold text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
@@ -467,9 +542,9 @@ export const Header: React.FC = () => {
                     <button
                       type="button"
                       id="syncTypeLeaguesBtn"
-                      onClick={() => setSyncType("leagues")}
+                      onClick={() => setDraftSyncType("leagues")}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center transition ${
-                        syncType === "leagues"
+                        draftSyncType === "leagues"
                           ? "bg-slate-800 font-bold text-slate-200 shadow-sm"
                           : "text-slate-400 hover:text-slate-200"
                       }`}
@@ -482,7 +557,7 @@ export const Header: React.FC = () => {
                   {/* Username Panel */}
                   <div
                     id="userSyncPanel"
-                    className={syncType === "user" && platform !== "espn" ? "" : "hidden"}
+                    className={draftSyncType === "user" && draftPlatform !== "espn" ? "" : "hidden"}
                   >
                     <label
                       htmlFor="userIdInput"
@@ -497,8 +572,8 @@ export const Header: React.FC = () => {
                       <input
                         type="text"
                         id="userIdInput"
-                        value={inputUser}
-                        onChange={e => setInputUser(e.target.value)}
+                        value={draftSleeperUser}
+                        onChange={e => setDraftSleeperUser(e.target.value)}
                         placeholder="e.g. username or numeric ID"
                         className="w-full rounded-xl border border-slate-700/80 bg-slate-900 px-3.5 py-2 pl-9 text-sm font-medium text-white placeholder-slate-500 transition-all focus:border-transparent focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
@@ -509,11 +584,11 @@ export const Header: React.FC = () => {
                   {/* League IDs Panel */}
                   <div
                     id="leaguesSyncPanel"
-                    className={`space-y-2.5 ${syncType === "leagues" || platform === "espn" ? "" : "hidden"}`}
+                    className={`space-y-2.5 ${draftSyncType === "leagues" || draftPlatform === "espn" ? "" : "hidden"}`}
                   >
                     <label className="block flex items-center justify-between text-xs font-black tracking-wider text-slate-400 uppercase">
                       <span id="customLeaguesLabel">
-                        {platform === "espn" ? "ESPN League IDs (Public)" : "League IDs"}
+                        {draftPlatform === "espn" ? "ESPN League IDs (Public)" : "League IDs"}
                       </span>
                       <span className="text-[10px] font-medium text-slate-500">multi-league</span>
                     </label>
@@ -531,7 +606,9 @@ export const Header: React.FC = () => {
                               handleAddLeagueId();
                             }
                           }}
-                          placeholder={platform === "espn" ? "e.g. espn:12345678" : "e.g. 12345678"}
+                          placeholder={
+                            draftPlatform === "espn" ? "e.g. espn:12345678" : "e.g. 12345678"
+                          }
                           className="w-full rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-2 pl-8 font-mono text-xs text-white placeholder-slate-500 transition-all focus:border-transparent focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
                         <span className="absolute top-2 left-2.5 font-mono text-xs text-slate-500">
@@ -553,7 +630,7 @@ export const Header: React.FC = () => {
                       id="customLeagueIdsChips"
                       className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto"
                     >
-                      {customLeagueIds.map(id => (
+                      {activeDraftLeagues.map(id => (
                         <span
                           key={id}
                           className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 font-mono text-xs text-slate-200"
@@ -561,7 +638,7 @@ export const Header: React.FC = () => {
                           <span>{id}</span>
                           <button
                             type="button"
-                            onClick={() => removeCustomLeagueId(id)}
+                            onClick={() => handleRemoveLeagueId(id)}
                             className="ml-1 cursor-pointer font-bold text-slate-400 hover:text-rose-400"
                           >
                             <X className="h-3.5 w-3.5" />
@@ -583,8 +660,8 @@ export const Header: React.FC = () => {
                     </label>
                     <select
                       id="modeSelect"
-                      value={mode}
-                      onChange={e => setMode(e.target.value as SyncMode)}
+                      value={draftMode}
+                      onChange={e => setDraftMode(e.target.value as SyncMode)}
                       className="w-full cursor-pointer rounded-xl border border-slate-700/80 bg-slate-900 px-2.5 py-2 text-xs font-semibold text-white transition-all focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:text-sm"
                     >
                       <option value="WEEKLY">Weekly Matchup</option>
@@ -601,8 +678,8 @@ export const Header: React.FC = () => {
                     </label>
                     <select
                       id="seasonInput"
-                      value={season}
-                      onChange={e => setSeason(Number(e.target.value))}
+                      value={draftSeason}
+                      onChange={e => setDraftSeason(Number(e.target.value))}
                       className="w-full cursor-pointer rounded-xl border border-slate-700/80 bg-slate-900 px-2.5 py-2 text-xs font-semibold text-white transition-all focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:text-sm"
                     >
                       {[2026, 2025, 2024, 2023, 2022, 2021].map(yr => (

@@ -35,7 +35,7 @@ describe("Source & Bundle Integrity", () => {
     );
     assert.match(
       code,
-      /localStorage\.setItem\("sleeper_username", userName\)/,
+      /setPreference\(STORAGE_KEYS\.PREF_USER_NAME,\s*userName\)/,
       "The username setter must persist the active dashboard preference"
     );
   });

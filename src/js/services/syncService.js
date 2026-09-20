@@ -7,7 +7,8 @@ import { apiFetch, resolveUser, processWeeklyMatchups } from "../api/sleeper.js"
 import { fetchEspnLeague } from "../api/espn.js";
 import { initPlayersDb } from "../api/players.js";
 import { calculateStdDev } from "../analytics/statistics.js";
-import { saveDataToCache, tryLoadFromCache } from "../state/cache.js";
+import { saveReportToCache, loadReportFromCache } from "../state/cache.js";
+import { updateUrlParams } from "../state/urlParams.js";
 
 export async function syncData(forceRefresh = false) {
   const store = useCrossLeagueStore.getState();
@@ -24,12 +25,18 @@ export async function syncData(forceRefresh = false) {
   } = store;
 
   const isLeaguesSync = syncType === "leagues" || platform === "espn";
-  const inputUser = userName || userId;
+  const inputUser = isLeaguesSync ? "" : userName || userId;
 
   let targetIds =
-    pendingLeagueIdsFilter && pendingLeagueIdsFilter.length > 0
-      ? pendingLeagueIdsFilter
-      : customLeagueIds;
+    platform === "espn"
+      ? customLeagueIds && customLeagueIds.length > 0
+        ? customLeagueIds
+        : store.espnCustomLeagueIds || []
+      : syncType === "leagues"
+        ? customLeagueIds && customLeagueIds.length > 0
+          ? customLeagueIds
+          : store.sleeperCustomLeagueIds || []
+        : [];
 
   if (isLeaguesSync || platform === "espn" || (!inputUser && targetIds.length > 0)) {
     if (targetIds.length === 0) {
@@ -47,13 +54,59 @@ export async function syncData(forceRefresh = false) {
 
   // Check cache first if not forced
   if (!forceRefresh) {
-    const cached = tryLoadFromCache(inputUser, season, mode, week);
+    const cached = loadReportFromCache({
+      platform,
+      user: inputUser,
+      customLeagueIds: targetIds,
+      season,
+      mode,
+      week
+    });
     if (cached) {
       store.setRawRecords(cached.records || []);
       store.setLeaguesMap(cached.leaguesMap || {});
       store.setAllLeaguesData(cached.allLeaguesData || []);
+      if (cached.selectedLeagueIds && cached.selectedLeagueIds.length > 0) {
+        store.setSelectedLeagueIds(cached.selectedLeagueIds);
+      }
+      if (isLeaguesSync) {
+        store.setUserName("");
+        store.setUserId("");
+        store.setUserAvatar("");
+        store.setCustomLeagueIds(targetIds);
+      } else {
+        store.setCustomLeagueIds([]);
+        if (cached.user?.id && !store.userId) {
+          store.setUserId(cached.user.id);
+        }
+        if (cached.user?.avatar && !store.userAvatar) {
+          store.setUserAvatar(cached.user.avatar);
+        }
+        if (cached.user?.name && !store.userName) {
+          store.setUserName(cached.user.name);
+        }
+      }
+      if (cached.espnPlayersDb && Object.keys(cached.espnPlayersDb).length > 0) {
+        store.setEspnPlayersDb(cached.espnPlayersDb);
+      }
+      initPlayersDb();
       store.setError(null);
       store.setLoading(false);
+      const currentStore = useCrossLeagueStore.getState();
+      updateUrlParams({
+        platform,
+        user: inputUser,
+        userId: currentStore.userId,
+        userName: currentStore.userName,
+        customLeagueIds: targetIds,
+        selectedLeagueIds: currentStore.selectedLeagueIds,
+        allLeaguesData: cached.allLeaguesData || [],
+        season,
+        mode,
+        week,
+        syncType: currentStore.syncType,
+        rawRecords: cached.records || []
+      });
       return;
     }
   }
@@ -388,15 +441,51 @@ export async function syncData(forceRefresh = false) {
         .map(l => l.league_id)
         .filter(id => pendingLeagueIdsFilter.includes(id));
       store.setSelectedLeagueIds(activeIds.length > 0 ? activeIds : Object.keys(leaguesMap));
+      useCrossLeagueStore.setState({ pendingLeagueIdsFilter: null });
     } else {
       store.setSelectedLeagueIds(Object.keys(leaguesMap));
     }
 
     // Cache results
-    saveDataToCache(inputUser, season, mode, week, {
+    saveReportToCache({
+      platform,
+      user: inputUser,
+      userId: store.userId,
+      userAvatar: store.userAvatar,
+      customLeagueIds: targetIds,
+      season,
+      mode,
+      week,
       records: combinedRecords,
       leaguesMap,
-      allLeaguesData: combinedLeaguesData
+      allLeaguesData: combinedLeaguesData,
+      selectedLeagueIds: store.selectedLeagueIds,
+      nflState: store.nflState
+    });
+
+    if (isLeaguesSync) {
+      store.setUserName("");
+      store.setUserId("");
+      store.setUserAvatar("");
+      store.setCustomLeagueIds(targetIds);
+    } else {
+      useCrossLeagueStore.setState({ customLeagueIds: [] });
+    }
+
+    const currentStore = useCrossLeagueStore.getState();
+    updateUrlParams({
+      platform,
+      user: isLeaguesSync ? "" : inputUser,
+      userId: currentStore.userId,
+      userName: currentStore.userName,
+      customLeagueIds: isLeaguesSync ? targetIds : [],
+      selectedLeagueIds: currentStore.selectedLeagueIds,
+      allLeaguesData: combinedLeaguesData,
+      season,
+      mode,
+      week,
+      syncType: currentStore.syncType,
+      rawRecords: combinedRecords
     });
 
     store.setError(null);
