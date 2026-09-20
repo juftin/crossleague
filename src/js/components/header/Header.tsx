@@ -17,7 +17,9 @@ import {
   TrendingUp,
   Grid,
   Clover,
-  Star
+  Star,
+  Moon,
+  Sun
 } from "lucide-react";
 import { useCrossLeagueStore } from "../../state/useCrossLeagueStore.js";
 import { copyChatRecap } from "../../export/recap.js";
@@ -32,6 +34,8 @@ export const Header: React.FC = () => {
   const setActiveTab = useCrossLeagueStore(s => s.setActiveTab);
   const platform = useCrossLeagueStore(s => s.platform);
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
+  const theme = useCrossLeagueStore(s => s.theme);
+  const setTheme = useCrossLeagueStore(s => s.setTheme);
   const sleeperUserName = useCrossLeagueStore(s => s.sleeperUserName);
   const sleeperSyncType = useCrossLeagueStore(s => s.sleeperSyncType);
   const sleeperCustomLeagueIds = useCrossLeagueStore(s => s.sleeperCustomLeagueIds);
@@ -400,15 +404,32 @@ export const Header: React.FC = () => {
                     Menu & Controls
                   </span>
                 </div>
-                <button
-                  type="button"
-                  id="btnCloseSettingsModal"
-                  onClick={closeSettingsModal}
-                  className="cursor-pointer rounded-lg bg-slate-800/60 p-1 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
-                  aria-label="Close menu"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    id="themeToggleBtn"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg bg-slate-800/60 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                    aria-label="Toggle color mode"
+                    aria-pressed={theme === "light"}
+                    title="Toggle color mode"
+                  >
+                    {theme === "dark" ? (
+                      <Sun className="h-3.5 w-3.5 text-amber-400" />
+                    ) : (
+                      <Moon className="h-3.5 w-3.5 text-cyan-400" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    id="btnCloseSettingsModal"
+                    onClick={closeSettingsModal}
+                    className="cursor-pointer rounded-lg bg-slate-800/60 p-1 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                    aria-label="Close menu"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               {/* 1. Matchup Week Stepper inside Menu */}

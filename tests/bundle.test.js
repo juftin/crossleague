@@ -130,7 +130,8 @@ describe("Source & Bundle Integrity", () => {
     assert.ok(rootHtml.includes('id="selectAllLeaguesBtn"'), "Must contain #selectAllLeaguesBtn");
     assert.ok(rootHtml.includes('id="clearAllLeaguesBtn"'), "Must contain #clearAllLeaguesBtn");
 
-    // Menu Action Buttons (Copy Recap, Share, Clear Data)
+    // Menu Action Buttons (Theme, Copy Recap, Share, Clear Data)
+    assert.ok(rootHtml.includes('id="themeToggleBtn"'), "Must contain #themeToggleBtn");
     assert.ok(rootHtml.includes('id="copyRecapBtn"'), "Must contain #copyRecapBtn");
     assert.ok(rootHtml.includes('id="shareUrlBtn"'), "Must contain #shareUrlBtn");
     assert.ok(rootHtml.includes('id="clearDataBtn"'), "Must contain #clearDataBtn");
@@ -179,6 +180,15 @@ describe("Source & Bundle Integrity", () => {
       code,
       /btnOpenSettingsModal\.addEventListener\("click",\s*toggleSettingsDropdown\)/,
       "React must own the menu button click handler without a legacy DOM listener"
+    );
+  });
+
+  it("should let Tailwind responsive display utilities override hidden", () => {
+    const styles = fs.readFileSync(path.join(rootDir, "src", "css", "styles.css"), "utf8");
+    assert.doesNotMatch(
+      styles,
+      /\.hidden\s*\{\s*display:\s*none/,
+      "A custom .hidden rule would override responsive utilities such as md:block"
     );
   });
 });

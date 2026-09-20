@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CrossLeague • Multi-League Fantasy Dashboard</title>
+    <script>
+      try {
+        if (localStorage.getItem("crossleague_theme") === "light") {
+          document.documentElement.classList.replace("dark", "light");
+        }
+      } catch {}
+    </script>
     <meta
       name="description"
       content="Universal power rankings, multi-league analytics, and advanced fantasy metrics for Sleeper and ESPN fantasy football leagues."
@@ -50,6 +57,7 @@
       id="customLeagueIdsChips"
       id="modeSelect"
       id="seasonInput"
+      id="themeToggleBtn"
       id="leagueDropdownContainer"
       id="leagueDropdownBtn"
       id="leagueDropdownLabel"

@@ -16,6 +16,7 @@ const initialEspnPlayers =
 
 export const useCrossLeagueStore = create((set, get) => ({
   platform: initialPreferences.platform,
+  theme: "dark",
   mode: initialPreferences.mode,
   season: initialPreferences.season,
   week: initialPreferences.week,
@@ -104,6 +105,18 @@ export const useCrossLeagueStore = create((set, get) => ({
     });
 
     setPreference(STORAGE_KEYS.PREF_PLATFORM, platform);
+  },
+
+  setTheme: theme => {
+    const nextTheme = theme === "light" ? "light" : "dark";
+    set({ theme: nextTheme });
+    try {
+      localStorage.setItem("crossleague_theme", nextTheme);
+    } catch {}
+    try {
+      document.documentElement.classList.toggle("dark", nextTheme === "dark");
+      document.documentElement.classList.toggle("light", nextTheme === "light");
+    } catch {}
   },
 
   setMode: mode => {
@@ -359,6 +372,7 @@ export const useCrossLeagueStore = create((set, get) => ({
     const currentYear = new Date().getFullYear();
     set({
       platform: "sleeper",
+      theme: "dark",
       mode: "WEEKLY",
       season: currentYear,
       week: 1,
@@ -378,6 +392,10 @@ export const useCrossLeagueStore = create((set, get) => ({
       allLeaguesData: [],
       error: null
     });
+    try {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    } catch {}
   }
 }));
 

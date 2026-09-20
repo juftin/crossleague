@@ -84,4 +84,5 @@ graph TD
 
 - **Score Distribution Chart**: Histogram of scores grouped into statistical bins.
 - **League Scoring Comparison**: Bar chart comparing Average Points Per Game (Avg PPG) across all leagues.
-- Retains imperative Chart.js canvas renderers integrated via React `useEffect` refs.
+- Retains imperative Chart.js canvas renderers integrated via React `useEffect` refs, with theme-aware canvas text, grid, legend, and tooltip colors.
+- Shared chart-help popovers use a high-contrast white surface in light mode and a slate surface in dark mode.
