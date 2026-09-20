@@ -119,6 +119,13 @@ function buildSnapshotHtmlPages() {
       actionScript: "window.switchTab('visuals', false);"
     },
     {
+      id: "light-analytics-tooltip",
+      embeddedData: mockEmbeddedReport,
+      theme: "light",
+      actionScript:
+        "window.switchTab('visuals', false); const openTooltip = () => { const popover = document.querySelector('#viewVisuals .card-info-popover'); if (popover) popover.classList.add('is-open'); else window.setTimeout(openTooltip, 25); }; openTooltip();"
+    },
+    {
       id: "light-settings-modal",
       embeddedData: mockEmbeddedReport,
       theme: "light",
