@@ -290,14 +290,10 @@ export const Header: React.FC = () => {
             <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400 sm:text-sm">
               Every league. Every squad. One board.
             </p>
-            <p
-              id="snapshotSubtitle"
-              className="mt-0.5 hidden truncate text-[10px] font-semibold text-cyan-400 sm:text-xs"
-            />
           </div>
         </div>
 
-        {/* Right Side: Year/Week Badges, Snapshot Indicator & Hamburger Menu Button */}
+        {/* Right Side: Year/Week Badges & Hamburger Menu Button */}
         <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3">
           {hasData && (
             <div
@@ -344,14 +340,6 @@ export const Header: React.FC = () => {
               </span>
             </div>
           )}
-
-          <span
-            id="snapshotIndicator"
-            className="hidden inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-950/80 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-sm"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] sm:h-2.5 sm:w-2.5" />
-            Snapshot
-          </span>
 
           {/* MENU DROPDOWN CONTAINER */}
           <div
@@ -487,47 +475,6 @@ export const Header: React.FC = () => {
 
               {/* 2. Account & Scope Settings Form */}
               <form id="filterForm" onSubmit={handleApplySettings} className="space-y-3.5">
-                {/* Appearance Selector */}
-                <div className="space-y-1.5">
-                  <span className="block px-1 text-[10px] font-black tracking-wider text-slate-400 uppercase">
-                    Appearance
-                  </span>
-                  <div
-                    className="flex items-center rounded-xl border border-slate-800 bg-slate-900 p-1 text-xs font-bold"
-                    role="group"
-                    aria-label="Color theme"
-                  >
-                    <button
-                      type="button"
-                      id="themeLightBtn"
-                      onClick={() => setTheme("light")}
-                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
-                        theme === "light"
-                          ? "bg-slate-800 text-slate-200 shadow-sm"
-                          : "text-slate-400 hover:text-slate-200"
-                      }`}
-                      aria-pressed={theme === "light"}
-                    >
-                      <Sun className="h-3.5 w-3.5 text-amber-400" />
-                      <span>Light</span>
-                    </button>
-                    <button
-                      type="button"
-                      id="themeDarkBtn"
-                      onClick={() => setTheme("dark")}
-                      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold transition ${
-                        theme === "dark"
-                          ? "bg-slate-800 text-slate-200 shadow-sm"
-                          : "text-slate-400 hover:text-slate-200"
-                      }`}
-                      aria-pressed={theme === "dark"}
-                    >
-                      <Moon className="h-3.5 w-3.5 text-cyan-400" />
-                      <span>Dark</span>
-                    </button>
-                  </div>
-                </div>
-
                 {/* Platform Selector */}
                 <div className="space-y-1.5">
                   <span className="block px-1 text-[10px] font-black tracking-wider text-slate-400 uppercase">
@@ -867,6 +814,21 @@ export const Header: React.FC = () => {
                 <span className="block px-1 text-[10px] font-black tracking-wider text-slate-500 uppercase">
                   Quick Actions
                 </span>
+                <button
+                  type="button"
+                  id="themeToggleBtn"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white"
+                  aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                  title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
+                  ) : (
+                    <Moon className="h-3.5 w-3.5 flex-shrink-0 text-cyan-400" />
+                  )}
+                  <span>Switch to {theme === "dark" ? "Light" : "Dark"} Mode</span>
+                </button>
                 <button
                   type="button"
                   id="copyRecapBtn"
