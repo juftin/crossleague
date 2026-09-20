@@ -32,13 +32,6 @@ export const Header: React.FC = () => {
   const setActiveTab = useCrossLeagueStore(s => s.setActiveTab);
   const platform = useCrossLeagueStore(s => s.platform);
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
-  const syncType = useCrossLeagueStore(s => s.syncType);
-  const setSyncType = useCrossLeagueStore(s => s.setSyncType);
-  const userName = useCrossLeagueStore(s => s.userName);
-  const setUserName = useCrossLeagueStore(s => s.setUserName);
-  const userId = useCrossLeagueStore(s => s.userId);
-  const setUserId = useCrossLeagueStore(s => s.setUserId);
-  const setUserAvatar = useCrossLeagueStore(s => s.setUserAvatar);
   const sleeperUserName = useCrossLeagueStore(s => s.sleeperUserName);
   const sleeperSyncType = useCrossLeagueStore(s => s.sleeperSyncType);
   const sleeperCustomLeagueIds = useCrossLeagueStore(s => s.sleeperCustomLeagueIds);
@@ -47,8 +40,6 @@ export const Header: React.FC = () => {
   const setSleeperUser = useCrossLeagueStore(s => s.setSleeperUser);
   const setSleeperCustomLeagueIds = useCrossLeagueStore(s => s.setSleeperCustomLeagueIds);
   const setEspnCustomLeagueIds = useCrossLeagueStore(s => s.setEspnCustomLeagueIds);
-  const customLeagueIds = useCrossLeagueStore(s => s.customLeagueIds);
-  const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
   const leaguesMap = useCrossLeagueStore(s => s.leaguesMap);
   const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
   const toggleSelectedLeagueId = useCrossLeagueStore(s => s.toggleSelectedLeagueId);

@@ -5,13 +5,7 @@
 import { create } from "zustand";
 import { useMemo } from "react";
 import { TAB_HASH_MAP, STORAGE_KEYS } from "./constants.js";
-import {
-  getItem,
-  getPreference,
-  setPreference,
-  getAllPreferences,
-  clearAllStorage
-} from "./storage.js";
+import { getItem, setPreference, getAllPreferences, clearAllStorage } from "./storage.js";
 import { clearUrlParams } from "./urlParams.js";
 
 const initialPreferences = getAllPreferences();
