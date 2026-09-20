@@ -96,7 +96,10 @@ html.light [class*="text-slate-200"] {
 }
 
 html.light [class*="text-slate-3"],
-html.light [class*="text-slate-4"],
+html.light [class*="text-slate-4"] {
+  color: #334155;
+}
+
 html.light [class*="text-slate-5"] {
   color: #475569;
 }
@@ -137,6 +140,15 @@ html.light [class*="bg-emerald"] {
 
 html.light [class*="bg-amber"] {
   background-color: rgba(180, 83, 9, 0.12);
+}
+
+html.light #badBeatCard {
+  background-color: rgba(251, 113, 133, 0.1);
+  border-color: rgba(190, 24, 93, 0.28);
+}
+
+html.light #badBeatCard [class*="bg-rose"] {
+  background-color: rgba(251, 113, 133, 0.18);
 }
 
 html.light body {
