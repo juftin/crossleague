@@ -215,43 +215,45 @@ header {
   z-index: 40;
 }
 
-.glass-card {
-  background: rgba(15, 23, 42, 0.72);
+@utility glass-card {
+  background-color: rgba(15, 23, 42, 0.72);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.07);
   width: 100%;
 }
 
-.glass-card-hover {
+@utility glass-card-hover {
   transition:
     transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.25s ease,
     box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translate3d(0, -2px, 0);
+    border-color: rgba(52, 211, 153, 0.3);
+    box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.15);
+  }
 }
 
-.glass-card-hover:hover {
-  transform: translate3d(0, -2px, 0);
-  border-color: rgba(52, 211, 153, 0.3);
-  box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.15);
-}
-
-.gold-glow {
+@utility gold-glow {
   box-shadow: 0 0 25px -5px rgba(234, 179, 8, 0.3);
   border: 1px solid rgba(234, 179, 8, 0.35);
 }
 
-.silver-glow {
+@utility silver-glow {
   box-shadow: 0 0 20px -5px rgba(148, 163, 184, 0.25);
   border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
-.bronze-glow {
+@utility bronze-glow {
   box-shadow: 0 0 20px -5px rgba(217, 119, 6, 0.25);
   border: 1px solid rgba(217, 119, 6, 0.35);
 }
 
-.skeleton-loader {
+@utility skeleton-loader {
   background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
