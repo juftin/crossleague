@@ -1,50 +1,164 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="CrossLeague Football with Lightning Bolt Logo">
   <defs>
-    <!-- Primary Brand Lightning Bolt Gradient -->
-    <linearGradient id="crossBoltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#34d399" />
-      <stop offset="50%" stop-color="#06b6d4" />
-      <stop offset="100%" stop-color="#38bdf8" />
+    <!-- Rich Authentic Football Leather Gradient -->
+    <radialGradient id="leatherGlow" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#b45309" />
+      <stop offset="35%" stop-color="#8c3a10" />
+      <stop offset="70%" stop-color="#5a2007" />
+      <stop offset="100%" stop-color="#2d0e02" />
+    </radialGradient>
+
+    <!-- 3D Surface Light & Volume -->
+    <linearGradient id="leatherSheen" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28" />
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0.05" />
+      <stop offset="70%" stop-color="#000000" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.55" />
     </linearGradient>
 
-    <!-- Stencil Mask: Uniform 14px negative-space clearance slice parting the football -->
-    <mask id="crossStencilMask">
-      <rect x="0" y="0" width="512" height="512" fill="#ffffff" />
-      <polygon points="197.0,-25.0 356.0,227.0 284.0,246.0 346.0,537.0 167.0,286.0 238.0,266.0" fill="#000000" />
-    </mask>
+    <!-- Lightning Bolt Upper Bevel (Bright Golden Yellow) -->
+    <linearGradient id="boltYellowFacet" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="30%" stop-color="#fde047" />
+      <stop offset="70%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+
+    <!-- Lightning Bolt Lower Bevel (Warm Amber Orange) -->
+    <linearGradient id="boltOrangeFacet" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="50%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#92400e" />
+    </linearGradient>
+
+    <!-- Clip Path for Football Details (Stripes & Leather Texture) -->
+    <clipPath id="ballBodyClip">
+      <path d="M -162 0 C -108 -104, 108 -104, 162 0 C 108 104, -108 104, -162 0 Z" />
+    </clipPath>
   </defs>
 
-  <!-- FOOTBALL (Clean Stencil Silhouette parted by negative-space channel) -->
-  <g mask="url(#crossStencilMask)" transform="translate(256, 256) rotate(-30)">
-    <!-- Ball Body -->
-    <path d="M -180 0 C -120 -116, 120 -116, 180 0 C 120 116, -120 116, -180 0 Z"
-          fill="#10b981" stroke="#059669" stroke-width="4" stroke-linejoin="round" />
+  <!-- 1. ELECTRIC ENERGY CRACKLES RADIATING OUTWARD -->
+  <g id="spark-clusters" fill="#facc15" stroke="#ca8a04" stroke-width="1.5" stroke-linejoin="round">
+    <!-- Top-Left Sparks (above ball, flanking the top of bolt) -->
+    <polygon points="172,50 196,86 182,90 206,124 192,126 214,148 188,142 198,118 178,114 190,82" />
+    <polygon points="196,66 216,100 204,104 222,130 208,132 226,152 202,146 212,124 194,120 204,94" />
 
-    <!-- Left Stripe -->
-    <path d="M -124 -68 C -138 -25, -138 25, -124 68 L -104 78 C -118 25, -118 -25, -104 -78 Z"
-          fill="#ffffff" />
+    <!-- Mid-Left Sparks (flanking left side of ball) -->
+    <polygon points="132,124 168,154 154,158 178,188 162,192 182,212 154,206 166,182 146,180 158,150" />
+    <polygon points="144,178 178,202 168,206 190,228 174,232 192,248 164,244 174,226 156,224 168,200" />
 
-    <!-- Right Stripe -->
-    <path d="M 104 -78 C 118 -25, 118 25, 104 78 L 124 68 C 138 25, 138 -25, 124 -68 Z"
-          fill="#ffffff" />
+    <!-- Bottom Flank Sparks (below ball) -->
+    <polygon points="292,374 274,396 284,400 268,424 282,428 266,450 290,438 280,418 296,414 286,394" />
+    <polygon points="314,370 294,392 304,396 288,420 302,424 286,446 310,434 300,414 316,410 306,390" />
+    <polygon points="334,364 314,386 324,390 308,414 322,418 306,440 330,428 320,408 336,404 326,384" />
 
-    <!-- Center Seam -->
-    <line x1="-72" y1="0" x2="72" y2="0" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
-
-    <!-- Stitched Laces -->
-    <rect x="-56" y="-18" width="8" height="36" rx="4" fill="#ffffff" />
-    <rect x="-34" y="-20" width="8" height="40" rx="4" fill="#ffffff" />
-    <rect x="-12" y="-21" width="8" height="42" rx="4" fill="#ffffff" />
-    <rect x="10" y="-21" width="8" height="42" rx="4" fill="#ffffff" />
-    <rect x="32" y="-20" width="8" height="40" rx="4" fill="#ffffff" />
-    <rect x="54" y="-18" width="8" height="36" rx="4" fill="#ffffff" />
+    <!-- Lower-Right Sparks (right of the bolt exit tip) -->
+    <polygon points="362,254 336,276 346,280 328,300 340,304 324,324 348,314 340,296 354,292 344,274" />
+    <polygon points="382,286 356,306 366,310 348,330 360,334 344,354 368,344 360,326 374,322 364,304" />
   </g>
 
-  <!-- LIGHTNING BOLT (Razor 6-Point Geometric Vector) -->
-  <polygon points="220.0,38.0 334.0,218.0 268.0,236.0 318.0,474.0 190.0,294.0 254.0,276.0"
-           fill="url(#crossBoltGrad)" stroke="#67e8f9" stroke-width="3" stroke-linejoin="round" />
+  <!-- 2. MAIN FOOTBALL (Tilted at -35 deg, with sticker border & realistic leather details) -->
+  <g transform="translate(268, 238) rotate(-35)">
+    <!-- (A) Thick White Outer Sticker Border -->
+    <path d="M -178 0 C -118 -118, 118 -118, 178 0 C 118 118, -118 118, -178 0 Z"
+          fill="#ffffff" />
 
-  <!-- Clean Bevel Facet (Athletic depth without blur filters) -->
-  <polygon points="220.0,38.0 334.0,218.0 268.0,236.0 254.0,276.0"
-           fill="#ffffff" opacity="0.25" />
+    <!-- (B) Dark Blue/Slate Inner Outline Stroke -->
+    <path d="M -168 0 C -112 -110, 112 -110, 168 0 C 112 110, -112 110, -168 0 Z"
+          fill="#0c1322" />
+
+    <!-- (C) Rich Football Leather Body -->
+    <path d="M -162 0 C -108 -104, 108 -104, 162 0 C 108 104, -108 104, -162 0 Z"
+          fill="url(#leatherGlow)" />
+
+    <!-- (D) Clipped Details (Shading & Stripes) -->
+    <g clip-path="url(#ballBodyClip)">
+      <!-- 3D Leather Volume & Specular Highlights -->
+      <path d="M -162 0 C -108 -104, 108 -104, 162 0 C 108 104, -108 104, -162 0 Z"
+            fill="url(#leatherSheen)" />
+
+      <!-- Left Athletic White Stripe -->
+      <path d="M -118 -82 C -136 -28, -136 28, -118 82 L -92 88 C -110 28, -110 -28, -92 -88 Z"
+            fill="#ffffff" opacity="0.94" />
+
+      <!-- Right Athletic White Stripe -->
+      <path d="M 92 -88 C 110 -28, 110 28, 92 88 L 118 82 C 136 28, 136 -28, 118 -82 Z"
+            fill="#ffffff" opacity="0.94" />
+
+      <!-- Center Strike Fracture / Impact Shadow under Bolt -->
+      <polygon points="-30,-90 60,-5 20,95 -45,95 -10,0 -65,-90"
+               fill="#150601" opacity="0.45" />
+
+      <!-- Longitudinal Seam Curve -->
+      <path d="M -155 -5 Q 0 -18 155 -5" stroke="#230a01" stroke-width="3" fill="none" />
+    </g>
+
+    <!-- (E) Upper Curved Laces (8 Stitches across Seam with Spine) -->
+    <g id="football-laces">
+      <!-- Dark Seam Bedding -->
+      <path d="M -66 -30 Q 0 -44 66 -30" stroke="#1c0a00" stroke-width="6" stroke-linecap="round" fill="none" />
+
+      <!-- Horizontal Spine -->
+      <path d="M -62 -30 Q 0 -44 62 -30" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" fill="none" />
+
+      <!-- 8 Cross Stitches -->
+      <g stroke="#ffffff" stroke-width="4" stroke-linecap="round">
+        <line x1="-52" y1="-41" x2="-52" y2="-19" />
+        <line x1="-37" y1="-44" x2="-37" y2="-22" />
+        <line x1="-22" y1="-47" x2="-22" y2="-25" />
+        <line x1="-7"  y1="-48" x2="-7"  y2="-26" />
+        <line x1="7"   y1="-48" x2="7"   y2="-26" />
+        <line x1="22"  y1="-47" x2="22"  y2="-25" />
+        <line x1="37"  y1="-44" x2="37"  y2="-22" />
+        <line x1="52"  y1="-41" x2="52"  y2="-19" />
+      </g>
+    </g>
+  </g>
+
+  <!-- 3. LARGE 3D PIERCING LIGHTNING BOLT (Top-Left to Bottom-Right) -->
+  <g id="hero-lightning-bolt">
+    <!-- Dark Silhouette Underlay / Drop Shadow -->
+    <polygon points="
+      140,78
+      256,176
+      242,238
+      376,400
+      274,272
+      294,212
+    " fill="#150601" opacity="0.55" />
+
+    <!-- Lower Amber/Orange 3D Facet -->
+    <polygon points="
+      144,82
+      252,228
+      266,260
+      372,396
+      288,212
+    " fill="url(#boltOrangeFacet)" stroke="#92400e" stroke-width="1" stroke-linejoin="round" />
+
+    <!-- Upper Yellow/Gold 3D Facet -->
+    <polygon points="
+      144,82
+      254,178
+      240,236
+      266,260
+      372,396
+      252,228
+    " fill="url(#boltYellowFacet)" stroke="#f59e0b" stroke-width="1" stroke-linejoin="round" />
+
+    <!-- Crisp Center Ridge Highlight -->
+    <polyline points="
+      144,82
+      252,228
+      266,260
+      372,396
+    " stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+
+    <!-- Center Jog Accent Facet -->
+    <polygon points="
+      240,236
+      266,260
+      252,228
+    " fill="#fef08a" />
+  </g>
 </svg>
