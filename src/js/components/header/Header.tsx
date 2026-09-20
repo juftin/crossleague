@@ -404,15 +404,32 @@ export const Header: React.FC = () => {
                     Menu & Controls
                   </span>
                 </div>
-                <button
-                  type="button"
-                  id="btnCloseSettingsModal"
-                  onClick={closeSettingsModal}
-                  className="cursor-pointer rounded-lg bg-slate-800/60 p-1 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
-                  aria-label="Close menu"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    id="themeToggleBtn"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg bg-slate-800/60 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                    aria-label="Toggle color mode"
+                    aria-pressed={theme === "light"}
+                    title="Toggle color mode"
+                  >
+                    {theme === "dark" ? (
+                      <Sun className="h-3.5 w-3.5 text-amber-400" />
+                    ) : (
+                      <Moon className="h-3.5 w-3.5 text-cyan-400" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    id="btnCloseSettingsModal"
+                    onClick={closeSettingsModal}
+                    className="cursor-pointer rounded-lg bg-slate-800/60 p-1 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                    aria-label="Close menu"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               {/* 1. Matchup Week Stepper inside Menu */}
@@ -814,21 +831,6 @@ export const Header: React.FC = () => {
                 <span className="block px-1 text-[10px] font-black tracking-wider text-slate-500 uppercase">
                   Quick Actions
                 </span>
-                <button
-                  type="button"
-                  id="themeToggleBtn"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white"
-                  aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-                  title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-                >
-                  {theme === "dark" ? (
-                    <Sun className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
-                  ) : (
-                    <Moon className="h-3.5 w-3.5 flex-shrink-0 text-cyan-400" />
-                  )}
-                  <span>Switch to {theme === "dark" ? "Light" : "Dark"} Mode</span>
-                </button>
                 <button
                   type="button"
                   id="copyRecapBtn"
