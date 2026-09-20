@@ -23,16 +23,16 @@ This document provides AI coding agents and autonomous coding assistants with ar
 
 When tasked with specific features, fixes, or refactors, consult these technical guides:
 
-| Topic / Domain                                              | Reference Documentation                                    | Primary Source Directory                        | Key Test File                      |
-| :---------------------------------------------------------- | :--------------------------------------------------------- | :---------------------------------------------- | :--------------------------------- |
-| **All-Play, Expected Wins, Luck Index, Efficiency, StdDev** | [`docs/analytics.md`](docs/analytics.md)                   | `src/js/analytics/`                             | `tests/analytics.test.js`          |
-| **Sleeper & ESPN APIs, Slot Mappings, Roster Parsers**      | [`docs/api-adapters.md`](docs/api-adapters.md)             | `src/js/api/`, `src/js/services/`               | `tests/espn.test.js`               |
-| **Zustand State Store, LocalStorage, TTL Caching**          | [`docs/state-and-caching.md`](docs/state-and-caching.md)   | `src/js/state/`                                 | `tests/cache.test.js`              |
-| **URL Search Params, Aliases, Deep Linking**                | [`docs/url-parameters.md`](docs/url-parameters.md)         | `src/js/state/urlParams.js`                     | `tests/share.test.js`              |
-| **React Components, Tabs, Modals, Lucide Icons**            | [`docs/ui-components.md`](docs/ui-components.md)           | `src/js/components/`                            | `tests/react-interactions.test.js` |
-| **Chat Recaps, CSV Export, Shareable Links**                | [`docs/export-and-sharing.md`](docs/export-and-sharing.md) | `src/js/export/`                                | `tests/recap.test.js`              |
-| **System Architecture, React App Shell, Build Pipeline**    | [`docs/architecture.md`](docs/architecture.md)             | `src/js/components/App.tsx`, `scripts/build.js` | `tests/bundle.test.js`             |
-| **Developer Workflows, Taskfile, TypeScript, Knip**         | [`docs/development.md`](docs/development.md)               | `Taskfile.yaml`, `tsconfig.json`                | `tests/snapshots.test.js`          |
+| Topic / Domain                                              | Reference Documentation                                    | Primary Source Directory                      | Key Test File                      |
+| :---------------------------------------------------------- | :--------------------------------------------------------- | :-------------------------------------------- | :--------------------------------- |
+| **All-Play, Expected Wins, Luck Index, Efficiency, StdDev** | [`docs/analytics.md`](docs/analytics.md)                   | `src/js/analytics/`                           | `tests/analytics.test.js`          |
+| **Sleeper & ESPN APIs, Slot Mappings, Roster Parsers**      | [`docs/api-adapters.md`](docs/api-adapters.md)             | `src/js/api/`, `src/js/services/`             | `tests/espn.test.js`               |
+| **Zustand State Store, LocalStorage, TTL Caching**          | [`docs/state-and-caching.md`](docs/state-and-caching.md)   | `src/js/state/`                               | `tests/cache.test.js`              |
+| **URL Search Params, Aliases, Deep Linking**                | [`docs/url-parameters.md`](docs/url-parameters.md)         | `src/js/state/urlParams.js`                   | `tests/share.test.js`              |
+| **React Components, Tabs, Modals, Lucide Icons**            | [`docs/ui-components.md`](docs/ui-components.md)           | `src/js/components/`                          | `tests/react-interactions.test.js` |
+| **Chat Recaps, CSV Export, Shareable Links**                | [`docs/export-and-sharing.md`](docs/export-and-sharing.md) | `src/js/export/`                              | `tests/recap.test.js`              |
+| **System Architecture, React App Shell, Build Pipeline**    | [`docs/architecture.md`](docs/architecture.md)             | `src/js/components/App.tsx`, `vite.config.js` | `tests/bundle.test.js`             |
+| **Developer Workflows, Taskfile, TypeScript, Knip**         | [`docs/development.md`](docs/development.md)               | `Taskfile.yaml`, `tsconfig.json`              | `tests/snapshots.test.js`          |
 
 ---
 
@@ -104,7 +104,7 @@ task snapshots:check
 ### Build Synchronization Rule
 
 - Whenever you modify files in `src/`, ensure you run `task build` (or `task check`) to re-generate the artifacts in `dist/`.
-- CI strictly checks that `dist/index.html`, `dist/app.min.js`, and `dist/styles.min.css` match the source files via `task check:build`.
+- CI strictly checks that `dist/` is up-to-date with source files via `task check:build`.
 
 ---
 

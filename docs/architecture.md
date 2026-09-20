@@ -97,7 +97,6 @@ crossleague/
 │   └── development.md        # Local development, testing, and CI/CD
 ├── snapshots/                # Visual regression baseline PNG snapshots (11 files)
 ├── scripts/
-│   ├── build.js              # Vite production bundler & HTML inliner
 │   └── generate-snapshots.js # Automated Chrome headless visual snapshot generator
 ├── src/
 │   ├── css/
@@ -140,15 +139,17 @@ crossleague/
 │   │   ├── types/            # TypeScript type definitions
 │   │   │   └── index.ts          # Core data models and component types
 │   │   └── index.js          # Application bootstrap & entry point
-│   └── index.html            # Vite development HTML template
+│   └── index.html            # Application HTML template & entry point
 ├── dist/                     # Production build artifacts
-│   ├── app.min.js            # Minified IIFE bundle (+ sourcemap)
-│   ├── styles.min.css        # Minified CSS bundle
-│   └── index.html            # Standalone zero-dependency inlined HTML app
+│   ├── assets/               # Bundled JavaScript and CSS assets
+│   └── index.html            # Production HTML entry point
+├── public/                   # Static assets copied to dist
+│   └── .nojekyll             # Prevents Jekyll processing on static hosts
 ├── tests/                    # Native Node.js test suite (`node:test`)
 ├── eslint.config.js          # ESLint flat config
 ├── knip.json                 # Unused code analyzer configuration
 ├── tsconfig.json             # TypeScript compiler configuration
+├── vite.config.js            # Standard Vite configuration
 ├── wrangler.jsonc            # Cloudflare Pages deployment configuration
 ├── package.json              # Package metadata and dependencies
 └── Taskfile.yaml             # Development and CI task orchestration
@@ -158,21 +159,18 @@ crossleague/
 
 ## ⚙️ Build and Distribution Pipeline
 
-The build process is orchestrated by [`scripts/build.js`](../scripts/build.js) using [Vite](https://vitejs.dev/) programmatic APIs:
+The build process uses standard [Vite](https://vitejs.dev/) (`vite build`) configured in [`vite.config.js`](../vite.config.js):
 
 ```mermaid
 flowchart LR
-    srcJS["src/js/index.js (React / TSX)"] -->|Vite IIFE build| distJS["dist/app.min.js"]
-    srcCSS["src/css/styles.css"] -->|Vite CSS minify| distCSS["dist/styles.min.css"]
-    srcHTML["src/index.html"] --> Inliner["Inlining Engine"]
-    distJS --> Inliner
-    distCSS --> Inliner
-    Inliner -->|Inline JS & CSS| distHTML["dist/index.html"]
+    srcHTML["src/index.html"] --> Vite["Vite Build Engine"]
+    srcJS["src/js/index.js (React / TSX)"] --> Vite
+    srcCSS["src/css/styles.css"] --> Vite
+    Vite --> distHTML["dist/index.html"]
+    Vite --> distAssets["dist/assets/*.js & *.css"]
 ```
 
-1. **JavaScript Bundling**:
-   `src/js/index.js` (including all React components and dependencies) is compiled and bundled into an IIFE named `CrossLeague` at `dist/app.min.js`.
-2. **CSS Minification**:
-   `src/css/styles.css` is minified into `dist/styles.min.css`.
-3. **Inlined Standalone Application**:
-   `src/index.html` is parsed, and script/style tags are replaced with inlined code to create `dist/index.html`, which can run offline in any browser or be served via Cloudflare Pages.
+1. **Standard Vite Pipeline**:
+   `vite build` processes `src/index.html` as the root entry point, bundling and minifying React components, styles, and dependencies into optimized ES module chunks in `dist/assets/`.
+2. **Deterministic Output & Static Hosting**:
+   The output in `dist/` is directly deployable to Cloudflare Pages, GitHub Pages, or any static hosting service.

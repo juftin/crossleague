@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   root: "src",
+  base: "./",
   publicDir: "../public",
   plugins: [react()],
   server: {
@@ -19,7 +20,7 @@ export default defineConfig({
   },
   build: {
     outDir: "../dist",
-    emptyOutDir: false,
+    emptyOutDir: true,
     sourcemap: true,
     cssMinify: true
   },

@@ -2,10 +2,8 @@ import { describe, it, before } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import vm from "node:vm";
-import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { build } from "../scripts/build.js";
+import { build as viteBuild } from "vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,19 +11,26 @@ const rootDir = path.resolve(__dirname, "..");
 
 describe("Source & Bundle Integrity", () => {
   before(async () => {
-    await build({ isCheckMode: false, silent: true });
+    await viteBuild({ logLevel: "silent" });
   });
 
   const srcJsPath = path.join(rootDir, "src", "js", "index.js");
   const srcHtmlPath = path.join(rootDir, "src", "index.html");
-  const distAppMinJsPath = path.join(rootDir, "dist", "app.min.js");
-  const distIndexHtmlPath = path.join(rootDir, "dist", "index.html");
+  const distDir = path.join(rootDir, "dist");
+  const distIndexHtmlPath = path.join(distDir, "index.html");
 
-  it("should have valid JavaScript syntax in src/js/index.js and dist/app.min.js", () => {
-    const minCode = fs.readFileSync(distAppMinJsPath, "utf8");
-    assert.doesNotThrow(() => {
-      new vm.Script(minCode, { filename: "dist/app.min.js" });
-    }, "dist/app.min.js should compile without syntax errors");
+  it("should have bundled production assets in dist/assets", () => {
+    const assetsDir = path.join(distDir, "assets");
+    assert.ok(fs.existsSync(assetsDir), "dist/assets directory must exist");
+    const jsFiles = fs.readdirSync(assetsDir).filter(f => f.endsWith(".js"));
+    const cssFiles = fs.readdirSync(assetsDir).filter(f => f.endsWith(".css"));
+    assert.ok(jsFiles.length > 0, "dist/assets must contain bundled JS files");
+    assert.ok(cssFiles.length > 0, "dist/assets must contain bundled CSS files");
+
+    for (const jsFile of jsFiles) {
+      const code = fs.readFileSync(path.join(assetsDir, jsFile), "utf8");
+      assert.ok(code.length > 0, `${jsFile} must not be empty`);
+    }
   });
 
   it("should persist dashboard preferences through the React store", () => {
@@ -55,32 +60,17 @@ describe("Source & Bundle Integrity", () => {
     assert.match(code, /export function getUrlParams/);
   });
 
-  it("should have valid JavaScript syntax in scripts/build.js", () => {
-    const buildScriptPath = path.join(rootDir, "scripts", "build.js");
-    assert.doesNotThrow(() => {
-      execFileSync(process.execPath, ["--check", buildScriptPath]);
-    }, "scripts/build.js should compile without syntax errors");
-  });
-
-  it("should produce standalone inlined distribution in dist/index.html", () => {
+  it("should produce production distribution in dist/index.html and dist/assets", () => {
     const distHtml = fs.readFileSync(distIndexHtmlPath, "utf8");
-    assert.ok(distHtml.includes("<style>"), "dist/index.html must contain inlined <style>");
+    assert.ok(distHtml.includes('<div id="root"></div>'), "dist/index.html must contain #root");
     assert.ok(
-      distHtml.includes("<!-- Application Logic -->"),
-      "dist/index.html must contain Application Logic marker"
+      distHtml.includes('<script type="module"'),
+      "dist/index.html must contain module script tag"
     );
     assert.equal(
       (distHtml.match(/<!doctype html>/gi) || []).length,
       1,
-      "Inline application code must not duplicate the HTML document"
-    );
-
-    const appMarker = distHtml.indexOf("<!-- Application Logic -->");
-    const scriptClose = distHtml.indexOf("</script>", appMarker);
-    const bodyClose = distHtml.indexOf("</body>", appMarker);
-    assert.ok(
-      scriptClose > appMarker && bodyClose - scriptClose < 64,
-      "The inlined application script must remain intact through the closing body tag"
+      "HTML document must not be duplicated"
     );
   });
 

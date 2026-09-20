@@ -5,8 +5,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.js",
-    "build:check": "node scripts/build.js --check",
+    "build": "vite build",
+    "build:check": "vite build",
+    "preview": "vite preview",
     "format": "prettier --write \"**/*.{js,json,jsonc,html,css,md,yaml,yml,ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{js,json,jsonc,html,css,md,yaml,yml,ts,tsx}\"",
     "lint": "eslint .",
