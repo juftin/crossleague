@@ -163,14 +163,14 @@ The build process uses standard [Vite](https://vitejs.dev/) (`vite build`) confi
 
 ```mermaid
 flowchart LR
-    srcHTML["src/index.html"] --> Vite["Vite Build Engine"]
+    srcHTML["index.html"] --> Vite["Vite Build Engine"]
     srcJS["src/js/index.js (React / TSX)"] --> Vite
-    srcCSS["src/css/styles.css"] --> Vite
+    srcCSS["src/css/styles.css (Tailwind v4)"] --> Vite
     Vite --> distHTML["dist/index.html"]
     Vite --> distAssets["dist/assets/*.js & *.css"]
 ```
 
 1. **Standard Vite Pipeline**:
-   `vite build` processes `src/index.html` as the root entry point, bundling and minifying React components, styles, and dependencies into optimized ES module chunks in `dist/assets/`.
+   `vite build` processes `index.html` as the root entry point, compiling Tailwind CSS v4 ahead-of-time and bundling React components, Chart.js, styles, and dependencies into optimized ES module chunks in `dist/assets/`.
 2. **Deterministic Output & Static Hosting**:
    The output in `dist/` is directly deployable to Cloudflare Pages, GitHub Pages, or any static hosting service.

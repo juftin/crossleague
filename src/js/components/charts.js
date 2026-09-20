@@ -2,6 +2,7 @@
  * CrossLeague • Chart.js Visualizations (Score Distribution & League Averages)
  */
 
+import Chart from "chart.js/auto";
 import { state, getActiveRecords, getActiveLeaguesMap } from "../state/store.js";
 
 /**

@@ -2,6 +2,47 @@
    CrossLeague • Design System & Glassmorphic Styles
    ========================================================================== */
 
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+
+  --color-sleeper-cyan: #00ceb8;
+  --color-sleeper-blue: #0284c7;
+  --color-sleeper-navy: #0f172a;
+  --color-sleeper-card: rgba(15, 23, 42, 0.75);
+
+  --animate-shimmer: shimmer 2s infinite linear;
+  --animate-pulse-glow: pulseGlow 2.5s infinite ease-in-out;
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  @keyframes pulseGlow {
+    0%,
+    100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+  }
+}
+
 html,
 body {
   font-family: "Plus Jakarta Sans", sans-serif;
