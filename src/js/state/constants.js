@@ -77,3 +77,69 @@ export const HASH_TAB_MAP = {
   players: "players",
   player: "players"
 };
+
+/**
+ * Standardized Namespaced Storage & Cache Keys
+ */
+export const STORAGE_KEYS = {
+  // User Preferences
+  PREF_PLATFORM: "crossleague:pref:platform",
+  PREF_SYNC_TYPE: "crossleague:pref:sync_type",
+  PREF_USER_NAME: "crossleague:pref:username",
+  PREF_USER_ID: "crossleague:pref:user_id",
+  PREF_CUSTOM_LEAGUES: "crossleague:pref:custom_leagues",
+  PREF_SLEEPER_USER_NAME: "crossleague:pref:sleeper_username",
+  PREF_SLEEPER_USER_ID: "crossleague:pref:sleeper_user_id",
+  PREF_SLEEPER_CUSTOM_LEAGUES: "crossleague:pref:sleeper_custom_leagues",
+  PREF_SLEEPER_SYNC_TYPE: "crossleague:pref:sleeper_sync_type",
+  PREF_ESPN_CUSTOM_LEAGUES: "crossleague:pref:espn_custom_leagues",
+  PREF_SEASON: "crossleague:pref:season",
+  PREF_WEEK: "crossleague:pref:week",
+  PREF_MODE: "crossleague:pref:mode",
+
+  // Static Metadata / Player Databases
+  PLAYERS_SLEEPER: "crossleague:cache:players:sleeper",
+  PLAYERS_ESPN: "crossleague:cache:players:espn"
+};
+
+/**
+ * Cache Key Prefixes
+ */
+export const CACHE_PREFIXES = {
+  REPORT: "crossleague:cache:report:",
+  API: "crossleague:cache:api:",
+  LEGACY_REPORT: "crossleague_cache_",
+  LEGACY_API: "crossleague_api_"
+};
+
+/**
+ * Legacy storage keys mapped for seamless backward-compatibility migration
+ */
+export const LEGACY_STORAGE_MAP = {
+  [STORAGE_KEYS.PREF_PLATFORM]: ["crossleague_platform"],
+  [STORAGE_KEYS.PREF_SYNC_TYPE]: ["sleeper_sync_type"],
+  [STORAGE_KEYS.PREF_USER_NAME]: ["sleeper_username"],
+  [STORAGE_KEYS.PREF_USER_ID]: ["sleeper_user_id"],
+  [STORAGE_KEYS.PREF_CUSTOM_LEAGUES]: ["sleeper_custom_league_ids"],
+  [STORAGE_KEYS.PREF_SLEEPER_USER_NAME]: [STORAGE_KEYS.PREF_USER_NAME, "sleeper_username"],
+  [STORAGE_KEYS.PREF_SLEEPER_USER_ID]: [STORAGE_KEYS.PREF_USER_ID, "sleeper_user_id"],
+  [STORAGE_KEYS.PREF_SLEEPER_CUSTOM_LEAGUES]: ["sleeper_custom_league_ids"],
+  [STORAGE_KEYS.PREF_SLEEPER_SYNC_TYPE]: [STORAGE_KEYS.PREF_SYNC_TYPE, "sleeper_sync_type"],
+  [STORAGE_KEYS.PREF_ESPN_CUSTOM_LEAGUES]: [],
+  [STORAGE_KEYS.PREF_SEASON]: ["sleeper_season"],
+  [STORAGE_KEYS.PREF_WEEK]: ["sleeper_week"],
+  [STORAGE_KEYS.PREF_MODE]: ["sleeper_mode"],
+  [STORAGE_KEYS.PLAYERS_SLEEPER]: ["sleeper_players_v3"],
+  [STORAGE_KEYS.PLAYERS_ESPN]: ["crossleague_espn_players_v1"]
+};
+
+/**
+ * Cache Expiration / TTL Defaults (milliseconds)
+ */
+export const TTL = {
+  API_DEFAULT: 15 * 60 * 1000, // 15 minutes
+  NFL_STATE: 2 * 60 * 60 * 1000, // 2 hours
+  PLAYERS_DB: 24 * 60 * 60 * 1000, // 24 hours
+  REPORT_ACTIVE: 10 * 60 * 1000, // 10 minutes for in-progress weeks
+  REPORT_FINISHED: 7 * 24 * 60 * 60 * 1000 // 7 days for immutable historical weeks
+};

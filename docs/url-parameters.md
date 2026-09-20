@@ -47,6 +47,30 @@ Appending a hash fragment automatically opens the corresponding dashboard tab on
 
 ---
 
+## 🔄 Dynamic Address Bar Synchronization (`updateUrlParams`)
+
+CrossLeague continuously synchronizes the browser address bar's search parameters using `window.history.replaceState` whenever data is synced, season/week/mode is updated, or active league filters change:
+
+```javascript
+import { updateUrlParams, clearUrlParams } from "../state/urlParams.js";
+
+// Updates address bar to reflect current session state
+updateUrlParams({
+  platform: "espn",
+  season: 2026,
+  week: 1,
+  mode: "WEEKLY",
+  leagues: "1664455"
+});
+// Browser URL: https://crossleague.pages.dev/?platform=espn&season=2026&week=1&mode=WEEKLY&leagues=1664455#awards
+
+// Clears all query parameters on "Clear Data"
+clearUrlParams();
+// Browser URL: https://crossleague.pages.dev/#awards
+```
+
+---
+
 ## 📤 Shareable URL Generation (`generateShareableUrl`)
 
 The share button generates a clean URL designed for sharing with league members:

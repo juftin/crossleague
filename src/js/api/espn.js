@@ -5,10 +5,11 @@
  * maps position IDs and lineups, and normalizes matchup structures to standard CrossLeague schema.
  */
 
-import { ESPN_BASE_URL, ESPN_POS_MAP, ESPN_PRO_TEAMS } from "../state/constants.js";
+import { ESPN_BASE_URL, ESPN_POS_MAP, ESPN_PRO_TEAMS, STORAGE_KEYS } from "../state/constants.js";
 import { state } from "../state/store.js";
 import { calculateStdDev } from "../analytics/statistics.js";
 import { cachedApiFetch } from "../state/cache.js";
+import { setItem } from "../state/storage.js";
 
 /**
  * Determines if an ESPN lineup slot ID corresponds to an active starting position.
@@ -130,10 +131,10 @@ export function parseRosterEntries(roster, targetWeekNum = 1) {
     }
   });
 
-  try {
-    localStorage.setItem("crossleague_espn_players_v1", JSON.stringify(state.espnPlayersDb));
-  } catch {
-    // quota safe
+  setItem(STORAGE_KEYS.PLAYERS_ESPN, state.espnPlayersDb);
+  setItem("crossleague_espn_players_v1", state.espnPlayersDb);
+  if (state.setEspnPlayersDb) {
+    state.setEspnPlayersDb({ ...state.espnPlayersDb });
   }
 
   // Optimal Lineup Potential

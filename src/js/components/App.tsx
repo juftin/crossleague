@@ -12,10 +12,11 @@ import { LuckModal } from "./modals/LuckModal.tsx";
 import { ToastContainer } from "./common/Toast.tsx";
 import { MobileBottomNav } from "./common/MobileBottomNav.tsx";
 import { syncData } from "../services/syncService.js";
-import { getUrlParams } from "../state/urlParams.js";
+import { getUrlParams, extractCustomLeagueIds, updateUrlParams } from "../state/urlParams.js";
 import { BASE_URL, HASH_TAB_MAP } from "../state/constants.js";
 import { cachedApiFetch } from "../state/cache.js";
 import { getMaxPlayedWeek } from "../state/preferences.js";
+import { initPlayersDb } from "../api/players.js";
 
 export const App: React.FC = () => {
   const activeTab = useCrossLeagueStore(s => s.activeTab);
@@ -33,11 +34,21 @@ export const App: React.FC = () => {
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
   const setTheme = useCrossLeagueStore(s => s.setTheme);
   const setUserName = useCrossLeagueStore(s => s.setUserName);
+  const setUserId = useCrossLeagueStore(s => s.setUserId);
+  const setUserAvatar = useCrossLeagueStore(s => s.setUserAvatar);
   const setSyncType = useCrossLeagueStore(s => s.setSyncType);
   const setCustomLeagueIds = useCrossLeagueStore(s => s.setCustomLeagueIds);
+  const setSelectedLeagueIds = useCrossLeagueStore(s => s.setSelectedLeagueIds);
+  const setRawRecords = useCrossLeagueStore(s => s.setRawRecords);
+  const setLeaguesMap = useCrossLeagueStore(s => s.setLeaguesMap);
+  const setAllLeaguesData = useCrossLeagueStore(s => s.setAllLeaguesData);
   const setNflState = useCrossLeagueStore(s => s.setNflState);
   const openSettingsModal = useCrossLeagueStore(s => s.openSettingsModal);
   const rawRecords = useCrossLeagueStore(s => s.rawRecords);
+  const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
+
+  const isInitializedRef = React.useRef(false);
+  const prevParamsRef = React.useRef<{ week?: number; season?: number; mode?: string }>({});
 
   // Initialize from embedded report, URL parameters, or localStorage
   useEffect(() => {
@@ -70,56 +81,65 @@ export const App: React.FC = () => {
         return;
       }
 
-      // 2. Load stored preferences from localStorage
-      const savedPlatform = localStorage.getItem("crossleague_platform");
-      if (savedPlatform === "espn" || savedPlatform === "sleeper") {
-        setPlatform(savedPlatform);
-      }
-      const savedSyncType = localStorage.getItem("sleeper_sync_type");
-      if (savedSyncType === "leagues" || savedSyncType === "user") {
-        setSyncType(savedSyncType);
-      }
-      const savedCustomLeagues = localStorage.getItem("sleeper_custom_league_ids");
-      if (savedCustomLeagues) {
-        try {
-          const parsed = JSON.parse(savedCustomLeagues);
-          if (Array.isArray(parsed)) setCustomLeagueIds(parsed.filter(Boolean));
-        } catch {}
-      }
-      const savedUser =
-        localStorage.getItem("sleeper_username") || localStorage.getItem("sleeper_user_id");
-      if (savedUser) setUserName(savedUser);
-      const savedSeason = localStorage.getItem("sleeper_season");
-      if (savedSeason) setSeason(Number(savedSeason));
-      const savedWeek = localStorage.getItem("sleeper_week");
-      if (savedWeek) setWeek(Number(savedWeek));
-      const savedMode = localStorage.getItem("sleeper_mode");
-      if (savedMode === "WEEKLY" || savedMode === "SEASON_ROLLUP") {
-        setMode(savedMode);
-      }
+      // 2. Load stored preferences from storage & initialize player databases
+      useCrossLeagueStore.getState().hydratePreferences();
+      initPlayersDb();
 
       // 3. URL Query Parameter overrides
       const urlParams = getUrlParams();
-      if (urlParams.platform) {
-        setPlatform(urlParams.platform.toLowerCase() === "espn" ? "espn" : "sleeper");
+      const currentStore = useCrossLeagueStore.getState();
+
+      const urlPlatform = urlParams.platform
+        ? urlParams.platform.toLowerCase() === "espn"
+          ? "espn"
+          : "sleeper"
+        : null;
+      const urlUser = urlParams.user ? urlParams.user.trim() : null;
+      const urlLeagues = urlParams.leagues ? extractCustomLeagueIds(urlParams.leagues) : null;
+      const urlSeason = urlParams.season ? Number(urlParams.season) : null;
+      const urlWeek = urlParams.week ? Number(urlParams.week) : null;
+      const urlMode = urlParams.mode
+        ? urlParams.mode.toUpperCase() === "SEASON_ROLLUP"
+          ? "SEASON_ROLLUP"
+          : "WEEKLY"
+        : null;
+
+      const isUserDifferent =
+        urlUser !== null && urlUser.toLowerCase() !== (currentStore.userName || "").toLowerCase();
+
+      const targetPlatform = urlPlatform || currentStore.platform || "sleeper";
+
+      if (urlPlatform) {
+        setPlatform(urlPlatform);
       }
-      if (urlParams.user) {
-        setSyncType("user");
-        setUserName(urlParams.user.trim());
+
+      if (targetPlatform === "espn") {
+        if (urlLeagues && urlLeagues.length > 0) {
+          useCrossLeagueStore.getState().setEspnCustomLeagueIds(urlLeagues);
+        }
+      } else {
+        if (urlUser) {
+          useCrossLeagueStore.getState().setSleeperSyncType("user");
+          useCrossLeagueStore.getState().setSleeperUser(urlUser);
+          if (urlLeagues && urlLeagues.length > 0) {
+            useCrossLeagueStore.setState({ pendingLeagueIdsFilter: urlLeagues });
+          }
+          if (isUserDifferent) {
+            setUserId("");
+            setUserAvatar("");
+            if (!urlLeagues) {
+              setSelectedLeagueIds([]);
+            }
+          }
+        } else if (urlLeagues && urlLeagues.length > 0) {
+          useCrossLeagueStore.getState().setSleeperSyncType("leagues");
+          useCrossLeagueStore.getState().setSleeperCustomLeagueIds(urlLeagues);
+        }
       }
-      if (urlParams.leagues) {
-        const ids = urlParams.leagues
-          .split(",")
-          .map((id: string) => id.trim())
-          .filter(Boolean);
-        setCustomLeagueIds(ids);
-        if (!urlParams.user) setSyncType("leagues");
-      }
-      if (urlParams.season) setSeason(Number(urlParams.season));
-      if (urlParams.week) setWeek(Number(urlParams.week));
-      if (urlParams.mode) {
-        setMode(urlParams.mode.toUpperCase() === "SEASON_ROLLUP" ? "SEASON_ROLLUP" : "WEEKLY");
-      }
+
+      if (urlSeason) setSeason(urlSeason);
+      if (urlWeek) setWeek(urlWeek);
+      if (urlMode) setMode(urlMode);
 
       // 4. Tab from hash
       if (typeof window !== "undefined" && window.location.hash) {
@@ -142,10 +162,19 @@ export const App: React.FC = () => {
             season_type: nflData.season_type || "regular"
           };
           setNflState(nfl);
-          if (!urlParams.season && !localStorage.getItem("sleeper_season") && nfl.season) {
+          if (
+            !urlParams.season &&
+            !localStorage.getItem("sleeper_season") &&
+            !localStorage.getItem("crossleague:pref:season") &&
+            nfl.season
+          ) {
             setSeason(nfl.season);
           }
-          if (!urlParams.week && !localStorage.getItem("sleeper_week")) {
+          if (
+            !urlParams.week &&
+            !localStorage.getItem("sleeper_week") &&
+            !localStorage.getItem("crossleague:pref:week")
+          ) {
             const defaultWeek = nfl.display_week || nfl.week || 1;
             if (defaultWeek >= 1 && defaultWeek <= 18) {
               setWeek(defaultWeek);
@@ -157,18 +186,25 @@ export const App: React.FC = () => {
       }
 
       // 6. Check if user is set, then auto-sync
-      const currentStore = useCrossLeagueStore.getState();
+      const storeState = useCrossLeagueStore.getState();
       const hasUser =
-        Boolean(currentStore.userName) ||
-        (currentStore.syncType === "leagues" && currentStore.customLeagueIds.length > 0) ||
+        Boolean(storeState.userName) ||
+        (storeState.syncType === "leagues" && storeState.customLeagueIds.length > 0) ||
         Boolean(urlParams.user) ||
         Boolean(urlParams.leagues);
 
       if (hasUser) {
-        syncData(false);
+        await syncData(false);
       } else {
         openSettingsModal();
       }
+
+      prevParamsRef.current = {
+        week: useCrossLeagueStore.getState().week,
+        season: useCrossLeagueStore.getState().season,
+        mode: useCrossLeagueStore.getState().mode
+      };
+      isInitializedRef.current = true;
     }
 
     init();
@@ -177,7 +213,13 @@ export const App: React.FC = () => {
     setTheme,
     setSyncType,
     setCustomLeagueIds,
+    setSelectedLeagueIds,
     setUserName,
+    setUserId,
+    setUserAvatar,
+    setRawRecords,
+    setLeaguesMap,
+    setAllLeaguesData,
     setSeason,
     setWeek,
     setMode,
@@ -186,13 +228,17 @@ export const App: React.FC = () => {
     openSettingsModal
   ]);
 
-  // Re-sync when week, season, or mode changes (only on subsequent updates)
-  const isInitialMount = React.useRef(true);
+  // Re-sync when week, season, or mode changes (only on subsequent user updates)
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
+    if (!isInitializedRef.current) {
       return;
     }
+    const prev = prevParamsRef.current;
+    if (prev.week === week && prev.season === season && prev.mode === mode) {
+      return;
+    }
+    prevParamsRef.current = { week, season, mode };
+
     const s = useCrossLeagueStore.getState();
     const hasSource =
       Boolean(s.userName) ||
@@ -203,6 +249,14 @@ export const App: React.FC = () => {
       syncData(false);
     }
   }, [week, season, mode]);
+
+  // Sync URL query parameters when active league selection changes
+  useEffect(() => {
+    if (!isInitializedRef.current || (window as any).__CROSSLEAGUE_SNAPSHOT_DATA__) {
+      return;
+    }
+    updateUrlParams(useCrossLeagueStore.getState());
+  }, [selectedLeagueIds]);
 
   // Arrow Keybindings (Left / Right arrow for weeks)
   useEffect(() => {
