@@ -167,9 +167,6 @@ html.light ::-webkit-scrollbar-thumb {
   background: rgba(100, 116, 139, 0.7);
 }
 
-.hidden {
-  display: none;
-}
 body::before {
   content: "";
   position: fixed;

@@ -182,4 +182,13 @@ describe("Source & Bundle Integrity", () => {
       "React must own the menu button click handler without a legacy DOM listener"
     );
   });
+
+  it("should let Tailwind responsive display utilities override hidden", () => {
+    const styles = fs.readFileSync(path.join(rootDir, "src", "css", "styles.css"), "utf8");
+    assert.doesNotMatch(
+      styles,
+      /\.hidden\s*\{\s*display:\s*none/,
+      "A custom .hidden rule would override responsive utilities such as md:block"
+    );
+  });
 });
