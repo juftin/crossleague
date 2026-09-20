@@ -142,6 +142,16 @@ html.light [class*="bg-amber"] {
   background-color: rgba(180, 83, 9, 0.12);
 }
 
+html.light #headerSeasonBadge > span:first-child {
+  background-color: #0284c7;
+  box-shadow: 0 0 8px rgba(2, 132, 199, 0.75);
+}
+
+html.light #headerWeekBadge > span:first-child {
+  background-color: #059669;
+  box-shadow: 0 0 8px rgba(5, 150, 105, 0.75);
+}
+
 html.light #badBeatCard {
   background-color: rgba(251, 113, 133, 0.1);
   border-color: rgba(190, 24, 93, 0.28);

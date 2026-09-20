@@ -113,6 +113,12 @@ function buildSnapshotHtmlPages() {
       actionScript: "window.switchTab('awards', false);"
     },
     {
+      id: "light-analytics",
+      embeddedData: mockEmbeddedReport,
+      theme: "light",
+      actionScript: "window.switchTab('visuals', false);"
+    },
+    {
       id: "light-settings-modal",
       embeddedData: mockEmbeddedReport,
       theme: "light",
