@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="CrossLeague">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" role="img" aria-label="CrossLeague">
   <defs>
-    <linearGradient id="boltGradient" x1="9" y1="7" x2="23" y2="26" gradientUnits="userSpaceOnUse">
+    <linearGradient id="boltGradient" x1="4" y1="3" x2="20" y2="21" gradientUnits="userSpaceOnUse">
       <stop stop-color="#0f766e" />
       <stop offset="0.52" stop-color="#059669" />
       <stop offset="1" stop-color="#0284c7" />
@@ -13,6 +13,6 @@
       </feMerge>
     </filter>
   </defs>
-  <rect width="32" height="32" rx="8" fill="#f8fbff" />
-  <path d="M18.5 4 8.75 17.25h6.5L13.5 28l9.75-13.25h-6.5L18.5 4Z" fill="url(#boltGradient)" filter="url(#boltGlow)" />
+  <rect width="24" height="24" rx="6" fill="#f8fbff" />
+  <path d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z" stroke="url(#boltGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#boltGlow)" />
 </svg>
