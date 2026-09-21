@@ -1,6 +1,7 @@
 import React from "react";
 import { useCrossLeagueStore } from "../../state/useCrossLeagueStore.js";
-import { CheckCircle2, XCircle, AlertTriangle, Zap, X } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, X } from "lucide-react";
+import { BrandBoltIcon } from "./BrandBoltIcon.tsx";
 
 export const ToastContainer: React.FC = () => {
   const toasts = useCrossLeagueStore(s => s.toasts);
@@ -15,7 +16,7 @@ export const ToastContainer: React.FC = () => {
     >
       {toasts.map(toast => {
         let borderClass = "border-slate-700 bg-slate-900/95 text-slate-200";
-        let IconComponent = Zap;
+        let IconComponent: React.ElementType = BrandBoltIcon;
         let iconClass = "text-cyan-400";
         if (toast.type === "success") {
           borderClass = "border-emerald-500/40 bg-slate-900/95 text-emerald-300";

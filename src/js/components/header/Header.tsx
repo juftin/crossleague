@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
 import {
-  Zap,
   Sliders,
   Shield,
   User,
@@ -27,6 +26,7 @@ import { shareUrl } from "../../export/share.js";
 import { syncData } from "../../services/syncService.js";
 import { getMaxPlayedWeek } from "../../state/preferences.js";
 import { extractCustomLeagueIds } from "../../state/urlParams.js";
+import { BrandBoltIcon } from "../common/BrandBoltIcon.tsx";
 import type { TabId, SyncMode } from "../../types/index.js";
 
 export const Header: React.FC = () => {
@@ -76,6 +76,11 @@ export const Header: React.FC = () => {
   const [inputLeagueId, setInputLeagueId] = useState("");
   const [isLeagueFilterOpen, setIsLeagueFilterOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const favicon = document.getElementById("favicon") as HTMLLinkElement | null;
+    if (favicon) favicon.href = theme === "light" ? "/favicon-light.svg" : "/favicon.svg";
+  }, [theme]);
 
   // Sync draft state with store whenever settings modal opens
   useEffect(() => {
@@ -278,7 +283,11 @@ export const Header: React.FC = () => {
           <div className="group relative flex-shrink-0">
             <div className="pointer-events-none absolute -inset-0.5 transform-gpu rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-60 blur transition-opacity duration-300 group-hover:opacity-100" />
             <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-slate-900 shadow-xl sm:h-12 sm:w-12">
-              <Zap className="h-5 w-5 text-emerald-400 sm:h-6 sm:w-6" />
+              <img
+                src={theme === "light" ? "/favicon-light.svg" : "/favicon.svg"}
+                alt="CrossLeague"
+                className="h-7 w-7 sm:h-9 sm:w-9"
+              />
             </div>
           </div>
           <div className="min-w-0 flex-1">
@@ -313,7 +322,7 @@ export const Header: React.FC = () => {
                   {platform === "espn" ? (
                     <Shield className="h-3 w-3" />
                   ) : (
-                    <Zap className="h-3 w-3" />
+                    <BrandBoltIcon className="h-3 w-3" />
                   )}
                   {platform === "espn" ? "ESPN" : "Sleeper"}
                 </span>
@@ -508,7 +517,7 @@ export const Header: React.FC = () => {
                           : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      <Zap className="h-3.5 w-3.5 text-emerald-400" />
+                      <BrandBoltIcon className="h-3.5 w-3.5 text-emerald-400" />
                       <span>Sleeper</span>
                     </button>
                     <button
@@ -572,7 +581,7 @@ export const Header: React.FC = () => {
                       htmlFor="userIdInput"
                       className="mb-1.5 block flex items-center justify-between text-xs font-black tracking-wider text-slate-400 uppercase"
                     >
-                      <span id="userIdInputLabel">Sleeper Username or ID</span>
+                      <span id="userIdInputLabel">Fantasy Username or ID</span>
                       <span className="text-[10px] font-bold text-emerald-400 lowercase">
                         remembered
                       </span>

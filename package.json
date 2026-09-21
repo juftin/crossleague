@@ -1,7 +1,7 @@
 {
   "name": "crossleague",
   "version": "2.0.0",
-  "description": "Universal power rankings and multi-league analytics dashboard for Sleeper and ESPN fantasy football leagues",
+  "description": "Universal power rankings and multi-league fantasy football analytics dashboard",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,8 +22,7 @@
   },
   "keywords": [
     "crossleague",
-    "sleeper",
-    "espn",
+    "multi-league",
     "fantasy-football",
     "analytics",
     "power-rankings",

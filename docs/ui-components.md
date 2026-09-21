@@ -1,6 +1,6 @@
 # 🎨 React UI Components & Visualizations
 
-CrossLeague features a responsive, dark-mode glassmorphic interface engineered with **React 19**, **TypeScript**, **Tailwind CSS**, and **Lucide React** icons.
+CrossLeague features a responsive, dark-mode glassmorphic interface engineered with **React 19**, **TypeScript**, **Tailwind CSS**, and Lucide React icons.
 
 ---
 
@@ -10,7 +10,7 @@ CrossLeague utilizes a dark glassmorphic styling system defined in [`src/css/sty
 
 - **Background Canvas**: Deep slate/navy gradients (`#0b0f19` to `#020617`).
 - **Glassmorphic Panels (`glass-card`)**: Translucent panels with background blur (`backdrop-blur-md bg-slate-900/60 border border-slate-800/80 shadow-2xl`).
-- **Iconography**: Standardized **Lucide React** icons across all buttons, indicators, and metrics.
+- **Iconography**: Lucide React icons are used across controls and metrics; the CrossLeague bolt is rendered by the shared `BrandBoltIcon` component and dedicated light/dark SVG assets.
 - **Color Coding**: Emerald greens for high scoring and lucky draws, rose for bad beats and unlucky schedules, and cyan/violet for platform identity.
 
 ---
@@ -59,7 +59,7 @@ graph TD
 
 ### 2. Fixed Header & Controls (`src/js/components/header/Header.tsx`)
 
-- Contains the brand logo, platform indicator (`#headerPlatformBadge`), and season badge.
+- Contains the theme-aware brand logo and favicon, platform indicator (`#headerPlatformBadge`), and season badge.
 - Houses the **WeekNavigator**, **LeagueDropdown**, Sync button, Share button, and Settings dropdown menu.
 - Hosts the desktop navigation tab bar.
 
