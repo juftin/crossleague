@@ -86,8 +86,9 @@ graph TD
 - **League Scoring Comparison**: Bar chart comparing Average Points Per Game (Avg PPG) across all leagues.
 - **Scoring Settings Warning**: A modal warns when selected leagues report different scoring rules;
   raw point totals across those leagues are not directly equivalent.
-- **Player Analytics Scope**: Player ownership and start rates span selected leagues, while a player's
-  displayed weekly points use one league's score (the highest available score), rather than a
-  cross-league sum. Season Avg PPG aggregates recorded selected-league scores and is not normalized.
+- **Player Analytics Scope**: When selected leagues have mismatched scoring settings, Player
+  Analytics warns that ownership and start rates span selected leagues while a player's displayed
+  weekly points use one league's score (the highest available score), rather than a cross-league
+  sum. Season Avg PPG aggregates recorded selected-league scores and is not normalized.
 - Retains imperative Chart.js canvas renderers integrated via React `useEffect` refs, with theme-aware canvas text, grid, legend, and tooltip colors.
 - Shared chart-help popovers use a high-contrast white surface in light mode and a slate surface in dark mode.
