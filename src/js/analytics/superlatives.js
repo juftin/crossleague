@@ -29,8 +29,8 @@ export function computeSuperlatives(records = [], isSeason = false) {
     return { badBeat: null, luckyEscape: null, benchKing: null };
   }
 
-  let badBeat = null;
-  let luckyEscape = null;
+  let badBeat;
+  let luckyEscape;
 
   if (!isSeason) {
     // Single Week Mode

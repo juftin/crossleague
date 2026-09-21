@@ -1,18 +1,30 @@
-# 🏈 CrossLeague • Universal Fantasy Football Power Rankings
+<h1 align="center">
+  <img src="public/favicon.svg" alt="" width="64" height="64"><br>
+  CrossLeague
+</h1>
 
-<div align="center">
+<p align="center">
+Universal fantasy football power rankings and multi-league analytics dashboard.
+</p>
 
-[![CI](https://github.com/juftin/crossleague/actions/workflows/ci.yaml/badge.svg)](https://github.com/juftin/crossleague/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
-[![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org)
-[![Platforms](https://img.shields.io/badge/Platforms-Multi--League-0f766e.svg)](#-features)
+<p align="center">
+  <a href="https://github.com/juftin/crossleague/releases"><img src="https://img.shields.io/github/v/release/juftin/crossleague?color=blue&label=CrossLeague&logo=github" alt="GitHub release"></a>
+  <a href="https://github.com/juftin/crossleague/blob/main/LICENSE"><img src="https://img.shields.io/github/license/juftin/crossleague?color=blue&label=License" alt="MIT License"></a>
+  <a href="https://github.com/juftin/crossleague/actions/workflows/ci.yaml?query=branch%3Amain"><img src="https://github.com/juftin/crossleague/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI status"></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-blue?logo=react" alt="React 19"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-6.0-blue?logo=typescript" alt="TypeScript 6.0"></a>
+  <a href="https://github.com/go-task/task"><img src="https://img.shields.io/badge/task---?message=task&logo=task&color=teal&labelColor=grey" alt="Task"></a>
+  <a href="https://github.com/semantic-release/semantic-release"><img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="semantic-release"></a>
+  <a href="https://gitmoji.dev"><img src="https://img.shields.io/badge/gitmoji-%20%F0%9F%98%9C%20%F0%9F%98%8D-FFDD67.svg" alt="Gitmoji"></a>
+</p>
 
-**Universal multi-league power rankings, schedule luck analytics, player exposure tracking, and outcome superlatives for fantasy football leagues.**
-
-[✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📸 Visual Showcase](#-visual-showcase) • [📚 Documentation Hub](#-documentation-hub) • [🛠️ Development](#-development--testing)
-
-</div>
+<p align="center">
+  <a href="#-features">Features</a> •
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-visual-showcase">Visual Showcase</a> •
+  <a href="#-documentation-hub">Documentation</a> •
+  <a href="#-development--testing">Development</a>
+</p>
 
 ---
 
@@ -188,9 +200,3 @@ CrossLeague uses [Task](https://taskfile.dev/) to orchestrate development tasks,
 | `task snapshots` | Generate Snapshots   | Captures 11 visual snapshot PNGs with headless Chrome.            |
 
 For detailed developer instructions, see the [Development & Testing Guide](docs/development.md).
-
----
-
-## 📜 License
-
-Distributed under the [MIT License](LICENSE). Built with ❤️ by [Justin Flannery](https://github.com/juftin).
