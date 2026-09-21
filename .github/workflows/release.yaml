@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: release
+
+on:
+  push:
+    branches: [main, next, next-major, beta, alpha, "*.x"]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: release
+    if: github.repository_owner == 'juftin'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: semantic-release
+        uses: juftin/actions/semantic-release@v1
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
