@@ -140,6 +140,7 @@ export async function syncData(forceRefresh = false) {
                 avatar: res.leagueInfo.avatar,
                 platform: "espn",
                 totalRosters: res.leagueInfo.total_rosters,
+                scoringSettings: res.leagueInfo.scoringSettings,
                 scores: (res.records || []).map(r => r.points)
               };
               (res.records || []).forEach(r => combinedRecords.push(r));
@@ -202,6 +203,7 @@ export async function syncData(forceRefresh = false) {
                 avatar: lavatar,
                 platform: "sleeper",
                 totalRosters: league.total_rosters || 12,
+                scoringSettings: league.scoring_settings || {},
                 scores: []
               };
 
@@ -377,6 +379,7 @@ export async function syncData(forceRefresh = false) {
                 avatar: lavatar,
                 platform: "sleeper",
                 totalRosters: league.total_rosters || 12,
+                scoringSettings: league.scoring_settings || {},
                 scores: []
               };
 

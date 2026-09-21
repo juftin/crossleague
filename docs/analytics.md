@@ -182,3 +182,10 @@ Universal leaderboard and all-play rankings are sorted deterministically:
 1. **Primary Sort**: All-Play Win Percentage (`allPlayWinPct`) descending.
 2. **Secondary Tiebreaker**: Total Points Scored (`totalPoints` or `points`) descending.
 3. **Tertiary Tiebreaker**: Head-to-Head Win Count (`wins`) descending.
+
+### Scoring-settings compatibility
+
+CrossLeague preserves each platform's scoring-settings payload and compares it for the selected
+leagues. When the settings differ, it warns that raw team and player totals are not directly
+equivalent. All-Play, Expected Wins, and Luck Index remain comparable because each calculation uses
+only the teams and scores from its own league.

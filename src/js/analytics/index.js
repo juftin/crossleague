@@ -8,3 +8,4 @@ export * from "./efficiency.js";
 export * from "./statistics.js";
 export * from "./superlatives.js";
 export * from "./aggregation.js";
+export * from "./scoringSettings.js";

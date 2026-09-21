@@ -205,6 +205,19 @@ export const PlayersTab: React.FC = () => {
 
   return (
     <div id="viewPlayers" className="w-full space-y-6">
+      <div
+        id="playerScoreScopeDisclaimer"
+        className="flex items-start gap-3 rounded-2xl border border-cyan-500/25 bg-cyan-500/10 p-4 text-sm text-cyan-50"
+      >
+        <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-300" />
+        <p className="leading-relaxed">
+          {isSeason
+            ? "Season Avg PPG aggregates recorded season scores from selected leagues; it is not a normalized cross-league metric."
+            : "Weekly player points show one league's score—when a player appears in multiple selected leagues, CrossLeague uses that player's highest score rather than adding scores together."}{" "}
+          Ownership and start rates still reflect every selected league.
+        </p>
+      </div>
+
       {/* Positional MVP Spotlight Cards */}
       <div>
         <div className="mb-3.5 flex items-center justify-between">
