@@ -581,7 +581,7 @@ export const Header: React.FC = () => {
                       htmlFor="userIdInput"
                       className="mb-1.5 block flex items-center justify-between text-xs font-black tracking-wider text-slate-400 uppercase"
                     >
-                      <span id="userIdInputLabel">Sleeper Username or ID</span>
+                      <span id="userIdInputLabel">Fantasy Username or ID</span>
                       <span className="text-[10px] font-bold text-emerald-400 lowercase">
                         remembered
                       </span>

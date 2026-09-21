@@ -6,10 +6,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org)
-[![Sleeper](https://img.shields.io/badge/Platform-Sleeper-00ceb8.svg)](https://sleeper.com)
-[![ESPN](https://img.shields.io/badge/Platform-ESPN%20Fantasy-ff0033.svg)](https://fantasy.espn.com)
+[![Platforms](https://img.shields.io/badge/Platforms-Multi--League-0f766e.svg)](#-features)
 
-**Universal multi-league power rankings, schedule luck analytics, player exposure tracking, and outcome superlatives for Sleeper and ESPN fantasy football leagues.**
+**Universal multi-league power rankings, schedule luck analytics, player exposure tracking, and outcome superlatives for fantasy football leagues.**
 
 [✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📸 Visual Showcase](#-visual-showcase) • [📚 Documentation Hub](#-documentation-hub) • [🛠️ Development](#-development--testing)
 
@@ -50,7 +49,7 @@ Whether you manage 2 leagues or 20, CrossLeague normalizes scoring across league
   - Formats ready-to-paste markdown rankings and superlatives for Discord, Slack, and GroupMe.
   - Download complete CSV spreadsheets with All-Play, Expected Wins, and Luck metrics.
 - **⚡ Two-Tier Caching & Multi-Platform Support**:
-  - Seamlessly supports both **Sleeper** and **ESPN** public fantasy leagues.
+  - Connect public fantasy leagues from supported platforms.
   - In-memory and `localStorage` caching with automatic TTL expiration prevents upstream API rate-limiting.
 
 ---
@@ -103,7 +102,7 @@ Visit `http://localhost:3000` to view the live dashboard.
 
 ### 2. Configure Your Leagues
 
-Click **⚙️ Settings** in the dashboard header, enter your Sleeper username or custom Sleeper/ESPN League IDs, and select your target season and week.
+Click **⚙️ Settings** in the dashboard header, choose a platform, then enter your fantasy username or league IDs and select your target season and week.
 
 ### 3. Share with Deep Links
 
@@ -125,7 +124,7 @@ Explore in-depth technical documentation in the [`docs/`](docs/) directory:
 | :---------------------------------------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------- |
 | [**Architecture**](docs/architecture.md)                    | High-level system design and execution model         | React 19 + TypeScript runtime, Zustand store, data flow, build pipeline                 |
 | [**Analytics & Mathematics**](docs/analytics.md)            | Analytical models, algorithms, and math formulations | All-Play, Expected Wins ($xW$), Luck Index, Lineup Efficiency, Consistency              |
-| [**API Adapters**](docs/api-adapters.md)                    | Upstream fantasy platform integration                | Sleeper REST API, ESPN Fantasy API, slot IDs, roster parsing, sync service              |
+| [**API Adapters**](docs/api-adapters.md)                    | Upstream fantasy platform integration                | Platform APIs, slot IDs, roster parsing, sync service                                   |
 | [**State Management & Caching**](docs/state-and-caching.md) | Client state and storage persistence                 | Zustand store (`useCrossLeagueStore`), `localStorage` caching, TTL expiration           |
 | [**URL Parameters & Deep Linking**](docs/url-parameters.md) | Shareable state and parameter mapping                | Shorthand query aliases, multi-league query parsing, deep linking                       |
 | [**UI Components & Visualizations**](docs/ui-components.md) | User interface architecture & glassmorphic design    | React component tree, tabs, modals, podium, Chart.js integrations, Lucide icons         |
@@ -146,7 +145,7 @@ crossleague/
 ├── src/
 │   ├── js/
 │   │   ├── analytics/    # All-Play, Luck Index, Efficiency, Statistics, Superlatives
-│   │   ├── api/          # Sleeper REST client, ESPN adapter, Player DB client
+│   │   ├── api/          # Fantasy platform adapters and player DB client
 │   │   ├── components/   # React components (Header, Tabs, Podium, Modals, Summary)
 │   │   ├── export/       # Chat recap generator, CSV export, shareable link builder
 │   │   ├── services/     # Cross-platform data synchronization service

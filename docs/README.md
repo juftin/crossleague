@@ -1,6 +1,6 @@
 # 📚 CrossLeague Documentation Hub
 
-Welcome to the comprehensive technical documentation for **CrossLeague** — the client-side fantasy football analytics and power rankings dashboard for Sleeper and ESPN leagues.
+Welcome to the comprehensive technical documentation for **CrossLeague** — the client-side fantasy football analytics and power rankings dashboard for multi-league play.
 
 Whether you are a developer, an open-source contributor, or an AI coding agent, this documentation hub provides in-depth technical guides for every subsystem of CrossLeague.
 
@@ -12,7 +12,7 @@ Whether you are a developer, an open-source contributor, or an AI coding agent, 
 | :----------------------------------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------- |
 | [**Architecture**](architecture.md)                    | High-level system design and execution model         | React 19 + TypeScript runtime, Zustand store, data flow, build pipeline                 |
 | [**Analytics & Mathematics**](analytics.md)            | Analytical models, algorithms, and math formulations | All-Play, Expected Wins ($xW$), Luck Index, Lineup Efficiency, Consistency              |
-| [**API Adapters**](api-adapters.md)                    | Upstream fantasy platform integration                | Sleeper REST API, ESPN Fantasy API, slot IDs, roster parsing, sync service              |
+| [**API Adapters**](api-adapters.md)                    | Upstream fantasy platform integration                | Platform APIs, slot IDs, roster parsing, sync service                                   |
 | [**State Management & Caching**](state-and-caching.md) | Client state and storage persistence                 | Zustand store (`useCrossLeagueStore`), `localStorage` caching, TTL expiration           |
 | [**URL Parameters & Deep Linking**](url-parameters.md) | Shareable state and parameter mapping                | Shorthand query aliases, multi-league query parsing, deep linking                       |
 | [**UI Components & Visualizations**](ui-components.md) | User interface architecture & glassmorphic design    | React component tree, tabs, modals, podium, Chart.js integrations, Lucide icons         |
@@ -45,7 +45,7 @@ src/
 ├── css/             # Glassmorphic Tailwind CSS design system
 ├── js/
 │   ├── analytics/   # Pure functional mathematical & statistical calculators
-│   ├── api/         # Platform adapters (Sleeper, ESPN) & player DB clients
+│   ├── api/         # Fantasy platform adapters and player DB clients
 │   ├── components/  # React 19 component tree (Header, Tabs, Modals, Summary)
 │   ├── export/      # Chat recaps, CSV exports, shareable link builders
 │   ├── services/    # Cross-platform data synchronization service

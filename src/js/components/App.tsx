@@ -367,8 +367,8 @@ export const App: React.FC = () => {
               Who Actually Ran the League?
             </h3>
             <p className="mx-auto max-w-lg text-base leading-relaxed text-slate-400">
-              Drop your Sleeper handle above to stack all your squads and league rivals on one
-              universal power board.
+              Add your fantasy username or league IDs above to stack all your squads and league
+              rivals on one universal power board.
             </p>
           </div>
         )}
