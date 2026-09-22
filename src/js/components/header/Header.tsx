@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
 import {
-  Zap,
   Sliders,
   Shield,
   User,
@@ -17,7 +16,9 @@ import {
   TrendingUp,
   Grid,
   Clover,
-  Star
+  Star,
+  Moon,
+  Sun
 } from "lucide-react";
 import { useCrossLeagueStore } from "../../state/useCrossLeagueStore.js";
 import { copyChatRecap } from "../../export/recap.js";
@@ -25,6 +26,7 @@ import { shareUrl } from "../../export/share.js";
 import { syncData } from "../../services/syncService.js";
 import { getMaxPlayedWeek } from "../../state/preferences.js";
 import { extractCustomLeagueIds } from "../../state/urlParams.js";
+import { BrandBoltIcon } from "../common/BrandBoltIcon.tsx";
 import type { TabId, SyncMode } from "../../types/index.js";
 
 export const Header: React.FC = () => {
@@ -32,6 +34,8 @@ export const Header: React.FC = () => {
   const setActiveTab = useCrossLeagueStore(s => s.setActiveTab);
   const platform = useCrossLeagueStore(s => s.platform);
   const setPlatform = useCrossLeagueStore(s => s.setPlatform);
+  const theme = useCrossLeagueStore(s => s.theme);
+  const setTheme = useCrossLeagueStore(s => s.setTheme);
   const sleeperUserName = useCrossLeagueStore(s => s.sleeperUserName);
   const sleeperSyncType = useCrossLeagueStore(s => s.sleeperSyncType);
   const sleeperCustomLeagueIds = useCrossLeagueStore(s => s.sleeperCustomLeagueIds);
@@ -93,6 +97,11 @@ export const Header: React.FC = () => {
       window.removeEventListener("resize", updateHeight);
     };
   }, []);
+
+  useEffect(() => {
+    const favicon = document.getElementById("favicon") as HTMLLinkElement | null;
+    if (favicon) favicon.href = theme === "light" ? "/favicon-light.svg" : "/favicon.svg";
+  }, [theme]);
 
   // Sync draft state with store whenever settings modal opens
   useEffect(() => {
@@ -298,7 +307,11 @@ export const Header: React.FC = () => {
           <div className="group relative flex-shrink-0">
             <div className="pointer-events-none absolute -inset-0.5 transform-gpu rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-60 blur transition-opacity duration-300 group-hover:opacity-100" />
             <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-slate-900 shadow-xl sm:h-12 sm:w-12">
-              <Zap className="h-5 w-5 text-emerald-400 sm:h-6 sm:w-6" />
+              <img
+                src={theme === "light" ? "/favicon-light.svg" : "/favicon.svg"}
+                alt="CrossLeague"
+                className="h-7 w-7 sm:h-9 sm:w-9"
+              />
             </div>
           </div>
           <div className="min-w-0 flex-1">
@@ -310,14 +323,10 @@ export const Header: React.FC = () => {
             <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400 sm:text-sm">
               Every league. Every squad. One board.
             </p>
-            <p
-              id="snapshotSubtitle"
-              className="mt-0.5 hidden truncate text-[10px] font-semibold text-cyan-400 sm:text-xs"
-            />
           </div>
         </div>
 
-        {/* Right Side: Year/Week Badges, Snapshot Indicator & Hamburger Menu Button */}
+        {/* Right Side: Year/Week Badges & Hamburger Menu Button */}
         <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-3">
           {hasData && (
             <div
@@ -337,7 +346,7 @@ export const Header: React.FC = () => {
                   {platform === "espn" ? (
                     <Shield className="h-3 w-3" />
                   ) : (
-                    <Zap className="h-3 w-3" />
+                    <BrandBoltIcon className="h-3 w-3" />
                   )}
                   {platform === "espn" ? "ESPN" : "Sleeper"}
                 </span>
@@ -364,14 +373,6 @@ export const Header: React.FC = () => {
               </span>
             </div>
           )}
-
-          <span
-            id="snapshotIndicator"
-            className="hidden inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-950/80 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-sm"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] sm:h-2.5 sm:w-2.5" />
-            Snapshot
-          </span>
 
           {/* MENU DROPDOWN CONTAINER */}
           <div
@@ -436,15 +437,32 @@ export const Header: React.FC = () => {
                     Menu & Controls
                   </span>
                 </div>
-                <button
-                  type="button"
-                  id="btnCloseSettingsModal"
-                  onClick={closeSettingsModal}
-                  className="cursor-pointer rounded-lg bg-slate-800/60 p-1 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
-                  aria-label="Close menu"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    id="themeToggleBtn"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg bg-slate-800/60 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                    aria-label="Toggle color mode"
+                    aria-pressed={theme === "light"}
+                    title="Toggle color mode"
+                  >
+                    {theme === "dark" ? (
+                      <Sun className="h-3.5 w-3.5 text-amber-400" />
+                    ) : (
+                      <Moon className="h-3.5 w-3.5 text-cyan-400" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    id="btnCloseSettingsModal"
+                    onClick={closeSettingsModal}
+                    className="cursor-pointer rounded-lg bg-slate-800/60 p-1 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                    aria-label="Close menu"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               {/* 1. Matchup Week Stepper inside Menu */}
@@ -523,7 +541,7 @@ export const Header: React.FC = () => {
                           : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      <Zap className="h-3.5 w-3.5 text-emerald-400" />
+                      <BrandBoltIcon className="h-3.5 w-3.5 text-emerald-400" />
                       <span>Sleeper</span>
                     </button>
                     <button
@@ -587,7 +605,7 @@ export const Header: React.FC = () => {
                       htmlFor="userIdInput"
                       className="mb-1.5 block flex items-center justify-between text-xs font-black tracking-wider text-slate-400 uppercase"
                     >
-                      <span id="userIdInputLabel">Sleeper Username or ID</span>
+                      <span id="userIdInputLabel">Fantasy Username or ID</span>
                       <span className="text-[10px] font-bold text-emerald-400 lowercase">
                         remembered
                       </span>

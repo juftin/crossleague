@@ -4,60 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CrossLeague • Multi-League Fantasy Dashboard</title>
-    <script data-cfasync="false" src="https://cdn.tailwindcss.com"></script>
-    <script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <script data-cfasync="false">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['"Plus Jakarta Sans"', "Inter", "sans-serif"]
-            },
-            colors: {
-              brand: {
-                50: "#ecfdf5",
-                100: "#d1fae5",
-                400: "#34d399",
-                500: "#10b981",
-                600: "#059669",
-                700: "#047857"
-              },
-              sleeper: {
-                cyan: "#00ceb8",
-                blue: "#0284c7",
-                navy: "#0f172a",
-                card: "rgba(15, 23, 42, 0.75)"
-              }
-            },
-            animation: {
-              shimmer: "shimmer 2s infinite linear",
-              "pulse-glow": "pulseGlow 2.5s infinite ease-in-out"
-            },
-            keyframes: {
-              shimmer: {
-                "0%": { backgroundPosition: "-1000px 0" },
-                "100%": { backgroundPosition: "1000px 0" }
-              },
-              pulseGlow: {
-                "0%, 100%": { opacity: "0.6", transform: "scale(1)" },
-                "50%": { opacity: "1", transform: "scale(1.02)" }
-              }
-            }
-          }
+    <script>
+      try {
+        if (localStorage.getItem("crossleague_theme") === "light") {
+          document.documentElement.classList.replace("dark", "light");
         }
-      };
+      } catch {}
     </script>
+    <meta
+      name="description"
+      content="Universal power rankings, multi-league analytics, and advanced fantasy football metrics."
+    />
+    <meta property="og:title" content="CrossLeague • Multi-League Fantasy Dashboard" />
+    <meta
+      property="og:description"
+      content="Universal power rankings, All-Play records, Luck Index, and multi-league fantasy analytics."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/favicon.svg" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:image" content="/favicon.svg" />
+    <link id="favicon" rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="stylesheet" href="/src/css/styles.css" />
   </head>
-  <body class="text-slate-100 min-h-screen antialiased flex flex-col selection:bg-emerald-500 selection:text-slate-950">
+  <body class="selection:bg-emerald-500 selection:text-slate-950 flex min-h-screen flex-col text-slate-100 antialiased">
     <!-- React Root Container -->
     <div id="root"></div>
 
@@ -83,6 +59,7 @@
       id="customLeagueIdsChips"
       id="modeSelect"
       id="seasonInput"
+      id="themeToggleBtn"
       id="leagueDropdownContainer"
       id="leagueDropdownBtn"
       id="leagueDropdownLabel"
@@ -115,6 +92,6 @@
     -->
 
     <!-- Application Logic -->
-    <script type="module" src="./js/index.js"></script>
+    <script type="module" src="/src/js/index.js"></script>
   </body>
 </html>

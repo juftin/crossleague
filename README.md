@@ -1,19 +1,30 @@
-# 🏈 CrossLeague • Universal Fantasy Football Power Rankings
+<h1 align="center">
+  <img src="public/favicon.svg" alt="" width="64" height="64"><br>
+  CrossLeague
+</h1>
 
-<div align="center">
+<p align="center">
+Universal fantasy football power rankings and multi-league analytics dashboard.
+</p>
 
-[![CI](https://github.com/juftin/crossleague/actions/workflows/ci.yaml/badge.svg)](https://github.com/juftin/crossleague/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
-[![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org)
-[![Sleeper](https://img.shields.io/badge/Platform-Sleeper-00ceb8.svg)](https://sleeper.com)
-[![ESPN](https://img.shields.io/badge/Platform-ESPN%20Fantasy-ff0033.svg)](https://fantasy.espn.com)
+<p align="center">
+  <a href="https://github.com/juftin/crossleague/releases"><img src="https://img.shields.io/github/v/release/juftin/crossleague?color=blue&label=CrossLeague&logo=github" alt="GitHub release"></a>
+  <a href="https://github.com/juftin/crossleague/blob/main/LICENSE"><img src="https://img.shields.io/github/license/juftin/crossleague?color=blue&label=License" alt="MIT License"></a>
+  <a href="https://github.com/juftin/crossleague/actions/workflows/ci.yaml?query=branch%3Amain"><img src="https://github.com/juftin/crossleague/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI status"></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-blue?logo=react" alt="React 19"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-6.0-blue?logo=typescript" alt="TypeScript 6.0"></a>
+  <a href="https://github.com/go-task/task"><img src="https://img.shields.io/badge/task---?message=task&logo=task&color=teal&labelColor=grey" alt="Task"></a>
+  <a href="https://github.com/semantic-release/semantic-release"><img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="semantic-release"></a>
+  <a href="https://gitmoji.dev"><img src="https://img.shields.io/badge/gitmoji-%20%F0%9F%98%9C%20%F0%9F%98%8D-FFDD67.svg" alt="Gitmoji"></a>
+</p>
 
-**Universal multi-league power rankings, schedule luck analytics, player exposure tracking, and outcome superlatives for Sleeper and ESPN fantasy football leagues.**
-
-[✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📸 Visual Showcase](#-visual-showcase) • [📚 Documentation Hub](#-documentation-hub) • [🛠️ Development](#-development--testing)
-
-</div>
+<p align="center">
+  <a href="#-features">Features</a> •
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-visual-showcase">Visual Showcase</a> •
+  <a href="#-documentation-hub">Documentation</a> •
+  <a href="#-development--testing">Development</a>
+</p>
 
 ---
 
@@ -50,7 +61,7 @@ Whether you manage 2 leagues or 20, CrossLeague normalizes scoring across league
   - Formats ready-to-paste markdown rankings and superlatives for Discord, Slack, and GroupMe.
   - Download complete CSV spreadsheets with All-Play, Expected Wins, and Luck metrics.
 - **⚡ Two-Tier Caching & Multi-Platform Support**:
-  - Seamlessly supports both **Sleeper** and **ESPN** public fantasy leagues.
+  - Connect public fantasy leagues from supported platforms.
   - In-memory and `localStorage` caching with automatic TTL expiration prevents upstream API rate-limiting.
 
 ---
@@ -103,7 +114,7 @@ Visit `http://localhost:3000` to view the live dashboard.
 
 ### 2. Configure Your Leagues
 
-Click **⚙️ Settings** in the dashboard header, enter your Sleeper username or custom Sleeper/ESPN League IDs, and select your target season and week.
+Click **⚙️ Settings** in the dashboard header, choose a platform, then enter your fantasy username or league IDs and select your target season and week.
 
 ### 3. Share with Deep Links
 
@@ -125,7 +136,7 @@ Explore in-depth technical documentation in the [`docs/`](docs/) directory:
 | :---------------------------------------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------- |
 | [**Architecture**](docs/architecture.md)                    | High-level system design and execution model         | React 19 + TypeScript runtime, Zustand store, data flow, build pipeline                 |
 | [**Analytics & Mathematics**](docs/analytics.md)            | Analytical models, algorithms, and math formulations | All-Play, Expected Wins ($xW$), Luck Index, Lineup Efficiency, Consistency              |
-| [**API Adapters**](docs/api-adapters.md)                    | Upstream fantasy platform integration                | Sleeper REST API, ESPN Fantasy API, slot IDs, roster parsing, sync service              |
+| [**API Adapters**](docs/api-adapters.md)                    | Upstream fantasy platform integration                | Platform APIs, slot IDs, roster parsing, sync service                                   |
 | [**State Management & Caching**](docs/state-and-caching.md) | Client state and storage persistence                 | Zustand store (`useCrossLeagueStore`), `localStorage` caching, TTL expiration           |
 | [**URL Parameters & Deep Linking**](docs/url-parameters.md) | Shareable state and parameter mapping                | Shorthand query aliases, multi-league query parsing, deep linking                       |
 | [**UI Components & Visualizations**](docs/ui-components.md) | User interface architecture & glassmorphic design    | React component tree, tabs, modals, podium, Chart.js integrations, Lucide icons         |
@@ -142,26 +153,27 @@ crossleague/
 ├── docs/                 # Specialized technical documentation guides
 ├── snapshots/            # Visual regression PNG snapshots
 ├── scripts/
-│   ├── build.js          # Vite production bundler & minifier
 │   └── generate-snapshots.js # Automated Chrome headless visual snapshot engine
 ├── src/
-│   ├── css/
-│   │   └── styles.css    # Glassmorphic Tailwind CSS stylesheet
 │   ├── js/
 │   │   ├── analytics/    # All-Play, Luck Index, Efficiency, Statistics, Superlatives
-│   │   ├── api/          # Sleeper REST client, ESPN adapter, Player DB client
+│   │   ├── api/          # Fantasy platform adapters and player DB client
 │   │   ├── components/   # React components (Header, Tabs, Podium, Modals, Summary)
 │   │   ├── export/       # Chat recap generator, CSV export, shareable link builder
 │   │   ├── services/     # Cross-platform data synchronization service
 │   │   ├── state/        # Zustand store, TTL caching, URL parameter syncing
 │   │   ├── types/        # TypeScript interfaces & type definitions
 │   │   └── index.js      # Main JavaScript module & browser bootstrap entry point
-│   └── index.html        # Vite development HTML template
-├── dist/                 # Minified production bundles & standalone inlined app
+│   └── css/
+│       └── styles.css    # Tailwind CSS v4 design system stylesheet
+├── dist/                 # Production build assets & HTML
+├── public/               # Static assets (favicon.svg, .nojekyll)
 ├── tests/                # Native Node.js test suite (`node:test`)
+├── index.html            # Application HTML entry point
 ├── eslint.config.js      # ESLint flat configuration
 ├── knip.json             # Unused code & dependency analyzer configuration
 ├── tsconfig.json         # TypeScript configuration
+├── vite.config.js        # Standard Vite configuration
 ├── wrangler.jsonc        # Cloudflare Pages deployment configuration
 ├── package.json          # Package manifest & scripts
 ├── Taskfile.yaml         # Task runner entry points
@@ -188,9 +200,3 @@ CrossLeague uses [Task](https://taskfile.dev/) to orchestrate development tasks,
 | `task snapshots` | Generate Snapshots   | Captures 11 visual snapshot PNGs with headless Chrome.            |
 
 For detailed developer instructions, see the [Development & Testing Guide](docs/development.md).
-
----
-
-## 📜 License
-
-Distributed under the [MIT License](LICENSE). Built with ❤️ by [Justin Flannery](https://github.com/juftin).

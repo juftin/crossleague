@@ -2,6 +2,7 @@
  * CrossLeague • Chart.js Visualizations (Score Distribution & League Averages)
  */
 
+import Chart from "chart.js/auto";
 import { state, getActiveRecords, getActiveLeaguesMap } from "../state/store.js";
 
 /**
@@ -46,15 +47,34 @@ export function wrapLabel(str, maxLen = 16, maxLines = 3) {
  *
  * @param {Array<object>} [records] Records array
  * @param {Record<string, object>} [leagues] Active leagues map
+ * @param {"dark"|"light"} [theme="dark"] Active application theme
  */
-export function renderCharts(records = getActiveRecords(), leagues = getActiveLeaguesMap()) {
+export function renderCharts(
+  records = getActiveRecords(),
+  leagues = getActiveLeaguesMap(),
+  theme = "dark"
+) {
   const distEl = document.getElementById("scoreDistChart");
   const avgEl = document.getElementById("leagueAvgChart");
   if (!distEl || !avgEl) return;
   if (typeof Chart === "undefined") return;
 
-  const textColor = "#cbd5e1";
-  const gridColor = "rgba(255, 255, 255, 0.08)";
+  const isLightTheme = theme === "light";
+  const textColor = isLightTheme ? "#1e293b" : "#cbd5e1";
+  const gridColor = isLightTheme ? "rgba(100, 116, 139, 0.28)" : "rgba(255, 255, 255, 0.08)";
+  const tooltipColors = isLightTheme
+    ? {
+        backgroundColor: "#ffffff",
+        titleColor: "#0f172a",
+        bodyColor: "#334155",
+        borderColor: "rgba(100, 116, 139, 0.35)"
+      }
+    : {
+        backgroundColor: "#0f172a",
+        titleColor: "#f8fafc",
+        bodyColor: "#cbd5e1",
+        borderColor: "rgba(255, 255, 255, 0.15)"
+      };
 
   const buckets = {
     "< 80": 0,
@@ -106,8 +126,7 @@ export function renderCharts(records = getActiveRecords(), leagues = getActiveLe
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "#0f172a",
-          titleColor: "#f8fafc",
+          ...tooltipColors,
           bodyFont: { size: 13 },
           titleFont: { size: 13, weight: "bold" },
           borderColor: "rgba(255, 255, 255, 0.15)",
@@ -193,8 +212,7 @@ export function renderCharts(records = getActiveRecords(), leagues = getActiveLe
           }
         },
         tooltip: {
-          backgroundColor: "#0f172a",
-          titleColor: "#f8fafc",
+          ...tooltipColors,
           bodyFont: { size: 13 },
           titleFont: { size: 13, weight: "bold" },
           borderColor: "rgba(255, 255, 255, 0.15)",

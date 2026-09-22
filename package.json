@@ -1,12 +1,86 @@
 {
   "name": "crossleague",
-  "version": "2.0.0",
-  "description": "Universal power rankings and multi-league analytics dashboard for Sleeper and ESPN fantasy football leagues",
+  "version": "1.1.0",
+  "description": "Universal power rankings and multi-league fantasy football analytics dashboard",
   "private": true,
   "type": "module",
+  "release": {
+    "branches": [
+      "main",
+      "next",
+      "next-major",
+      "+([0-9])?(.{+([0-9]),x}).x",
+      {
+        "name": "beta",
+        "prerelease": true
+      },
+      {
+        "name": "alpha",
+        "prerelease": true
+      }
+    ],
+    "plugins": [
+      "semantic-release-gitmoji",
+      [
+        "@semantic-release/npm",
+        {
+          "npmPublish": false
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "package-lock.json"
+          ],
+          "message": "🔖 crossleague ${nextRelease.version}\n\n${nextRelease.notes}\n[skip ci]"
+        }
+      ],
+      "@semantic-release/github"
+    ]
+  },
+  "prettier": {
+    "printWidth": 100,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "none",
+    "bracketSpacing": true,
+    "arrowParens": "avoid",
+    "plugins": [
+      "prettier-plugin-tailwindcss"
+    ]
+  },
+  "knip": {
+    "entry": [
+      "index.html",
+      "src/js/index.js",
+      "src/js/analytics/index.js",
+      "src/js/api/index.js",
+      "src/js/export/index.js",
+      "tests/**/*.test.js"
+    ],
+    "project": [
+      "src/**/*.{js,ts,tsx}",
+      "scripts/**/*.js",
+      "tests/**/*.js"
+    ],
+    "ignoreExportsUsedInFile": true,
+    "ignoreDependencies": [
+      "tailwindcss"
+    ],
+    "rules": {
+      "exports": "warn",
+      "types": "off",
+      "files": "warn"
+    }
+  },
   "scripts": {
-    "build": "node scripts/build.js",
-    "build:check": "node scripts/build.js --check",
+    "build": "vite build",
+    "build:check": "vite build",
+    "preview": "vite preview",
     "format": "prettier --write \"**/*.{js,json,jsonc,html,css,md,yaml,yml,ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{js,json,jsonc,html,css,md,yaml,yml,ts,tsx}\"",
     "lint": "eslint .",
@@ -21,8 +95,7 @@
   },
   "keywords": [
     "crossleague",
-    "sleeper",
-    "espn",
+    "multi-league",
     "fantasy-football",
     "analytics",
     "power-rankings",
@@ -31,24 +104,27 @@
   "author": "Justin Flannery",
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^9.20.0",
-    "@types/node": "^26.6.1",
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
-    "eslint": "^9.20.0",
+    "eslint": "^10.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
-    "globals": "^15.14.0",
+    "globals": "^17.12.0",
     "knip": "^6.37.0",
-    "prettier": "^3.5.0",
+    "prettier": "^3.9.8",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "typescript": "^5.9.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
     "vite": "^8.3.0",
-    "wrangler": "^4.135.0"
+    "wrangler": "^4.136.0"
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
     "lucide-react": "^1.47.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

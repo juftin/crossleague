@@ -2,6 +2,47 @@
    CrossLeague • Design System & Glassmorphic Styles
    ========================================================================== */
 
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+
+  --color-sleeper-cyan: #00ceb8;
+  --color-sleeper-blue: #0284c7;
+  --color-sleeper-navy: #0f172a;
+  --color-sleeper-card: rgba(15, 23, 42, 0.75);
+
+  --animate-shimmer: shimmer 2s infinite linear;
+  --animate-pulse-glow: pulseGlow 2.5s infinite ease-in-out;
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  @keyframes pulseGlow {
+    0%,
+    100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+  }
+}
+
 :root {
   --app-header-height: 4rem;
 }
@@ -34,8 +75,137 @@ body {
   overflow-x: hidden;
 }
 
-.hidden {
-  display: none;
+/* Light theme is a cool, high-contrast counterpart to the dark dashboard. */
+html.light,
+html.light body {
+  background-color: #f4f9ff;
+  color: #0f172a;
+}
+
+html.light body::before {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.13) 0px, transparent 52%),
+    radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+}
+
+html.light .glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+html.light [class*="bg-slate-950"] {
+  background-color: #f8fbff;
+}
+
+html.light [class*="bg-slate-900"] {
+  background-color: #eff6ff;
+}
+
+html.light [class*="bg-slate-800"] {
+  background-color: #dbeafe;
+}
+
+html.light [class*="border-slate-8"],
+html.light [class*="border-slate-7"] {
+  border-color: #cbd5e1;
+}
+
+html.light [class*="text-white"],
+html.light [class*="text-slate-100"],
+html.light [class*="text-slate-200"] {
+  color: #0f172a;
+}
+
+html.light [class*="text-slate-3"],
+html.light [class*="text-slate-4"] {
+  color: #334155;
+}
+
+html.light [class*="text-slate-5"] {
+  color: #475569;
+}
+
+html.light [class*="text-emerald"],
+html.light [class*="text-cyan"] {
+  color: #0e7490;
+}
+
+html.light [class*="text-emerald"] {
+  color: #047857;
+}
+
+html.light [class*="text-amber"] {
+  color: #b45309;
+}
+
+html.light [class*="text-indigo"] {
+  color: #4f46e5;
+}
+
+html.light [class*="text-rose"] {
+  color: #be123c;
+}
+
+html.light h1.bg-clip-text {
+  background-image: linear-gradient(to right, #0f172a, #0e7490, #047857);
+}
+
+html.light [class*="bg-emerald"],
+html.light [class*="bg-cyan"] {
+  background-color: rgba(14, 116, 144, 0.12);
+}
+
+html.light [class*="bg-emerald"] {
+  background-color: rgba(4, 120, 87, 0.12);
+}
+
+html.light [class*="bg-amber"] {
+  background-color: rgba(180, 83, 9, 0.12);
+}
+
+html.light #headerSeasonBadge > span:first-child {
+  background-color: #0284c7;
+  box-shadow: 0 0 8px rgba(2, 132, 199, 0.75);
+}
+
+html.light #headerWeekBadge > span:first-child {
+  background-color: #059669;
+  box-shadow: 0 0 8px rgba(5, 150, 105, 0.75);
+}
+
+html.light #badBeatCard {
+  background-color: rgba(251, 113, 133, 0.1);
+  border-color: rgba(190, 24, 93, 0.28);
+}
+
+html.light #badBeatCard [class*="bg-rose"] {
+  background-color: rgba(251, 113, 133, 0.18);
+}
+
+html.light body {
+  background-color: #f4f9ff !important;
+}
+
+html.light #root > div {
+  background-color: transparent !important;
+}
+
+html.light .card-info-popover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(100, 116, 139, 0.35);
+  box-shadow:
+    0 16px 36px -8px rgba(15, 23, 42, 0.18),
+    0 0 0 1px rgba(148, 163, 184, 0.15);
+  color: #334155;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.8);
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.7);
 }
 
 body::before {
@@ -63,43 +233,45 @@ header {
   z-index: 40;
 }
 
-.glass-card {
-  background: rgba(15, 23, 42, 0.72);
+@utility glass-card {
+  background-color: rgba(15, 23, 42, 0.72);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.07);
   width: 100%;
 }
 
-.glass-card-hover {
+@utility glass-card-hover {
   transition:
     transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.25s ease,
     box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translate3d(0, -2px, 0);
+    border-color: rgba(52, 211, 153, 0.3);
+    box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.15);
+  }
 }
 
-.glass-card-hover:hover {
-  transform: translate3d(0, -2px, 0);
-  border-color: rgba(52, 211, 153, 0.3);
-  box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.15);
-}
-
-.gold-glow {
+@utility gold-glow {
   box-shadow: 0 0 25px -5px rgba(234, 179, 8, 0.3);
   border: 1px solid rgba(234, 179, 8, 0.35);
 }
 
-.silver-glow {
+@utility silver-glow {
   box-shadow: 0 0 20px -5px rgba(148, 163, 184, 0.25);
   border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
-.bronze-glow {
+@utility bronze-glow {
   box-shadow: 0 0 20px -5px rgba(217, 119, 6, 0.25);
   border: 1px solid rgba(217, 119, 6, 0.35);
 }
 
-.skeleton-loader {
+@utility skeleton-loader {
   background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
@@ -269,13 +441,16 @@ a {
   border: 1px solid rgba(0, 206, 184, 0.35);
 }
 
-/* ==========================================================================
-   Sticky Table Headers & Horizontal Scroll Containers
-   ========================================================================== */
-
+/* Sticky Table Headers & Horizontal Scroll Containers */
 .table-scroll-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.sticky-table-header {
+  position: relative;
+  z-index: 20;
+  will-change: transform;
 }
 
 .sticky-table-header th {
@@ -283,10 +458,4 @@ a {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 1px 0 0 rgba(30, 41, 59, 0.8);
-}
-
-.sticky-table-header {
-  position: relative;
-  z-index: 20;
-  will-change: transform;
 }

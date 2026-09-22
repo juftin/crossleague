@@ -1,13 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
+import http from "node:http";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { build as viteBuild } from "vite";
 import { mockEmbeddedReport } from "../tests/fixtures/mock-data.js";
-import { build } from "./build.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
+const distDir = path.join(rootDir, "dist");
 const snapshotsDir = path.join(rootDir, "snapshots");
 const tmpDir = path.join(rootDir, "tests", ".snapshot-tmp");
 
@@ -37,13 +39,9 @@ function getChromePath() {
   throw new Error("Could not locate Chrome/Chromium executable for snapshot generation.");
 }
 
-// Build self-contained HTML files for each snapshot scenario
+// Build in-memory HTML pages for each snapshot scenario
 function buildSnapshotHtmlPages() {
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, { recursive: true });
-  }
-
-  const distIndexHtmlPath = path.join(rootDir, "dist", "index.html");
+  const distIndexHtmlPath = path.join(distDir, "index.html");
   const indexHtml = fs.readFileSync(distIndexHtmlPath, "utf8");
 
   // Deterministic CSS override to eliminate animations and caret cursor
@@ -109,6 +107,32 @@ function buildSnapshotHtmlPages() {
         "window.switchTab('awards', false); if (window.openSettingsModal) window.openSettingsModal();"
     },
     {
+      id: "light-awards",
+      embeddedData: mockEmbeddedReport,
+      theme: "light",
+      actionScript: "window.switchTab('awards', false);"
+    },
+    {
+      id: "light-analytics",
+      embeddedData: mockEmbeddedReport,
+      theme: "light",
+      actionScript: "window.switchTab('visuals', false);"
+    },
+    {
+      id: "light-analytics-tooltip",
+      embeddedData: mockEmbeddedReport,
+      theme: "light",
+      actionScript:
+        "window.switchTab('visuals', false); const openTooltip = () => { const popover = document.querySelector('#viewVisuals .card-info-popover'); if (popover) popover.classList.add('is-open'); else window.setTimeout(openTooltip, 25); }; openTooltip();"
+    },
+    {
+      id: "light-settings-modal",
+      embeddedData: mockEmbeddedReport,
+      theme: "light",
+      actionScript:
+        "window.switchTab('awards', false); if (window.openSettingsModal) window.openSettingsModal();"
+    },
+    {
       id: "luck-modal",
       embeddedData: mockEmbeddedReport,
       actionScript:
@@ -121,6 +145,13 @@ function buildSnapshotHtmlPages() {
       actionScript: "window.switchTab('awards', false);"
     },
     {
+      id: "mobile-light-awards",
+      embeddedData: mockEmbeddedReport,
+      isMobile: true,
+      theme: "light",
+      actionScript: "window.switchTab('awards', false);"
+    },
+    {
       id: "mobile-leaderboard",
       embeddedData: mockEmbeddedReport,
       isMobile: true,
@@ -128,13 +159,16 @@ function buildSnapshotHtmlPages() {
     }
   ];
 
-  const generatedHtmlFiles = [];
+  const pages = [];
 
   for (const s of scenarios) {
     let html = indexHtml;
 
     const dataScript = s.embeddedData
       ? `<script>\nwindow.__CROSSLEAGUE_SNAPSHOT_DATA__ = ${JSON.stringify(s.embeddedData)};\n</script>`
+      : "";
+    const themeScript = s.theme
+      ? `<script>\nlocalStorage.setItem("crossleague_theme", "${s.theme}");\ndocument.documentElement.classList.replace("dark", "${s.theme}");\n</script>`
       : "";
 
     const runnerScript = `
@@ -168,10 +202,10 @@ function buildSnapshotHtmlPages() {
     if (html.includes("</head>")) {
       html = html.replace(
         "</head>",
-        () => `${deterministicOverride}\n${mobileStyle}\n${dataScript}\n</head>`
+        () => `${deterministicOverride}\n${mobileStyle}\n${themeScript}\n${dataScript}\n</head>`
       );
     } else {
-      html = `${deterministicOverride}\n${mobileStyle}\n${dataScript}\n${html}`;
+      html = `${deterministicOverride}\n${mobileStyle}\n${themeScript}\n${dataScript}\n${html}`;
     }
 
     if (html.includes("</body>")) {
@@ -180,22 +214,61 @@ function buildSnapshotHtmlPages() {
       html = `${html}\n${runnerScript}`;
     }
 
-    const filePath = path.join(tmpDir, `${s.id}.html`);
-    fs.writeFileSync(filePath, html, "utf8");
-    generatedHtmlFiles.push({
+    pages.push({
       id: s.id,
-      filePath,
+      html,
       isMobile: Boolean(s.isMobile)
     });
   }
 
-  return generatedHtmlFiles;
+  return pages;
 }
 
-function capturePageScreenshot(chromePath, page, targetDir) {
+function createSnapshotServer(pages) {
+  const pagesMap = new Map(pages.map(p => [p.id, p.html]));
+  const mimeTypes = {
+    ".html": "text/html; charset=utf-8",
+    ".js": "application/javascript",
+    ".mjs": "application/javascript",
+    ".css": "text/css",
+    ".json": "application/json",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2"
+  };
+
+  return http.createServer((req, res) => {
+    const parsedUrl = new URL(req.url, "http://127.0.0.1");
+    const pathname = decodeURIComponent(parsedUrl.pathname);
+    const scenarioId = pathname.replace(/^\//, "").replace(/\.html$/, "");
+
+    if (pagesMap.has(scenarioId)) {
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      res.end(pagesMap.get(scenarioId));
+      return;
+    }
+
+    const filePath = path.join(distDir, pathname === "/" ? "index.html" : pathname);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = mimeTypes[ext] || "application/octet-stream";
+      res.writeHead(200, { "Content-Type": contentType });
+      fs.createReadStream(filePath).pipe(res);
+      return;
+    }
+
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end("Not Found");
+  });
+}
+
+function capturePageScreenshot(chromePath, page, targetDir, port) {
   return new Promise((resolve, reject) => {
     const outputPath = path.join(targetDir, `${page.id}.png`);
-    const fileUrl = `file://${path.resolve(page.filePath)}`;
+    const fileUrl = `http://127.0.0.1:${port}/${page.id}.html`;
     const windowSize = page.isMobile ? "540,960" : "1280,800";
     const userProfileDir = path.join(tmpDir, `profile-${page.id}-${Date.now()}`);
 
@@ -227,7 +300,6 @@ function capturePageScreenshot(chromePath, page, targetDir) {
       "--disable-sync",
       "--no-first-run",
       "--no-default-browser-check",
-      "--allow-file-access-from-files",
       "--hide-scrollbars",
       "--force-device-scale-factor=1",
       "--run-all-compositor-stages-before-draw",
@@ -314,7 +386,7 @@ function capturePageScreenshot(chromePath, page, targetDir) {
 }
 
 export async function generateSnapshots({ isCheck = false } = {}) {
-  await build({ silent: true });
+  await viteBuild({ logLevel: "warn" });
   const chromePath = getChromePath();
   console.log(`📸 Using browser at: ${chromePath}`);
 
@@ -324,6 +396,13 @@ export async function generateSnapshots({ isCheck = false } = {}) {
   }
 
   const pages = buildSnapshotHtmlPages();
+  const server = createSnapshotServer(pages);
+
+  await new Promise(resolve => {
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  const port = server.address().port;
+
   console.log(
     `🖼️  ${isCheck ? "Checking" : "Generating"} ${pages.length} snapshot PNG images in ${outputDir}...`
   );
@@ -331,9 +410,15 @@ export async function generateSnapshots({ isCheck = false } = {}) {
   const startTime = Date.now();
 
   const CHUNK_SIZE = process.env.CI ? 2 : 3;
-  for (let i = 0; i < pages.length; i += CHUNK_SIZE) {
-    const chunk = pages.slice(i, i + CHUNK_SIZE);
-    await Promise.all(chunk.map(page => capturePageScreenshot(chromePath, page, outputDir)));
+  try {
+    for (let i = 0; i < pages.length; i += CHUNK_SIZE) {
+      const chunk = pages.slice(i, i + CHUNK_SIZE);
+      await Promise.all(
+        chunk.map(page => capturePageScreenshot(chromePath, page, outputDir, port))
+      );
+    }
+  } finally {
+    server.close();
   }
 
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(1);

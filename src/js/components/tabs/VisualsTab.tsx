@@ -11,13 +11,14 @@ export const VisualsTab: React.FC = () => {
   const records = useActiveRecords();
   const activeLeagues = useActiveLeaguesMap();
   const mode = useCrossLeagueStore(s => s.mode);
+  const theme = useCrossLeagueStore(s => s.theme);
 
   const distCanvasRef = useRef<HTMLCanvasElement>(null);
   const avgCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    renderCharts(records, activeLeagues);
-  }, [records, activeLeagues, mode]);
+    renderCharts(records, activeLeagues, theme);
+  }, [records, activeLeagues, mode, theme]);
 
   return (
     <div id="viewVisuals" className="w-full space-y-6">

@@ -66,8 +66,8 @@ export function formatRecapText(records, activeLeagues, options = {}) {
       : (sortedScores[midIdx - 1] + sortedScores[midIdx]) / 2;
 
   // Superlatives
-  let badBeat = null;
-  let luckyEscape = null;
+  let badBeat;
+  let luckyEscape;
   if (!isSeason) {
     const losers = records
       .filter(r => r.outcome === "loss" && r.points > 0)
@@ -115,8 +115,8 @@ export function formatRecapText(records, activeLeagues, options = {}) {
     ? `🏈 Season-to-Date Fantasy Recap (Weeks 1-${week}, ${season})`
     : `🏈 Week ${week} Fantasy Recap (${season})`;
 
-  let plainText = "";
-  let htmlText = "";
+  let plainText;
+  let htmlText;
 
   if (isSeason) {
     plainText = `*${titleText}*\n\n`;

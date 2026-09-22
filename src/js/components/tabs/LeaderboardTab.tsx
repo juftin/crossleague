@@ -3,13 +3,13 @@ import {
   Crown,
   Medal,
   TrendingUp,
-  Zap,
   Search,
   ChevronUp,
   ChevronDown,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import { BrandBoltIcon } from "../common/BrandBoltIcon.tsx";
 import { useCrossLeagueStore, useActiveRecords } from "../../state/useCrossLeagueStore.js";
 import { getAvatarUrl } from "../../api/sleeper.js";
 import { useStickyTableHeader } from "../common/useStickyTableHeader.ts";
@@ -621,7 +621,7 @@ export const LeaderboardTab: React.FC = () => {
                             <div className="glass-card space-y-3.5 rounded-xl border border-slate-800/80 p-5">
                               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
                                 <div className="flex items-center gap-2 text-xs font-black tracking-wider text-slate-200 uppercase sm:text-sm">
-                                  <Zap className="h-4 w-4 text-amber-400" />
+                                  <BrandBoltIcon className="h-4 w-4 text-amber-400" />
                                   <span>Starting Lineup vs Bench</span>
                                   <span className="font-normal text-slate-400">
                                     | Matchup #{r.matchupId || "N/A"}
