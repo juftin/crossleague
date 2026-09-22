@@ -235,5 +235,13 @@ describe("Source & Bundle Integrity", () => {
       hookCode.includes("translate3d"),
       "useStickyTableHeader must perform hardware-accelerated translations"
     );
+    assert.ok(
+      hookCode.includes("requestAnimationFrame"),
+      "useStickyTableHeader must batch scroll-driven position updates per animation frame"
+    );
+    assert.ok(
+      hookCode.includes("--app-header-height"),
+      "useStickyTableHeader must use the synchronized app header height"
+    );
   });
 });

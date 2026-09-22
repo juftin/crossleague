@@ -284,3 +284,9 @@ a {
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 1px 0 0 rgba(30, 41, 59, 0.8);
 }
+
+.sticky-table-header {
+  position: relative;
+  z-index: 20;
+  will-change: transform;
+}

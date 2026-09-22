@@ -14,35 +14,46 @@ export function useStickyTableHeader<T extends HTMLTableElement = HTMLTableEleme
     const thead = table.querySelector("thead");
     if (!thead) return;
 
-    const updateStickyPosition = () => {
-      const headerEl = document.querySelector(".app-header");
-      const headerBottom = headerEl ? headerEl.getBoundingClientRect().bottom : 0;
-      const rect = table.getBoundingClientRect();
-      const theadHeight = thead.offsetHeight;
-      const maxTranslate = Math.max(0, rect.height - theadHeight);
+    let animationFrameId: number | null = null;
+    let previousTransform = "";
 
-      if (rect.top < headerBottom) {
-        const diff = headerBottom - rect.top;
-        const translateY = Math.min(diff, maxTranslate);
-        thead.style.transform = `translate3d(0, ${translateY}px, 0)`;
-        thead.style.position = "relative";
-        thead.style.zIndex = "20";
-      } else {
-        thead.style.transform = "translate3d(0, 0px, 0)";
+    const updateStickyPosition = () => {
+      const rect = table.getBoundingClientRect();
+      const headerHeight = Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--app-header-height")
+      );
+      const headerBottom = Number.isFinite(headerHeight) ? headerHeight : 0;
+      const maxTranslate = Math.max(0, rect.height - thead.offsetHeight);
+      const translateY = Math.max(0, Math.min(headerBottom - rect.top, maxTranslate));
+      const transform = `translate3d(0, ${translateY}px, 0)`;
+
+      if (transform !== previousTransform) {
+        thead.style.transform = transform;
+        previousTransform = transform;
       }
     };
 
-    updateStickyPosition();
-    window.addEventListener("scroll", updateStickyPosition, { passive: true });
-    window.addEventListener("resize", updateStickyPosition, { passive: true });
+    const scheduleStickyPositionUpdate = () => {
+      if (animationFrameId !== null) return;
 
-    const ro = new ResizeObserver(updateStickyPosition);
+      animationFrameId = window.requestAnimationFrame(() => {
+        animationFrameId = null;
+        updateStickyPosition();
+      });
+    };
+
+    updateStickyPosition();
+    window.addEventListener("scroll", scheduleStickyPositionUpdate, { passive: true });
+    window.addEventListener("resize", scheduleStickyPositionUpdate, { passive: true });
+
+    const ro = new ResizeObserver(scheduleStickyPositionUpdate);
     ro.observe(table);
 
     return () => {
-      window.removeEventListener("scroll", updateStickyPosition);
-      window.removeEventListener("resize", updateStickyPosition);
+      window.removeEventListener("scroll", scheduleStickyPositionUpdate);
+      window.removeEventListener("resize", scheduleStickyPositionUpdate);
       ro.disconnect();
+      if (animationFrameId !== null) window.cancelAnimationFrame(animationFrameId);
       thead.style.transform = "";
     };
   }, []);
