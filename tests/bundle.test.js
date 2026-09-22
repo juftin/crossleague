@@ -211,6 +211,10 @@ describe("Source & Bundle Integrity", () => {
     assert.ok(cssCode.includes(".table-scroll-container"));
     assert.ok(cssCode.includes("overflow-x: auto"));
     assert.ok(hookCode.includes("translate3d"));
+    assert.ok(
+      hookCode.includes("devicePixelRatio"),
+      "useStickyTableHeader must align transforms to physical pixels"
+    );
     assert.match(
       hookCode,
       /addEventListener\("scroll", updateStickyPosition, \{ passive: true \}\)/,

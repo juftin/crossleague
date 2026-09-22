@@ -25,7 +25,9 @@ export function useStickyTableHeader<T extends HTMLTableElement = HTMLTableEleme
       const headerBottom = Number.isFinite(headerHeight) ? headerHeight : 0;
       const maxTranslate = Math.max(0, rect.height - thead.offsetHeight);
       const translateY = Math.max(0, Math.min(headerBottom - rect.top, maxTranslate));
-      const transform = `translate3d(0, ${translateY}px, 0)`;
+      const devicePixelRatio = window.devicePixelRatio || 1;
+      const pixelAlignedTranslateY = Math.round(translateY * devicePixelRatio) / devicePixelRatio;
+      const transform = `translate3d(0, ${pixelAlignedTranslateY}px, 0)`;
 
       if (transform !== previousTransform) {
         thead.style.transform = transform;
