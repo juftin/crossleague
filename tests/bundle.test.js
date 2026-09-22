@@ -211,7 +211,11 @@ describe("Source & Bundle Integrity", () => {
     assert.ok(cssCode.includes(".table-scroll-container"));
     assert.ok(cssCode.includes("overflow-x: auto"));
     assert.ok(hookCode.includes("translate3d"));
-    assert.ok(hookCode.includes("requestAnimationFrame"));
+    assert.match(
+      hookCode,
+      /addEventListener\("scroll", updateStickyPosition, \{ passive: true \}\)/,
+      "useStickyTableHeader must update synchronously with scrolling"
+    );
     assert.ok(hookCode.includes("--app-header-height"));
   });
 });

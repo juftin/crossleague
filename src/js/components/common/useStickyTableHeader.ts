@@ -43,14 +43,14 @@ export function useStickyTableHeader<T extends HTMLTableElement = HTMLTableEleme
     };
 
     updateStickyPosition();
-    window.addEventListener("scroll", scheduleStickyPositionUpdate, { passive: true });
+    window.addEventListener("scroll", updateStickyPosition, { passive: true });
     window.addEventListener("resize", scheduleStickyPositionUpdate, { passive: true });
 
     const ro = new ResizeObserver(scheduleStickyPositionUpdate);
     ro.observe(table);
 
     return () => {
-      window.removeEventListener("scroll", scheduleStickyPositionUpdate);
+      window.removeEventListener("scroll", updateStickyPosition);
       window.removeEventListener("resize", scheduleStickyPositionUpdate);
       ro.disconnect();
       if (animationFrameId !== null) window.cancelAnimationFrame(animationFrameId);
