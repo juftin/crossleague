@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect } from "react";
 import { useCrossLeagueStore, useActiveRecords } from "../../state/useCrossLeagueStore.js";
 import { aggregatePlayers } from "../../analytics/aggregation.js";
+import { compareScoringSettings } from "../../analytics/scoringSettings.js";
 import { getPlayerInfo, initPlayersDb } from "../../api/players.js";
 import { useStickyTableHeader } from "../common/useStickyTableHeader.ts";
 import {
@@ -47,12 +48,18 @@ export const PlayersTab: React.FC = () => {
   const setPlayerPageSize = useCrossLeagueStore(s => s.setPlayerPageSize);
   const expandedPlayerIds = useCrossLeagueStore(s => s.expandedPlayerIds);
   const togglePlayerRowExpand = useCrossLeagueStore(s => s.togglePlayerRowExpand);
+  const leaguesMap = useCrossLeagueStore(s => s.leaguesMap);
+  const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
 
   useEffect(() => {
     initPlayersDb();
   }, []);
 
   const isSeason = mode === "SEASON_ROLLUP";
+  const hasScoringMismatch = useMemo(
+    () => compareScoringSettings(leaguesMap, selectedLeagueIds).hasMismatch,
+    [leaguesMap, selectedLeagueIds]
+  );
 
   const allPlayers = useMemo<any[]>(() => {
     return aggregatePlayers(records, isSeason, week, getPlayerInfo);
@@ -207,6 +214,21 @@ export const PlayersTab: React.FC = () => {
 
   return (
     <div id="viewPlayers" className="w-full space-y-6">
+      {hasScoringMismatch && (
+        <div
+          id="playerScoreScopeDisclaimer"
+          className="flex items-start gap-3 rounded-2xl border border-cyan-500/25 bg-cyan-500/10 p-4 text-sm text-cyan-50"
+        >
+          <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-300" />
+          <p className="leading-relaxed">
+            {isSeason
+              ? "Season Avg PPG aggregates recorded season scores from selected leagues; it is not a normalized cross-league metric."
+              : "Weekly player points show one league's score—when a player appears in multiple selected leagues, CrossLeague uses that player's highest score rather than adding scores together."}{" "}
+            Ownership and start rates still reflect every selected league.
+          </p>
+        </div>
+      )}
+
       {/* Positional MVP Spotlight Cards */}
       <div>
         <div className="mb-3.5 flex items-center justify-between">

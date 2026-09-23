@@ -65,6 +65,7 @@ export interface LeagueInfo {
   avatar?: string;
   totalRosters: number;
   scoringType?: string;
+  scoringSettings?: Record<string, unknown> | unknown[];
   sport?: string;
   season?: string | number;
   status?: string;

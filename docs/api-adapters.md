@@ -32,6 +32,9 @@ export function getAvatarUrl(avatarId) {
 }
 ```
 
+CrossLeague retains each league's `scoring_settings` payload so selected Sleeper leagues can be
+checked for scoring-rule mismatches. ESPN uses `settings.scoringSettings` for the same purpose.
+
 ---
 
 ## 🛡️ ESPN Fantasy API Integration

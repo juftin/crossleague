@@ -9,6 +9,7 @@ import { LeagueGridTab } from "./tabs/LeagueGridTab.tsx";
 import { LuckTab } from "./tabs/LuckTab.tsx";
 import { PlayersTab } from "./tabs/PlayersTab.tsx";
 import { LuckModal } from "./modals/LuckModal.tsx";
+import { ScoringSettingsModal } from "./modals/ScoringSettingsModal.tsx";
 import { ToastContainer } from "./common/Toast.tsx";
 import { MobileBottomNav } from "./common/MobileBottomNav.tsx";
 import { BrandBoltIcon } from "./common/BrandBoltIcon.tsx";
@@ -18,6 +19,7 @@ import { BASE_URL, HASH_TAB_MAP } from "../state/constants.js";
 import { cachedApiFetch } from "../state/cache.js";
 import { getMaxPlayedWeek } from "../state/preferences.js";
 import { initPlayersDb } from "../api/players.js";
+import { compareScoringSettings } from "../analytics/scoringSettings.js";
 
 export const App: React.FC = () => {
   const activeTab = useCrossLeagueStore(s => s.activeTab);
@@ -47,6 +49,14 @@ export const App: React.FC = () => {
   const openSettingsModal = useCrossLeagueStore(s => s.openSettingsModal);
   const rawRecords = useCrossLeagueStore(s => s.rawRecords);
   const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
+  const leaguesMap = useCrossLeagueStore(s => s.leaguesMap);
+  const scoringComparison = React.useMemo(
+    () => compareScoringSettings(leaguesMap, selectedLeagueIds),
+    [leaguesMap, selectedLeagueIds]
+  );
+  const [dismissedScoringWarning, setDismissedScoringWarning] = React.useState("");
+  const isScoringWarningOpen =
+    scoringComparison.hasMismatch && dismissedScoringWarning !== scoringComparison.signature;
 
   const isInitializedRef = React.useRef(false);
   const prevParamsRef = React.useRef<{ week?: number; season?: number; mode?: string }>({});
@@ -398,6 +408,11 @@ export const App: React.FC = () => {
 
       {/* Global Modals & Controls */}
       <LuckModal />
+      <ScoringSettingsModal
+        isOpen={isScoringWarningOpen}
+        leagues={scoringComparison.leagues}
+        onClose={() => setDismissedScoringWarning(scoringComparison.signature)}
+      />
       <ToastContainer />
       <MobileBottomNav />
     </div>

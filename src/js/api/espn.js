@@ -482,6 +482,7 @@ export async function fetchEspnLeague(rawId, season, targetWeek, mode) {
         name: lname,
         avatar: lavatar,
         total_rosters: rosterCount,
+        scoringSettings: leagueObj.settings?.scoringSettings || {},
         platform: "espn"
       },
       records
@@ -685,6 +686,7 @@ export async function fetchEspnLeague(rawId, season, targetWeek, mode) {
       name: lname,
       avatar: lavatar,
       total_rosters: rosterCount,
+      scoringSettings: leagueObj.settings?.scoringSettings || {},
       platform: "espn"
     },
     records: weekRecords
