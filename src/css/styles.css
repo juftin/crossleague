@@ -447,11 +447,6 @@ a {
   -webkit-overflow-scrolling: touch;
 }
 
-.sticky-table-header {
-  position: relative;
-  z-index: 20;
-}
-
 .sticky-table-overlay {
   position: fixed;
   top: var(--app-header-height);

@@ -210,10 +210,19 @@ describe("Source & Bundle Integrity", () => {
 
     assert.ok(cssCode.includes(".table-scroll-container"));
     assert.ok(cssCode.includes("overflow-x: auto"));
-    assert.ok(cssCode.includes("position: fixed"));
+    assert.match(
+      cssCode,
+      /\.sticky-table-overlay\s*\{[^}]*position: fixed;[^}]*top: var\(--app-header-height\);/,
+      "the fixed header must sit below the app header"
+    );
     assert.ok(hookCode.includes("document.body.append(overlay)"));
     assert.ok(hookCode.includes("scrollContainer.scrollLeft"));
     assert.ok(hookCode.includes("forwardSort"));
     assert.ok(hookCode.includes("--app-header-height"));
+    assert.doesNotMatch(
+      hookCode,
+      /translate3d|style\.transform/,
+      "scrolling must not move the header"
+    );
   });
 });
