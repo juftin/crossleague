@@ -64,6 +64,27 @@ function buildSnapshotHtmlPages() {
     </script>
   `;
 
+  const seasonReport = {
+    ...mockEmbeddedReport,
+    mode: "SEASON_ROLLUP",
+    records: mockEmbeddedReport.records.map(record => {
+      const weeklyScores = [
+        record.points - 14,
+        record.points - 5,
+        record.points + 7,
+        record.points - 8,
+        record.points + 4,
+        record.points
+      ];
+      return {
+        ...record,
+        points: weeklyScores.reduce((sum, points) => sum + points, 0) / weeklyScores.length,
+        weeklyScores,
+        weeklyPlayerRecords: weeklyScores.map((_, index) => ({ week: index + 1 }))
+      };
+    })
+  };
+
   const scenarios = [
     {
       id: "empty-state",
@@ -83,6 +104,11 @@ function buildSnapshotHtmlPages() {
     {
       id: "visuals",
       embeddedData: mockEmbeddedReport,
+      actionScript: "window.switchTab('visuals', false);"
+    },
+    {
+      id: "visuals-season",
+      embeddedData: seasonReport,
       actionScript: "window.switchTab('visuals', false);"
     },
     {

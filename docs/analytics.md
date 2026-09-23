@@ -13,6 +13,7 @@ This document provides complete mathematical formulations, algorithm definitions
 - [5. Cross-League Outcome Superlatives](#5-cross-league-outcome-superlatives)
 - [6. Player Exposure & Positional MVPs](#6-player-exposure--positional-mvps)
 - [7. Power Rankings & Tiebreaker Sorting](#7-power-rankings--tiebreaker-sorting)
+- [8. Season Pulse](#8-season-pulse)
 
 ---
 
@@ -182,3 +183,11 @@ Universal leaderboard and all-play rankings are sorted deterministically:
 1. **Primary Sort**: All-Play Win Percentage (`allPlayWinPct`) descending.
 2. **Secondary Tiebreaker**: Total Points Scored (`totalPoints` or `points`) descending.
 3. **Tertiary Tiebreaker**: Head-to-Head Win Count (`wins`) descending.
+
+---
+
+## 8. Season Pulse
+
+Season Pulse pairs each season rollup score in `weeklyScores` with the week number in the corresponding `weeklyPlayerRecords` entry. Missing or unplayed weeks remain gaps in the squad line. The league benchmark for a week is the arithmetic mean of completed scores from squads in that same league; other leagues never contribute.
+
+The highlights report the selected squad's highest and lowest completed weekly scores. Recent form is the average of its last three completed weeks minus its average across all completed weeks. Recent form is unavailable until three completed weeks exist.

@@ -6,6 +6,7 @@ import {
   useActiveLeaguesMap
 } from "../../state/useCrossLeagueStore.js";
 import { renderCharts } from "../charts.js";
+import { SeasonPulse } from "./SeasonPulse.tsx";
 
 export const VisualsTab: React.FC = () => {
   const records = useActiveRecords();
@@ -22,6 +23,7 @@ export const VisualsTab: React.FC = () => {
 
   return (
     <div id="viewVisuals" className="w-full space-y-6">
+      <SeasonPulse />
       <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Score Distribution Histogram */}
         <div className="glass-card space-y-4 rounded-2xl border border-slate-800 p-6">

@@ -26,6 +26,7 @@ When tasked with specific features, fixes, or refactors, consult these technical
 | Topic / Domain                                              | Reference Documentation                                    | Primary Source Directory                      | Key Test File                      |
 | :---------------------------------------------------------- | :--------------------------------------------------------- | :-------------------------------------------- | :--------------------------------- |
 | **All-Play, Expected Wins, Luck Index, Efficiency, StdDev** | [`docs/analytics.md`](docs/analytics.md)                   | `src/js/analytics/`                           | `tests/analytics.test.js`          |
+| **Season Pulse, Weekly Scores, Recent Form**                | [`docs/analytics.md`](docs/analytics.md)                   | `src/js/analytics/seasonPulse.js`             | `tests/season-pulse.test.js`       |
 | **Sleeper & ESPN APIs, Slot Mappings, Roster Parsers**      | [`docs/api-adapters.md`](docs/api-adapters.md)             | `src/js/api/`, `src/js/services/`             | `tests/espn.test.js`               |
 | **Zustand State Store, LocalStorage, TTL Caching**          | [`docs/state-and-caching.md`](docs/state-and-caching.md)   | `src/js/state/`                               | `tests/cache.test.js`              |
 | **URL Search Params, Aliases, Deep Linking**                | [`docs/url-parameters.md`](docs/url-parameters.md)         | `src/js/state/urlParams.js`                   | `tests/share.test.js`              |

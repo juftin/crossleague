@@ -83,6 +83,7 @@ graph TD
 
 ### 6. Interactive Charts (`VisualsTab.tsx`, `charts.js`)
 
+- **Season Pulse**: In Season-to-Date mode, a squad selector and two-line chart compare weekly scores with the selected squad's league average. Best week, worst week, and three-week recent form appear below. Weekly mode offers a control to switch modes.
 - **Score Distribution Chart**: Histogram of scores grouped into statistical bins.
 - **League Scoring Comparison**: Bar chart comparing Average Points Per Game (Avg PPG) across all leagues.
 - Retains imperative Chart.js canvas renderers integrated via React `useEffect` refs, with theme-aware canvas text, grid, legend, and tooltip colors.

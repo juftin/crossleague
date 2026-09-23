@@ -53,6 +53,7 @@ Whether you manage 2 leagues or 20, CrossLeague normalizes scoring across league
   - **Bench Heavyweight 🪑**: Team leaving the most points on their bench.
   - **Lineup Efficiency %**: Measures managerial coaching performance ($\frac{\text{Actual Score}}{\text{Optimal Score}} \times 100$).
 - **📊 Interactive Chart Visualizations**:
+  - Season Pulse compares a squad's weekly scores with its league average and highlights best, worst, and recent form.
   - Score distribution histograms grouped into statistical scoring bins.
   - League scoring averages and competitiveness comparisons powered by Chart.js.
 - **📈 Season-to-Date Rollup Mode**:
@@ -89,6 +90,10 @@ Whether you manage 2 leagues or 20, CrossLeague normalizes scoring across league
 ### Interactive Scoring Visualizations
 
 ![Scoring Visualizations](snapshots/visuals.png)
+
+### Season Pulse
+
+![Season Pulse](snapshots/visuals-season.png)
 
 </div>
 
