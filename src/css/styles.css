@@ -450,7 +450,13 @@ a {
 .sticky-table-header {
   position: relative;
   z-index: 20;
-  will-change: transform;
+}
+
+.sticky-table-overlay {
+  position: fixed;
+  top: var(--app-header-height);
+  z-index: 30;
+  overflow: hidden;
 }
 
 .sticky-table-header th {
