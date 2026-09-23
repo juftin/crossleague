@@ -191,4 +191,38 @@ describe("Source & Bundle Integrity", () => {
       "A custom .hidden rule would override responsive utilities such as md:block"
     );
   });
+
+  it("should apply sticky table headers to all tabs containing tables", () => {
+    const tableTabs = ["LeaderboardTab.tsx", "LuckTab.tsx", "PlayersTab.tsx"];
+    const cssCode = fs.readFileSync(path.join(rootDir, "src", "css", "styles.css"), "utf8");
+    const hookCode = fs.readFileSync(
+      path.join(rootDir, "src", "js", "components", "common", "useStickyTableHeader.ts"),
+      "utf8"
+    );
+
+    for (const tab of tableTabs) {
+      const tabCode = fs.readFileSync(
+        path.join(rootDir, "src", "js", "components", "tabs", tab),
+        "utf8"
+      );
+      assert.ok(tabCode.includes("useStickyTableHeader"), `${tab} must use the sticky header hook`);
+    }
+
+    assert.ok(cssCode.includes(".table-scroll-container"));
+    assert.ok(cssCode.includes("overflow-x: auto"));
+    assert.match(
+      cssCode,
+      /\.sticky-table-overlay\s*\{[^}]*position: fixed;[^}]*top: var\(--app-header-height\);/,
+      "the fixed header must sit below the app header"
+    );
+    assert.ok(hookCode.includes("document.body.append(overlay)"));
+    assert.ok(hookCode.includes("scrollContainer.scrollLeft"));
+    assert.ok(hookCode.includes("forwardSort"));
+    assert.ok(hookCode.includes("--app-header-height"));
+    assert.doesNotMatch(
+      hookCode,
+      /translate3d|style\.transform/,
+      "scrolling must not move the header"
+    );
+  });
 });

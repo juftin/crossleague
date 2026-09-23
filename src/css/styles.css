@@ -43,6 +43,28 @@
   }
 }
 
+:root {
+  --app-header-height: 4rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --app-header-height: 6rem;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --app-header-height: 11rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --app-header-height: 9rem;
+  }
+}
+
 html,
 body {
   font-family: "Plus Jakarta Sans", sans-serif;
@@ -417,4 +439,24 @@ a {
   background: rgba(0, 206, 184, 0.15);
   color: #2dd4bf;
   border: 1px solid rgba(0, 206, 184, 0.35);
+}
+
+/* Sticky Table Headers & Horizontal Scroll Containers */
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sticky-table-overlay {
+  position: fixed;
+  top: var(--app-header-height);
+  z-index: 30;
+  overflow: hidden;
+}
+
+.sticky-table-header th {
+  background-color: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 0 rgba(30, 41, 59, 0.8);
 }
