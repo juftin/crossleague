@@ -91,8 +91,8 @@ export const AwardsTab: React.FC = () => {
                     icon={<HeartCrack className="h-3.5 w-3.5 flex-shrink-0 text-rose-400" />}
                     infoText={
                       isSeason
-                        ? "Highest scoring squad across all leagues that suffered a losing overall record."
-                        : "Highest scoring squad across all leagues that still took a loss in their matchup this week."
+                        ? "Highest scoring squad that suffered a losing overall record."
+                        : "Highest scoring squad that still took a loss in their matchup this week."
                     }
                     badgeClasses="text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-500/30 hover:border-rose-400/70"
                   />
@@ -143,8 +143,8 @@ export const AwardsTab: React.FC = () => {
                   icon={<HeartCrack className="h-3.5 w-3.5 flex-shrink-0 text-rose-400" />}
                   infoText={
                     isSeason
-                      ? "Highest scoring squad across all leagues that suffered a losing overall record."
-                      : "Highest scoring squad across all leagues that still took a loss in their matchup this week."
+                      ? "Highest scoring squad that suffered a losing overall record."
+                      : "Highest scoring squad that still took a loss in their matchup this week."
                   }
                   badgeClasses="text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700"
                 />
@@ -170,8 +170,8 @@ export const AwardsTab: React.FC = () => {
                     icon={<Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400" />}
                     infoText={
                       isSeason
-                        ? "Lowest scoring squad across all leagues that maintained a winning record."
-                        : "Lowest-scoring squad across all leagues that managed to win their matchup this week."
+                        ? "Lowest scoring squad that maintained a winning record."
+                        : "Lowest-scoring squad that managed to win their matchup this week."
                     }
                     badgeClasses="text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400/70"
                   />
@@ -224,8 +224,8 @@ export const AwardsTab: React.FC = () => {
                   icon={<Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400" />}
                   infoText={
                     isSeason
-                      ? "Lowest scoring squad across all leagues that maintained a winning record."
-                      : "Lowest-scoring squad across all leagues that managed to win their matchup this week."
+                      ? "Lowest scoring squad that maintained a winning record."
+                      : "Lowest-scoring squad that managed to win their matchup this week."
                   }
                   badgeClasses="text-xs font-black uppercase tracking-wider text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700"
                 />

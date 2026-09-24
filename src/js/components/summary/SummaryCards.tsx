@@ -45,27 +45,31 @@ export const SummaryCards: React.FC = () => {
   });
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+    <div
+      className={`grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 ${totalActiveLeagues > 1 ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}
+    >
       {/* 1. Leagues & Squads */}
       <div className="glass-card glass-card-hover relative flex flex-col justify-between rounded-2xl border border-slate-800/80 p-5">
         <div>
           <div className="flex items-center justify-between">
             <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
-              Leagues &amp; Squads
+              {totalActiveLeagues === 1 ? "League Squads" : "Leagues & Squads"}
             </span>
             <Building2 className="h-4 w-4 text-slate-400" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <div className="flex items-baseline gap-1">
-              <span
-                id="statTotalLeagues"
-                className="font-mono text-2xl font-black text-white sm:text-3xl lg:text-4xl"
-              >
-                {totalActiveLeagues}
-              </span>
-              <span className="text-xs font-bold text-slate-400 uppercase">Leagues</span>
-            </div>
-            <span className="font-black text-slate-600">•</span>
+            {totalActiveLeagues !== 1 && (
+              <div className="flex items-baseline gap-1">
+                <span
+                  id="statTotalLeagues"
+                  className="font-mono text-2xl font-black text-white sm:text-3xl lg:text-4xl"
+                >
+                  {totalActiveLeagues}
+                </span>
+                <span className="text-xs font-bold text-slate-400 uppercase">Leagues</span>
+              </div>
+            )}
+            {totalActiveLeagues !== 1 && <span className="font-black text-slate-600">•</span>}
             <div className="flex items-baseline gap-1">
               <span
                 id="statTotalTeams"
@@ -78,7 +82,9 @@ export const SummaryCards: React.FC = () => {
           </div>
         </div>
         <div className="mt-2 border-t border-slate-800/60 pt-2">
-          <div className="text-xs font-semibold text-slate-500">Active in filter</div>
+          <div className="text-xs font-semibold text-slate-500">
+            {totalActiveLeagues === 1 ? "In this league" : "Active in filter"}
+          </div>
         </div>
       </div>
 
@@ -183,47 +189,49 @@ export const SummaryCards: React.FC = () => {
             Median: {medianPts.toFixed(2)} pts
           </div>
           <div className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
-            Cross-league average
+            {totalActiveLeagues === 1 ? "League average" : "Cross-league average"}
           </div>
         </div>
       </div>
 
       {/* 5. Power League */}
-      <div className="glass-card glass-card-hover relative flex flex-col justify-between rounded-2xl border border-slate-800/80 p-5">
-        <div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
-              Power League
-            </span>
-            <Crown className="h-4 w-4 text-amber-400" />
+      {totalActiveLeagues > 1 && (
+        <div className="glass-card glass-card-hover relative flex flex-col justify-between rounded-2xl border border-slate-800/80 p-5">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black tracking-wider text-slate-400 uppercase">
+                Power League
+              </span>
+              <Crown className="h-4 w-4 text-amber-400" />
+            </div>
+            <div
+              id="statTopLeagueAvg"
+              className="mt-2 font-mono text-3xl font-black text-amber-400 sm:text-4xl"
+            >
+              {topLeagueAvg > 0 ? topLeagueAvg.toFixed(2) : "0.00"}
+            </div>
           </div>
-          <div
-            id="statTopLeagueAvg"
-            className="mt-2 font-mono text-3xl font-black text-amber-400 sm:text-4xl"
-          >
-            {topLeagueAvg > 0 ? topLeagueAvg.toFixed(2) : "0.00"}
+          <div className="mt-2 border-t border-slate-800/60 pt-2">
+            <div
+              id="statTopLeagueName"
+              className="flex items-center gap-1 truncate text-xs font-bold text-slate-200 sm:text-sm"
+              title={topLeagueAvg > 0 ? topLeagueName : ""}
+            >
+              {topLeagueAvg > 0 ? (
+                <>
+                  <Trophy className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
+                  <span className="truncate">{topLeagueName}</span>
+                </>
+              ) : (
+                "-"
+              )}
+            </div>
+            <div className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
+              Highest league average
+            </div>
           </div>
         </div>
-        <div className="mt-2 border-t border-slate-800/60 pt-2">
-          <div
-            id="statTopLeagueName"
-            className="flex items-center gap-1 truncate text-xs font-bold text-slate-200 sm:text-sm"
-            title={topLeagueAvg > 0 ? topLeagueName : ""}
-          >
-            {topLeagueAvg > 0 ? (
-              <>
-                <Trophy className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
-                <span className="truncate">{topLeagueName}</span>
-              </>
-            ) : (
-              "-"
-            )}
-          </div>
-          <div className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
-            Highest league average
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

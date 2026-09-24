@@ -10,14 +10,18 @@ import {
   ChevronRight
 } from "lucide-react";
 import { BrandBoltIcon } from "../common/BrandBoltIcon.tsx";
-import { useCrossLeagueStore, useActiveRecords } from "../../state/useCrossLeagueStore.js";
+import {
+  useCrossLeagueStore,
+  useActiveRecords,
+  useActiveLeaguesMap
+} from "../../state/useCrossLeagueStore.js";
 import { getAvatarUrl } from "../../api/sleeper.js";
 import { useStickyTableHeader } from "../common/useStickyTableHeader.ts";
 
 export const LeaderboardTab: React.FC = () => {
   const tableRef = useStickyTableHeader();
   const records = useActiveRecords();
-  const selectedLeagueIds = useCrossLeagueStore(s => s.selectedLeagueIds);
+  const activeLeagueCount = Object.keys(useActiveLeaguesMap()).length;
   const mode = useCrossLeagueStore(s => s.mode);
   const searchQuery = useCrossLeagueStore(s => s.searchQuery);
   const setSearchQuery = useCrossLeagueStore(s => s.setSearchQuery);
@@ -203,7 +207,7 @@ export const LeaderboardTab: React.FC = () => {
           <span id="rowCount">
             {records.length === 0
               ? "Showing 0 squads"
-              : `Showing ${rankedRecords.length} of ${records.length} squads across ${selectedLeagueIds.size} leagues`}
+              : `Showing ${rankedRecords.length} of ${records.length} squads${activeLeagueCount === 1 ? " in this league" : ` across ${activeLeagueCount} leagues`}`}
           </span>
         </div>
 
@@ -685,12 +689,12 @@ export const LeaderboardTab: React.FC = () => {
           <div id="noResultsFound" className="space-y-2 py-12 text-center text-slate-400">
             <Search className="mx-auto mb-2 h-8 w-8 text-slate-500" />
             <div className="font-bold text-slate-200">
-              {selectedLeagueIds.size === 0
+              {activeLeagueCount === 0
                 ? "No leagues selected."
                 : "Nothing on the board matching that search."}
             </div>
             <div className="text-xs text-slate-500">
-              {selectedLeagueIds.size === 0
+              {activeLeagueCount === 0
                 ? "Select one or more leagues in the filter bar above to display rankings."
                 : "Try clearing the keyword search or resetting filters."}
             </div>

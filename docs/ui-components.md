@@ -61,6 +61,7 @@ graph TD
 ### 2. Fixed Header & Controls (`src/js/components/header/Header.tsx`)
 
 - Contains the theme-aware brand logo and favicon, platform indicator (`#headerPlatformBadge`), and season badge.
+- When exactly one league is active, shows its name beneath the brand and in the league selector; otherwise the brand tagline and league count remain visible.
 - Houses the **WeekNavigator**, **LeagueDropdown**, Sync button, Share button, and Settings dropdown menu.
 - Hosts the desktop navigation tab bar.
 
@@ -68,6 +69,7 @@ graph TD
 
 - Renders the Top-3 gold, silver, and bronze squad cards.
 - Displays the multi-league rankings table with expandable starting lineup details.
+- With one active league, uses league-specific labels and omits the Power League card and league-comparison chart.
 - Supports multi-column sorting (Points, All-Play Win %, Luck, Optimal Points) and client-side pagination.
 
 ### 4. Schedule Luck & Expected Wins (`LuckTab.tsx`, `LuckModal.tsx`)
@@ -85,5 +87,6 @@ graph TD
 
 - **Score Distribution Chart**: Histogram of scores grouped into statistical bins.
 - **League Scoring Comparison**: Bar chart comparing Average Points Per Game (Avg PPG) across all leagues.
+- The league scoring comparison is hidden when only one league is active; the score distribution remains available.
 - Retains imperative Chart.js canvas renderers integrated via React `useEffect` refs, with theme-aware canvas text, grid, legend, and tooltip colors.
 - Shared chart-help popovers use a high-contrast white surface in light mode and a slate surface in dark mode.

@@ -76,6 +76,11 @@ function buildSnapshotHtmlPages() {
       actionScript: "window.switchTab('awards', false);"
     },
     {
+      id: "single-league-awards",
+      embeddedData: { ...mockEmbeddedReport, selectedLeagueIds: ["league_dynasty"] },
+      actionScript: "window.switchTab('awards', false);"
+    },
+    {
       id: "leaderboard",
       embeddedData: mockEmbeddedReport,
       actionScript: "window.switchTab('leaderboard', false);"
@@ -83,6 +88,11 @@ function buildSnapshotHtmlPages() {
     {
       id: "visuals",
       embeddedData: mockEmbeddedReport,
+      actionScript: "window.switchTab('visuals', false);"
+    },
+    {
+      id: "single-league-visuals",
+      embeddedData: { ...mockEmbeddedReport, selectedLeagueIds: ["league_dynasty"] },
       actionScript: "window.switchTab('visuals', false);"
     },
     {
