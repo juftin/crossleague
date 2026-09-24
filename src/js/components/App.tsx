@@ -12,6 +12,7 @@ import { LuckModal } from "./modals/LuckModal.tsx";
 import { ToastContainer } from "./common/Toast.tsx";
 import { MobileBottomNav } from "./common/MobileBottomNav.tsx";
 import { BrandBoltIcon } from "./common/BrandBoltIcon.tsx";
+import { GithubIcon } from "./common/GithubIcon.tsx";
 import { syncData } from "../services/syncService.js";
 import { getUrlParams, extractCustomLeagueIds, updateUrlParams } from "../state/urlParams.js";
 import { BASE_URL, HASH_TAB_MAP } from "../state/constants.js";
@@ -388,11 +389,20 @@ export const App: React.FC = () => {
 
       {/* Footer (Full-Width Fluid) */}
       <footer className="mt-auto w-full border-t border-slate-900 bg-slate-950/80 py-7 text-center text-sm text-slate-500">
-        <div className="flex w-full flex-col items-center justify-center gap-3 px-4 text-center sm:flex-row sm:px-8 lg:px-12">
+        <div className="flex w-full flex-col items-center justify-between gap-3 px-4 text-center sm:flex-row sm:px-8 lg:px-12">
           <div className="inline-flex items-center gap-1.5 font-semibold text-slate-400">
             <BrandBoltIcon className="h-4 w-4 text-emerald-400" />
             <span>CrossLeague • Fantasy Football Power Rankings</span>
           </div>
+          <a
+            href="https://github.com/juftin/crossleague"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 font-semibold text-slate-400 transition hover:text-white"
+          >
+            <GithubIcon className="h-4 w-4" />
+            <span>Free and Open Source</span>
+          </a>
         </div>
       </footer>
 
