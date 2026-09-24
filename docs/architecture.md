@@ -95,7 +95,7 @@ crossleague/
 │   ├── ui-components.md      # React components, tables, charts, and styling
 │   ├── export-and-sharing.md # Chat recap, CSV, and shareable URLs
 │   └── development.md        # Local development, testing, and CI/CD
-├── snapshots/                # Visual regression baseline PNG snapshots (11 files)
+├── snapshots/                # Visual regression baseline PNG snapshots (18 files)
 ├── scripts/
 │   └── generate-snapshots.js # Automated Chrome headless visual snapshot generator
 ├── src/

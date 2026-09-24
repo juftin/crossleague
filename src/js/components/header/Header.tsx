@@ -173,6 +173,13 @@ export const Header: React.FC = () => {
   const totalLeaguesCount = leagueEntries.length;
   const selectedCount =
     selectedLeagueIds.length === 0 ? totalLeaguesCount : selectedLeagueIds.length;
+  const singleLeague =
+    selectedCount === 1
+      ? leagueEntries.find(
+          ([id]) => selectedLeagueIds.length === 0 || selectedLeagueIds.includes(id)
+        )
+      : undefined;
+  const singleLeagueName = singleLeague?.[1]?.name || singleLeague?.[0];
 
   const activeDraftLeagues = draftPlatform === "espn" ? draftEspnLeagues : draftSleeperLeagues;
 
@@ -320,8 +327,11 @@ export const Header: React.FC = () => {
                 CrossLeague
               </h1>
             </div>
-            <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400 sm:text-sm">
-              Every league. Every squad. One board.
+            <p
+              className={`mt-0.5 truncate text-[11px] font-semibold sm:text-sm ${singleLeagueName ? "text-emerald-400" : "text-slate-400"}`}
+              title={singleLeagueName}
+            >
+              {singleLeagueName || "Every league. Every squad. One board."}
             </p>
           </div>
         </div>
@@ -778,9 +788,11 @@ export const Header: React.FC = () => {
                       <span id="leagueDropdownLabel" className="truncate text-slate-200">
                         {totalLeaguesCount === 0
                           ? "No Leagues Loaded"
-                          : selectedCount === totalLeaguesCount
-                            ? "All Leagues Selected"
-                            : `${selectedCount} of ${totalLeaguesCount} Selected`}
+                          : singleLeagueName
+                            ? singleLeagueName
+                            : selectedCount === totalLeaguesCount
+                              ? "All Leagues Selected"
+                              : `${selectedCount} of ${totalLeaguesCount} Selected`}
                       </span>
                     </div>
                     <div className="flex flex-shrink-0 items-center gap-1.5">

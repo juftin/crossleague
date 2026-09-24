@@ -10,6 +10,7 @@ import { renderCharts } from "../charts.js";
 export const VisualsTab: React.FC = () => {
   const records = useActiveRecords();
   const activeLeagues = useActiveLeaguesMap();
+  const isSingleLeague = Object.keys(activeLeagues).length === 1;
   const mode = useCrossLeagueStore(s => s.mode);
   const theme = useCrossLeagueStore(s => s.theme);
 
@@ -22,7 +23,7 @@ export const VisualsTab: React.FC = () => {
 
   return (
     <div id="viewVisuals" className="w-full space-y-6">
-      <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className={`grid w-full grid-cols-1 gap-6 ${isSingleLeague ? "" : "lg:grid-cols-2"}`}>
         {/* Score Distribution Histogram */}
         <div className="glass-card space-y-4 rounded-2xl border border-slate-800 p-6">
           <div>
@@ -38,8 +39,7 @@ export const VisualsTab: React.FC = () => {
               </button>
               <div className="card-info-popover" role="tooltip">
                 <div className="text-[11px] leading-relaxed font-normal text-slate-200">
-                  Frequency histogram of squad scores grouped into 20-point scoring tiers across all
-                  active leagues.
+                  Frequency histogram of squad scores grouped into 20-point scoring tiers.
                 </div>
               </div>
             </div>
@@ -53,7 +53,9 @@ export const VisualsTab: React.FC = () => {
         </div>
 
         {/* League Scoring Power */}
-        <div className="glass-card space-y-4 rounded-2xl border border-slate-800 p-6">
+        <div
+          className={`glass-card space-y-4 rounded-2xl border border-slate-800 p-6 ${isSingleLeague ? "hidden" : ""}`}
+        >
           <div>
             <div className="card-info-wrapper group relative inline-block">
               <button

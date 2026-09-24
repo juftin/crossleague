@@ -76,7 +76,7 @@ task snapshots
 
 Snapshots are stored in `snapshots/`:
 
-- Desktop Viewports (1280x800): `leaderboard.png`, `luck.png`, `players.png`, `awards.png`, `visuals.png`, `leagues.png`, `luck-modal.png`, `settings-modal.png`, `empty-state.png`.
+- Desktop Viewports (1280x800): `leaderboard.png`, `luck.png`, `players.png`, `awards.png`, `single-league-awards.png`, `visuals.png`, `single-league-visuals.png`, `leagues.png`, `luck-modal.png`, `settings-modal.png`, `empty-state.png`.
 - Mobile Viewports (540x960): `mobile-leaderboard.png`, `mobile-awards.png`.
 
 ---

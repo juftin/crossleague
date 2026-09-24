@@ -1,5 +1,9 @@
 import React, { useMemo, useEffect } from "react";
-import { useCrossLeagueStore, useActiveRecords } from "../../state/useCrossLeagueStore.js";
+import {
+  useCrossLeagueStore,
+  useActiveRecords,
+  useActiveLeaguesMap
+} from "../../state/useCrossLeagueStore.js";
 import { aggregatePlayers } from "../../analytics/aggregation.js";
 import { getPlayerInfo, initPlayersDb } from "../../api/players.js";
 import { useStickyTableHeader } from "../common/useStickyTableHeader.ts";
@@ -28,6 +32,7 @@ import { BrandBoltIcon } from "../common/BrandBoltIcon.tsx";
 export const PlayersTab: React.FC = () => {
   const tableRef = useStickyTableHeader();
   const records = useActiveRecords();
+  const isSingleLeague = Object.keys(useActiveLeaguesMap()).length === 1;
   const mode = useCrossLeagueStore(s => s.mode);
   const week = useCrossLeagueStore(s => s.week);
   const sleeperPlayersDb = useCrossLeagueStore(s => s.sleeperPlayersDb);
@@ -388,10 +393,13 @@ export const PlayersTab: React.FC = () => {
         {/* Player Table Count & Meta */}
         <div className="flex items-center justify-between px-1 text-xs text-slate-400 sm:text-sm">
           <span id="playerRowCount">
-            Showing {totalCount} of {allPlayers.length} players across selected leagues
+            Showing {totalCount} of {allPlayers.length} players
+            {isSingleLeague ? " in this league" : " across selected leagues"}
           </span>
           <span className="text-xs text-slate-500 italic">
-            Click a player row to see owner breakdown across leagues
+            {isSingleLeague
+              ? "Click a player row to see rostered managers"
+              : "Click a player row to see owner breakdown across leagues"}
           </span>
         </div>
 
