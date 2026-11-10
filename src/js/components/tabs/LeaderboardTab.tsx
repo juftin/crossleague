@@ -102,8 +102,27 @@ export const LeaderboardTab: React.FC = () => {
           valB = ((b as any).league || b.leagueName || "").toLowerCase();
         } else if (sortColumn === "Record") {
           if (isSeason) {
-            valA = typeof a.winPct === "number" ? a.winPct : 0;
-            valB = typeof b.winPct === "number" ? b.winPct : 0;
+            const winsA = a.wins ?? (a as any).rawWins ?? 0;
+            const lossesA = a.losses ?? (a as any).rawLosses ?? 0;
+            const tiesA = a.ties ?? (a as any).rawTies ?? 0;
+            const totalA = winsA + lossesA + tiesA;
+            valA =
+              typeof a.winPct === "number"
+                ? a.winPct
+                : totalA > 0
+                  ? Math.round(((winsA + 0.5 * tiesA) / totalA) * 100)
+                  : 0;
+
+            const winsB = b.wins ?? (b as any).rawWins ?? 0;
+            const lossesB = b.losses ?? (b as any).rawLosses ?? 0;
+            const tiesB = b.ties ?? (b as any).rawTies ?? 0;
+            const totalB = winsB + lossesB + tiesB;
+            valB =
+              typeof b.winPct === "number"
+                ? b.winPct
+                : totalB > 0
+                  ? Math.round(((winsB + 0.5 * tiesB) / totalB) * 100)
+                  : 0;
           } else {
             valA =
               a.outcome === "win"
@@ -398,7 +417,16 @@ export const LeaderboardTab: React.FC = () => {
                 // Matchup Result Pill
                 let matchupPill = <span className="text-[10px] text-slate-600 sm:text-xs">-</span>;
                 if (isSeason) {
-                  const winPct = r.winPct || 0;
+                  const wins = r.wins ?? (r as any).rawWins ?? 0;
+                  const losses = r.losses ?? (r as any).rawLosses ?? 0;
+                  const ties = r.ties ?? (r as any).rawTies ?? 0;
+                  const totalG = wins + losses + ties;
+                  const winPct =
+                    typeof r.winPct === "number"
+                      ? r.winPct
+                      : totalG > 0
+                        ? Math.round(((wins + 0.5 * ties) / totalG) * 100)
+                        : 0;
                   const winClass =
                     winPct >= 60
                       ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
@@ -411,7 +439,7 @@ export const LeaderboardTab: React.FC = () => {
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[10px] font-black sm:px-3 sm:py-1 sm:text-xs ${winClass}`}
                       >
-                        {r.wins || 0}W - {r.losses || 0}L{(r.ties || 0) > 0 ? ` - ${r.ties}T` : ""}
+                        {wins}W - {losses}L{ties > 0 ? ` - ${ties}T` : ""}
                       </span>
                       <div className="mt-0.5 font-mono text-[10px] text-slate-400 sm:text-xs">
                         {winPct}% Win

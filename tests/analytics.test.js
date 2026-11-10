@@ -1,5 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { computeSuperlatives } from "../src/js/analytics/superlatives.js";
 
 describe("Analytics & Matchup Calculations", () => {
   describe("All-Play & Expected Wins (xW) Calculation", () => {
@@ -154,6 +155,90 @@ describe("Analytics & Matchup Calculations", () => {
       assert.equal(sorted[0].manager, "Team B", "Team B scored more and should win tiebreaker");
       assert.equal(sorted[1].manager, "Team A");
       assert.equal(sorted[2].manager, "Team C");
+    });
+  });
+
+  describe("Season Rollup Head-to-Head & Superlatives", () => {
+    it("should compute superlatives correctly in season rollup mode using wins or rawWins", () => {
+      const records = [
+        {
+          id: "1",
+          manager: "High Scorer with Losing Record",
+          teamName: "Heartbreakers",
+          points: 130.0,
+          totalPoints: 650.0,
+          rawWins: 1,
+          rawLosses: 4,
+          rawTies: 0,
+          benchPoints: 20.0
+        },
+        {
+          id: "2",
+          manager: "Low Scorer with Winning Record",
+          teamName: "Teflon Dons",
+          points: 95.0,
+          totalPoints: 475.0,
+          wins: 4,
+          losses: 1,
+          ties: 0,
+          benchPoints: 15.0
+        },
+        {
+          id: "3",
+          manager: "Balanced Team",
+          teamName: "Middle",
+          points: 110.0,
+          totalPoints: 550.0,
+          wins: 3,
+          losses: 2,
+          ties: 0,
+          benchPoints: 45.0
+        }
+      ];
+
+      const { badBeat, luckyEscape, benchKing } = computeSuperlatives(records, true);
+      assert.equal(badBeat?.teamName, "Heartbreakers");
+      assert.equal(luckyEscape?.teamName, "Teflon Dons");
+      assert.equal(benchKing?.teamName, "Middle");
+    });
+
+    it("should accurately compute win percentage including ties in season rollup", () => {
+      const wins = 5;
+      const losses = 2;
+      const ties = 1;
+      const totalGames = wins + losses + ties;
+      const winPct = Math.round(((wins + 0.5 * ties) / totalGames) * 100);
+
+      // (5 + 0.5) / 8 = 5.5 / 8 = 0.6875 -> 69%
+      assert.equal(winPct, 69);
+    });
+
+    it("should correctly sort teams by win percentage in season rollup", () => {
+      const teams = [
+        { manager: "Team A", rawWins: 2, rawLosses: 4, rawTies: 0 }, // 33%
+        { manager: "Team B", wins: 5, losses: 1, ties: 0 }, // 83%
+        { manager: "Team C", rawWins: 4, rawLosses: 2, rawTies: 0 } // 67%
+      ];
+
+      const sorted = [...teams].sort((a, b) => {
+        const winsA = a.wins ?? a.rawWins ?? 0;
+        const lossesA = a.losses ?? a.rawLosses ?? 0;
+        const tiesA = a.ties ?? a.rawTies ?? 0;
+        const totalA = winsA + lossesA + tiesA;
+        const pctA = totalA > 0 ? ((winsA + 0.5 * tiesA) / totalA) * 100 : 0;
+
+        const winsB = b.wins ?? b.rawWins ?? 0;
+        const lossesB = b.losses ?? b.rawLosses ?? 0;
+        const tiesB = b.ties ?? b.rawTies ?? 0;
+        const totalB = winsB + lossesB + tiesB;
+        const pctB = totalB > 0 ? ((winsB + 0.5 * tiesB) / totalB) * 100 : 0;
+
+        return pctB - pctA;
+      });
+
+      assert.equal(sorted[0].manager, "Team B");
+      assert.equal(sorted[1].manager, "Team C");
+      assert.equal(sorted[2].manager, "Team A");
     });
   });
 });

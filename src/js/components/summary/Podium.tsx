@@ -57,8 +57,9 @@ export const Podium: React.FC = () => {
         const metricLabel = isSeason ? "Average PPG" : "Total Points";
         const effVal =
           typeof t.efficiency === "number" && !isNaN(t.efficiency) ? t.efficiency : 100;
+        const ties = t.rawTies || (t as any).ties || 0;
         const subMetric = isSeason
-          ? `${((t as any).totalPoints || t.points || 0).toFixed(1)} Total PF • ${t.rawWins || (t as any).wins || 0}W-${t.rawLosses || (t as any).losses || 0}L`
+          ? `${((t as any).totalPoints || t.points || 0).toFixed(1)} Total PF • ${t.rawWins || (t as any).wins || 0}W-${t.rawLosses || (t as any).losses || 0}L${ties > 0 ? `-${ties}T` : ""}`
           : `Lineup Efficiency: ${effVal}%`;
 
         const avatarUrl = getAvatarUrl((t as any).avatar || t.managerAvatar);

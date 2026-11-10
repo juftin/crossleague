@@ -46,7 +46,7 @@ export function computeSuperlatives(records = [], isSeason = false) {
   } else {
     // Season Rollup Mode
     const losingSquads = records
-      .filter(r => (r.losses || 0) > (r.wins || 0))
+      .filter(r => (r.losses ?? r.rawLosses ?? 0) > (r.wins ?? r.rawWins ?? 0))
       .sort((a, b) => (b.totalPoints || b.points || 0) - (a.totalPoints || a.points || 0));
     badBeat =
       losingSquads[0] ||
@@ -54,7 +54,7 @@ export function computeSuperlatives(records = [], isSeason = false) {
       null;
 
     const winningSquads = records
-      .filter(r => (r.wins || 0) > (r.losses || 0))
+      .filter(r => (r.wins ?? r.rawWins ?? 0) > (r.losses ?? r.rawLosses ?? 0))
       .sort((a, b) => (a.totalPoints || a.points || 0) - (b.totalPoints || b.points || 0));
     luckyEscape =
       winningSquads[0] ||

@@ -28,6 +28,7 @@ export interface TeamRecord {
   rosterId?: number | string;
   leagueId: string;
   leagueName: string;
+  league?: string;
   leagueAvatar?: string;
   manager: string;
   managerAvatar?: string;
@@ -37,15 +38,20 @@ export interface TeamRecord {
   optimalPoints?: number;
   benchPoints?: number;
   efficiency?: number;
+  wins?: number;
+  losses?: number;
+  ties?: number;
   rawWins?: number;
   rawLosses?: number;
   rawTies?: number;
+  winPct?: number;
   allPlayWins?: number;
   allPlayLosses?: number;
   allPlayTies?: number;
   allPlayWinPct?: number;
   expectedWins?: number;
   luck?: number;
+  luckIndex?: number;
   luckCategory?: "unlucky" | "balanced" | "lucky";
   stdDev?: number;
   consistencyRank?: number;

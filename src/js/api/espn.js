@@ -440,6 +440,7 @@ export async function fetchEspnLeague(rawId, season, targetWeek, mode) {
         id: t.id,
         leagueId: t.leagueId,
         league: t.league,
+        leagueName: t.league,
         leagueAvatar: t.leagueAvatar,
         manager: t.manager,
         teamName: t.teamName,
@@ -455,9 +456,12 @@ export async function fetchEspnLeague(rawId, season, targetWeek, mode) {
         wins: t.wins,
         losses: t.losses,
         ties: t.ties,
+        rawWins: t.wins,
+        rawLosses: t.losses,
+        rawTies: t.ties,
         winPct:
           t.wins + t.losses + t.ties > 0
-            ? Math.round((t.wins / (t.wins + t.losses + t.ties)) * 100)
+            ? Math.round(((t.wins + 0.5 * t.ties) / (t.wins + t.losses + t.ties)) * 100)
             : 0,
         allPlayWins: t.allPlayWins,
         allPlayLosses: t.allPlayLosses,
@@ -465,6 +469,7 @@ export async function fetchEspnLeague(rawId, season, targetWeek, mode) {
         allPlayWinPct: apWinPct,
         expectedWins: expWins,
         actualWins: actWins,
+        luck: seasonLuck,
         luckIndex: seasonLuck,
         pointsAgainst: avgPa,
         totalPointsAgainst: Math.round(t.opponentPointsTotal * 100) / 100,

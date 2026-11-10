@@ -22,6 +22,8 @@ export const LuckTab: React.FC = () => {
   const [isAllPlayInfoOpen, setIsAllPlayInfoOpen] = useState(false);
   const allPlayInfoRef = useRef<HTMLDivElement>(null);
   const records = useActiveRecords();
+  const mode = useCrossLeagueStore(s => s.mode);
+  const isSeason = mode === "SEASON_ROLLUP";
   const luckSearch = useCrossLeagueStore(s => s.luckSearch);
   const setLuckSearch = useCrossLeagueStore(s => s.setLuckSearch);
   const luckCategory = useCrossLeagueStore(s => s.luckCategory);
@@ -91,8 +93,27 @@ export const LuckTab: React.FC = () => {
         valA = ((a as any).league || a.leagueName || "").toLowerCase();
         valB = ((b as any).league || b.leagueName || "").toLowerCase();
       } else if (luckSortColumn === "Actual") {
-        valA = typeof a.winPct === "number" ? a.winPct : 0;
-        valB = typeof b.winPct === "number" ? b.winPct : 0;
+        const winsA = a.wins ?? (a as any).rawWins ?? 0;
+        const lossesA = a.losses ?? (a as any).rawLosses ?? 0;
+        const tiesA = a.ties ?? (a as any).rawTies ?? 0;
+        const totalA = winsA + lossesA + tiesA;
+        valA =
+          typeof a.winPct === "number"
+            ? a.winPct
+            : totalA > 0
+              ? Math.round(((winsA + 0.5 * tiesA) / totalA) * 100)
+              : 0;
+
+        const winsB = b.wins ?? (b as any).rawWins ?? 0;
+        const lossesB = b.losses ?? (b as any).rawLosses ?? 0;
+        const tiesB = b.ties ?? (b as any).rawTies ?? 0;
+        const totalB = winsB + lossesB + tiesB;
+        valB =
+          typeof b.winPct === "number"
+            ? b.winPct
+            : totalB > 0
+              ? Math.round(((winsB + 0.5 * tiesB) / totalB) * 100)
+              : 0;
       } else if (luckSortColumn === "AllPlay") {
         valA = a.allPlayWinPct || 0;
         valB = b.allPlayWinPct || 0;
@@ -306,7 +327,7 @@ export const LuckTab: React.FC = () => {
             </div>
             <div id="statLuckiestSub" className="mt-1 text-xs font-medium text-slate-400">
               {luckiest
-                ? `${luckiest.wins || 0}W-${luckiest.losses || 0}L (vs ${(luckiest.expectedWins || 0).toFixed(1)} xW)`
+                ? `${luckiest.wins ?? (luckiest as any).rawWins ?? 0}W-${luckiest.losses ?? (luckiest as any).rawLosses ?? 0}L (vs ${(luckiest.expectedWins || 0).toFixed(1)} xW)`
                 : "-"}
             </div>
           </div>
@@ -366,7 +387,7 @@ export const LuckTab: React.FC = () => {
             </div>
             <div id="statUnluckiestSub" className="mt-1 text-xs font-medium text-slate-400">
               {unluckiest
-                ? `${unluckiest.wins || 0}W-${unluckiest.losses || 0}L (vs ${(unluckiest.expectedWins || 0).toFixed(1)} xW)`
+                ? `${unluckiest.wins ?? (unluckiest as any).rawWins ?? 0}W-${unluckiest.losses ?? (unluckiest as any).rawLosses ?? 0}L (vs ${(unluckiest.expectedWins || 0).toFixed(1)} xW)`
                 : "-"}
             </div>
           </div>
@@ -741,19 +762,35 @@ export const LuckTab: React.FC = () => {
                 const allPlayTies = team.allPlayTies || 0;
                 const opponentName = (team as any).opponentName || "Opp";
                 const outcome = (team as any).outcome;
+                const wins = team.wins ?? (team as any).rawWins ?? 0;
+                const losses = team.losses ?? (team as any).rawLosses ?? 0;
+                const ties = team.ties ?? (team as any).rawTies ?? 0;
+                const totalGames = wins + losses + ties;
+                const winPct =
+                  typeof (team as any).winPct === "number"
+                    ? (team as any).winPct
+                    : totalGames > 0
+                      ? Math.round(((wins + 0.5 * ties) / totalGames) * 100)
+                      : 0;
+
                 const actualRecord =
-                  outcome === "win"
+                  !isSeason && outcome === "win"
                     ? "1-0"
-                    : outcome === "loss"
+                    : !isSeason && outcome === "loss"
                       ? "0-1"
-                      : outcome === "tie"
+                      : !isSeason && outcome === "tie"
                         ? "0-0-1"
-                        : `${(team as any).rawWins ?? (team as any).wins ?? 0}W-${(team as any).rawLosses ?? (team as any).losses ?? 0}L`;
-                const actualRecordClass =
-                  outcome === "loss"
-                    ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
+                        : `${wins}W-${losses}L${ties > 0 ? `-${ties}T` : ""}`;
+                const actualRecordClass = isSeason
+                  ? winPct >= 60
+                    ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                    : winPct >= 40
+                      ? "bg-slate-800 text-slate-300 border border-slate-700"
+                      : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
+                  : outcome === "loss"
+                    ? "bg-rose-500/15 text-rose-300 border border-rose-500/30"
                     : outcome === "win"
-                      ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                      ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
                       : "bg-slate-800 text-slate-300 border-slate-700";
                 const LuckIcon = luckVal >= 0.5 ? Clover : luckVal <= -0.5 ? HeartCrack : Scale;
 
@@ -804,14 +841,20 @@ export const LuckTab: React.FC = () => {
                       <span
                         className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-xs font-black ${actualRecordClass}`}
                       >
-                        {outcome === "win" && (
+                        {!isSeason && outcome === "win" && (
                           <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
                         )}
                         {actualRecord}
                       </span>
-                      <div className="mx-auto mt-0.5 max-w-[120px] truncate text-[11px] font-medium text-slate-400">
-                        vs {opponentName}
-                      </div>
+                      {isSeason ? (
+                        <div className="mx-auto mt-0.5 max-w-[120px] truncate font-mono text-[11px] text-slate-400">
+                          {winPct}% Win
+                        </div>
+                      ) : (
+                        <div className="mx-auto mt-0.5 max-w-[120px] truncate text-[11px] font-medium text-slate-400">
+                          vs {opponentName}
+                        </div>
+                      )}
                     </td>
                     <td className="px-2 py-2.5 text-center font-mono sm:px-4 sm:py-3.5">
                       <div className="font-bold text-slate-200">

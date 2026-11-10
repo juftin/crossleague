@@ -131,7 +131,7 @@ export const AwardsTab: React.FC = () => {
               </div>
               <div className="truncate border-t border-slate-800/80 pt-2.5 text-xs font-semibold text-slate-400">
                 {isSeason
-                  ? `${badBeat.wins || 0}W-${badBeat.losses || 0}L (${badBeat.winPct || 0}%) • ${((badBeat as any).totalPoints || 0).toFixed(1)} Total PF`
+                  ? `${badBeat.wins ?? (badBeat as any).rawWins ?? 0}W-${badBeat.losses ?? (badBeat as any).rawLosses ?? 0}L (${badBeat.winPct || 0}%) • ${((badBeat as any).totalPoints || 0).toFixed(1)} Total PF`
                   : `Lost by ${Math.abs(badBeat.margin || 0).toFixed(2)} to ${badBeat.opponentName || "Rival"}`}
               </div>
             </div>
@@ -212,7 +212,7 @@ export const AwardsTab: React.FC = () => {
               </div>
               <div className="truncate border-t border-slate-800/80 pt-2.5 text-xs font-semibold text-slate-400">
                 {isSeason
-                  ? `${luckyEscape.wins || 0}W-${luckyEscape.losses || 0}L (${luckyEscape.winPct || 0}%)`
+                  ? `${luckyEscape.wins ?? (luckyEscape as any).rawWins ?? 0}W-${luckyEscape.losses ?? (luckyEscape as any).rawLosses ?? 0}L (${luckyEscape.winPct || 0}%)`
                   : `Won by ${Math.abs(luckyEscape.margin || 0).toFixed(2)} vs ${luckyEscape.opponentName || "Rival"}`}
               </div>
             </div>

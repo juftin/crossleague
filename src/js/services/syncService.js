@@ -324,10 +324,14 @@ export async function syncData(forceRefresh = false) {
             const seasonLuck = Math.round((actWins - expWins) * 100) / 100;
             const avgPa =
               weeksCount > 0 ? Math.round((t.opponentPointsTotal / weeksCount) * 100) / 100 : 0;
+            const totalGames = t.wins + t.losses + t.ties;
+            const winPct =
+              totalGames > 0 ? Math.round(((t.wins + 0.5 * t.ties) / totalGames) * 100) : 0;
 
             return {
               id: t.id,
               leagueId: t.leagueId,
+              league: t.leagueName,
               leagueName: t.leagueName,
               leagueAvatar: t.leagueAvatar,
               manager: t.manager,
@@ -341,9 +345,13 @@ export async function syncData(forceRefresh = false) {
               stdDev: stdDev,
               highScore: highScore,
               lowScore: lowScore,
+              wins: t.wins,
+              losses: t.losses,
+              ties: t.ties,
               rawWins: t.wins,
               rawLosses: t.losses,
               rawTies: t.ties,
+              winPct: winPct,
               allPlayWins: t.allPlayWins,
               allPlayLosses: t.allPlayLosses,
               allPlayTies: t.allPlayTies,
@@ -351,6 +359,7 @@ export async function syncData(forceRefresh = false) {
               expectedWins: expWins,
               actualWins: actWins,
               luck: seasonLuck,
+              luckIndex: seasonLuck,
               pointsAgainst: avgPa,
               benchPoints: Math.round((t.totalBenchPoints / weeksCount) * 100) / 100,
               efficiency: avgEff,

@@ -98,7 +98,7 @@ task snapshots:check
 ### Data & Table Behavior
 
 - `rawRecords` in the store is the single source of truth; `useActiveRecords()` filters records by selected leagues.
-- Single-week records use `outcome` (`win`, `loss`, `tie`) and `opponentName`. Season rollups use `rawWins`, `rawLosses`, and `rawTies`.
+- Single-week records use `outcome` (`win`, `loss`, `tie`) and `opponentName`. Season rollups use `wins`, `losses`, `ties`, and `winPct` (with `rawWins`, `rawLosses`, and `rawTies` preserved for compatibility).
 - Preserve table sorting, searching, pagination, and expandable row behavior when modifying table views.
 
 ### Build Synchronization Rule
